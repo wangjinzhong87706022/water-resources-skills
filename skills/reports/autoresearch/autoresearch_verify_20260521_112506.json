@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "timestamp": "20260521_112506",
+    "phase": "verify",
+    "skills": 1,
+    "total_runs": 3
+  },
+  "summary": [
+    {
+      "skill": "rainfall",
+      "runs": 3,
+      "pass_rate": 0.92,
+      "total_pass": 11,
+      "total_evals": 12
+    }
+  ],
+  "details": [
+    {
+      "skill": "rainfall",
+      "runs": [
+        {
+          "skill": "rainfall",
+          "prompt": "查询扬州城区今日降雨量",
+          "prompt_desc": "单站实时查询",
+          "response": "查询结果如下:\n\n=== 扬州城区今日(2026-05-21)降雨情况 ===\n\n测站: 扬州站 (站码 58245)\n今日暂无降雨记录 — st_pptn_r 表中无当日数据。\n\n该站最新数据时间: 2025-11-26 11:20:00\n\n说明: 数据库中该站的降雨数据截止到 2025年11月26日，当前日期(2026-05-21)无降雨记录。可能原因：\n1. 数据采集/入库中断，近期数据未同步到数据库\n2. 今日确实无降雨，但站上也未上报\"零值\"记录\n\n如需查看最近一次有效降雨数据，我可以进一步查询。",
+          "duration_sec": 94.01,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 降雨/雨量/降水/雨站/mm/暴雨?",
+              "passed": false
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            }
+          ],
+          "pass_count": 3,
+          "total_evals": 4,
+          "pass_rate": 0.75,
+          "keyword_hits": 1,
+          "num_count": 18
+        },
+        {
+          "skill": "rainfall",
+          "prompt": "24年扬州城区降雨总量大概是多少？哪天降雨最大？",
+          "prompt_desc": "年度聚合+极值",
+          "response": "查询完毕，以下是2024年扬州城区（测站58245）的降雨情况：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  2024年扬州城区降雨统计\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  数据时段: 2024-01-01 ~ 2024-12-25\n  年度降雨总量: 1195.4 mm\n  记录数: 39434条（时段累积降水量drp累计）\n\n  降雨最大的一天:\n  >>> 2024年8月20日，日降雨量 222.9 mm（特大暴雨级别）\n  远超第二名7月10日的84.0mm，是全年最突出的降雨事件。\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  月度降雨分布\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n   1月:    18.6 mm  （少雨）\n   2月:    78.6 mm  （偏多）\n   3月:     3.4 mm  （干旱）\n   4月:    41.2 mm\n   5月:    44.1 mm\n   6月:   225.5 mm  ★ 梅雨季\n   7月:   156.3 mm  ★ 梅雨季\n   8月:   284.4 mm  ★ 全年最多（台风/强对流）\n   9月:   177.1 mm  ★ 秋雨\n  10月:   131.8 mm\n  11月:    34.4 mm\n  12月:     0.0 mm  （数据截止12月25日）\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n小结:\n- 2024年扬州城区降雨总量约 1195 mm，接近常年平均水平（扬州年均约1000-1100mm，偏多）\n- 降雨集中在6-9月（合计843.3mm，占全年70.5%），符合江淮地区梅雨+台风季特征\n- 8月20日单日222.9mm为全年最大，属于特大暴雨量级（≥250mm为特大暴雨，≥100mm为大暴雨，该日已超过大暴雨标准）\n- 12月数据仅到25日，实际全年总量应略高于1195mm",
+          "duration_sec": 87.64,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 降雨/雨量/降水/雨站/mm/暴雨?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            }
+          ],
+          "pass_count": 4,
+          "total_evals": 4,
+          "pass_rate": 1.0,
+          "keyword_hits": 5,
+          "num_count": 60
+        },
+        {
+          "skill": "rainfall",
+          "prompt": "查询最近三天各雨量站的累计降雨量",
+          "prompt_desc": "多站累计",
+          "response": "查询完成！\n\n**注意:** 降雨量数据最新截止到 **2026-03-30**，距今已有近两个月未更新。因此，最近三天（2026-05-18至2026-05-20）无降雨数据。\n\n我为您查询了 **最近有数据的三天（2026-03-28 至 2026-03-30）** 各雨量站的累计降雨量：\n\n**查询结果：**\n- 共 10 个雨量站有降雨记录\n- 总降雨量：114.5 mm\n\n**各站累计降雨量排名：**\n\n1. 马港河雨量站 - 13.5 mm\n2. 团结河雨量站（小袁庄） - 13.0 mm\n3. 响水河闸雨量站（利旧） - 12.5 mm\n4. 乌塔沟雨量站（横沟闸站） - 11.5 mm\n5. 太平闸站雨量站（利旧） - 11.5 mm\n6. 念四闸站雨量站（利旧） - 11.0 mm\n7. 沙施河南节制闸雨量站（利旧） - 11.0 mm\n8. 吴庄河闸雨量站（胜利河） - 10.5 mm\n9. 冷却河闸雨量站 - 10.0 mm\n10. 二道河雨量站（文昌中路） - 10.0 mm\n\n**说明：**\n- 所有雨量站均位于行政区划码 320188（扬州城区）\n- 降雨量分布较为均匀，各站差异不大\n- 数据来源：MySQL 数据库 sl323.st_pptn_r 表",
+          "duration_sec": 110.03,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 降雨/雨量/降水/雨站/mm/暴雨?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            }
+          ],
+          "pass_count": 4,
+          "total_evals": 4,
+          "pass_rate": 1.0,
+          "keyword_hits": 3,
+          "num_count": 39
+        }
+      ],
+      "total_pass": 11,
+      "total_evals": 12,
+      "pass_rate": 0.92
+    }
+  ]
+}

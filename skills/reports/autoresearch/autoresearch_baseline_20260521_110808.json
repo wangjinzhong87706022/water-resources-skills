@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "timestamp": "20260521_110808",
+    "phase": "baseline",
+    "skills": 1,
+    "total_runs": 3
+  },
+  "summary": [
+    {
+      "skill": "water-situation",
+      "runs": 3,
+      "pass_rate": 1.0,
+      "total_pass": 12,
+      "total_evals": 12
+    }
+  ],
+  "details": [
+    {
+      "skill": "water-situation",
+      "runs": [
+        {
+          "skill": "water-situation",
+          "prompt": "古运河有哪些水位测站",
+          "prompt_desc": "简单列出测站",
+          "response": "古运河共有 3 个水位测站：\n\n--------------------------------------------------------------\n站码           站名                 类型    河名\n--------------------------------------------------------------\n51004110       扬州闸闸上游（水文）   DD     古运河\n51004111       扬州闸闸下游（水文）   DD     古运河\n510D4440       黄金坝泵站（水文）     DP     古运河\n--------------------------------------------------------------\n\n说明：\n- DD 类型为闸坝站，DP 类型为泵站\n- 其中扬州闸闸上游和闸下游是一对，分别监测扬州闸前后的水位\n- 黄金坝泵站用于泵站运行工况监测\n\n如需查询这些测站的实时水位数据或防洪指标，请告诉我。",
+          "duration_sec": 57.4,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 水位/测站/河流/水情/水文/防洪/警戒/保证?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            }
+          ],
+          "pass_count": 4,
+          "total_evals": 4,
+          "pass_rate": 1.0,
+          "keyword_hits": 4,
+          "num_count": 5
+        },
+        {
+          "skill": "water-situation",
+          "prompt": "查询水位站数量最多、最少的河流",
+          "prompt_desc": "GROUP BY 聚合",
+          "response": "查询结果如下：\n\n共 9 条河流设有水位站（含水位站 ZZ 和水文站 ZQ）\n\n==================================================\n水位站最多的河流: 里运河，共 4 个站\n水位站最少的河流: 射阳湖，共 1 个站（另有长江、斜丰河、下引河、洪泽湖、邵伯湖也各仅 1 个站）\n==================================================\n\n完整排名:\n\n  排名  河流名称          站点数量\n  ---- ----------------  ------\n   1   里运河              4\n   2   高邮湖              2\n   3   北澄子河             2\n   4   长江                1\n   5   斜丰河              1\n   6   下引河              1\n   7   洪泽湖              1\n   8   邵伯湖              1\n   9   射阳湖              1\n\n里运河作为区域主要河流，站点布局最为密集；射阳湖等 5 条河流各仅有 1 个监测站点。",
+          "duration_sec": 32.66,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 水位/测站/河流/水情/水文/防洪/警戒/保证?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            }
+          ],
+          "pass_count": 4,
+          "total_evals": 4,
+          "pass_rate": 1.0,
+          "keyword_hits": 4,
+          "num_count": 24
+        },
+        {
+          "skill": "water-situation",
+          "prompt": "查询各水位站最新的水位值",
+          "prompt_desc": "多站最新数据",
+          "response": "查询完成，以下是各水位站最新水位汇总：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n河道水位站 (共 78 站) — 数据最新至 2026-03-31 19:15\n\n重点河道站:\n  蒋 坝 (洪泽湖)    13.52m  平\n  岗板头 (高邮湖)     5.92m  平\n  高邮(高) (高邮湖)   5.96m  平\n  六闸(三) (邵伯湖)   5.06m  平\n  宝 应 (里运河)     6.60m  平\n  高邮(大) (里运河)   6.53m  平\n  邵伯(大) (里运河)   6.40m  平\n\n城区主要河道站:\n  瘦西湖水位站        4.93m  (警戒 5.20m)  正常\n  古运河(新城河口)    4.72m  (警戒 5.50m)  正常\n  古运河(春江路)      4.78m  (警戒 5.50m)  正常\n  古运河(三湾公园)    4.72m               正常\n  新城河(文昌路桥)    5.41m  (警戒 6.10m)  正常\n  玉带河(史可法西路)   4.95m  (警戒 5.20m)  正常\n  中心河(站南路)      4.78m  (警戒 5.80m)  正常\n\n所有站点水位均低于警戒水位，无超警戒情况。\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n水库站 (共 46 站) — 数据最新至 2025-05-19 20:00\n\n所有水库水势均为\"平\"，入库/出库流量数据暂缺。主要水库水位:\n  月塘水库(坝上)     30.84m\n  芦坝水库           30.19m\n  梅桥水库           32.73m\n  程云水库           34.81m\n  姚庄水库           59.70m (最高)\n  头王水库           58.67m\n  江洼水库           53.80m\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n注意: 河道数据截止到 2026-03-31，水库数据截止到 2025-05-19，当前已无最新实时数据入库。如需查看历史趋势或特定站点详情，可以进一步查询。",
+          "duration_sec": 92.73,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 水位/测站/河流/水情/水文/防洪/警戒/保证?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            }
+          ],
+          "pass_count": 4,
+          "total_evals": 4,
+          "pass_rate": 1.0,
+          "keyword_hits": 2,
+          "num_count": 45
+        }
+      ],
+      "total_pass": 12,
+      "total_evals": 12,
+      "pass_rate": 1.0
+    }
+  ]
+}

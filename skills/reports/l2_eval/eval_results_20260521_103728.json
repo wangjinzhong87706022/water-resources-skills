@@ -1,0 +1,539 @@
+{
+  "meta": {
+    "timestamp": "20260521_103728",
+    "total_cases": 21,
+    "total_duration_sec": 2475.91
+  },
+  "results": [
+    {
+      "index": 5,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询古运河(河流名称)水位站的数量。",
+      "expected_sql": "SELECT COUNT(*) AS '水位站数量'\nFROM sl323.st_stbprp_b\nWHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ';",
+      "actual_response": "查询完成，以下是结果：\n\n古运河（河流名称）的水位站（sttp='ZZ'）数量为：0 个\n\n数据库中确实存在河流名称\"古运河\"，但该河流下没有标准水位站（ZZ类型）。当前古运河共有 3 个测站，具体类型如下：\n\n  - DD 类型（闸位站/水闸站）：2 个\n  - DP 类型（排涝站/排水站）：1 个\n\n如果需要查询这些站点的详细信息（站名、实时水位等），我可以进一步帮你查。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.4,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 3,
+        "response_length": 189
+      },
+      "total_score": 0.85,
+      "duration_sec": 63.95,
+      "error": ""
+    },
+    {
+      "index": 6,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询建站最早和最晚的测站名称及其建站时间。",
+      "expected_sql": "SELECT stnm AS '测站名称', esstym AS '建站时间'\nFROM sl323.st_stbprp_b\nWHERE esstym = (SELECT MIN(esstym) FROM sl323.st_stbprp_b)\nUNION ALL\nSELECT stnm AS '测站名称', esstym AS '建站时间'\nFROM sl323.st_stbprp_b\nWHERE esstym = (SELECT MAX(esstym) FROM sl323.st_stbprp_b);",
+      "actual_response": "查询结果如下：\n\n=== 建站最早的测站 ===\n  站名: 宝应        站类: 水位站(ZZ)  建站年月: 1912年9月  站码: 51005000\n\n  距今已有 113 年历史，是系统中最早建立的测站。\n\n=== 建站最晚的测站 ===\n  站名: 山头水库    站类: 水库站(RR)   建站年月: 2016年6月  站码: 510E4273\n  站名: 魏井水库    站类: 水库站(RR)   建站年月: 2016年6月  站码: 510E4271\n\n  两站同为 2016 年 6 月建站，是系统中最晚建立的测站。\n\n补充说明：\n- 最早的宝应站建于 1912 年（民国元年），已有超过百年水文观测历史\n- 建站最早的 TOP5 均为 1922 年之前的老站，以水位站和水文站为主\n- 建站最晚的 TOP2 均为 2016 年新建的水库站",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 3,
+        "response_length": 385
+      },
+      "total_score": 0.93,
+      "duration_sec": 35.74,
+      "error": ""
+    },
+    {
+      "index": 7,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询水位站数量最多、最少的河流。",
+      "expected_sql": "SELECT b.rvnm AS '河流名称', COUNT(b.stcd) AS '水位站数量'\nFROM sl323.st_stbprp_b b\nWHERE b.sttp = 'ZZ' AND b.rvnm IS NOT NULL AND b.rvnm != ''\nGROUP BY b.rvnm\nHAVING COUNT(b.stcd) = (SELECT MIN(stcd_count) FROM (SELECT COUNT(stcd) AS stcd_count FROM sl323.st_stbprp_b WHERE sttp = 'ZZ' AND rvnm IS NOT NULL AND rvnm != '' GROUP BY rvnm) AS min_count)\n   OR COUNT(b.stcd) = (SELECT MAX(stcd_count) FROM (SELECT COUNT(stcd) AS stcd_count FROM sl323.st_stbprp_b WHERE sttp = 'ZZ' AND rvnm IS NOT NULL AND rvnm != '' GROUP BY rvnm) AS max_count)\nORDER BY COUNT(b.stcd);",
+      "actual_response": "查询结果如下：\n\n水位站数量最多的河流（3个站）：\n  里运河: 3个站\n\n水位站数量最少的河流（1个站）：\n  邵伯湖: 1个站\n  斜丰河: 1个站\n  下引河: 1个站\n  射阳湖: 1个站\n  洪泽湖: 1个站\n\n系统中共 8 条河流设有水位站（sttp='ZZ'）。里运河拥有最多的水位站（3个），而邵伯湖、斜丰河、下引河、射阳湖、洪泽湖各仅有1个水位站。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.4,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 2,
+        "response_length": 183
+      },
+      "total_score": 0.75,
+      "duration_sec": 39.7,
+      "error": ""
+    },
+    {
+      "index": 8,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询古运河历史最高/低水位。",
+      "expected_sql": "SELECT b.stnm AS '测站名称',\n       MAX(r.z) AS '历史最高水位(m)',\n       MIN(r.z) AS '历史最低水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%') AND r.z IS NOT NULL\nGROUP BY b.stnm;",
+      "actual_response": "查询完成，以下是古运河历史最高/最低水位汇总：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  古运河历史最高/最低水位\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n【整体极值】\n  历史最高水位: 9.460m — 春江路站，2023-07-28 13:35\n  历史最低水位: 3.510m — 春江路站，2023-07-22 04:45\n  警戒水位(统一): 5.500m\n\n【各测站历史最高/最低水位】\n\n  测站名称                                  最高(m)   最低(m)   是否超警戒\n  ────────────────────────────────────────────────────────────────────\n  古运河水位站（春江路）                      9.460     3.510     最高超警戒\n  古运河水位站（新城河口）                    6.960     3.880     最高超警戒\n  古运河水文站（钞关泵站）                    6.943     3.818     最高超警戒\n  古运河水文站（扬子津体育公园）              6.884     3.660     最高超警戒\n  古运河水文站(大运河博物馆)                  5.540     3.860     最高超警戒\n  古运河水文站（扬子江南路古运河大桥）        5.326     3.960     未超警戒\n  古运河水位站(三湾公园)                      5.296     4.254     未超警戒\n\n【说明】\n- 警戒水位: 5.500m（各站统一标准）\n- 保证水位/实测最高水位: 防洪指标表中暂无记录\n- 春江路站水位波动最大（9.460 ~ 3.510m，变幅 5.95m）\n- 三湾公园站水位相对稳定（5.296 ~ 4.254m，变幅 1.04m）",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 6,
+        "response_length": 944
+      },
+      "total_score": 0.93,
+      "duration_sec": 57.4,
+      "error": ""
+    },
+    {
+      "index": 9,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询里运河（河流）最近两个月的水位数据。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '水位(m)', r.tm AS '时间'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.rvnm = '里运河'\n  AND r.tm >= DATE_SUB(NOW(), INTERVAL 2 MONTH)\n  AND r.z IS NOT NULL\nORDER BY r.tm DESC;",
+      "actual_response": "里运河最近两个月水位数据查询结果如下：\n\n数据说明：\n- 数据库最新数据截至：2026-03-31\n- 查询时间范围：2026年2月 - 2026年3月\n\n里运河共有4个水位测站，各站月度水位统计：\n\n测站名称             类型   月份       平均水位(m)  最高水位(m)  最低水位(m)  数据量\n--------------------------------------------------------------------------------\n宝应                 ZZ    2026-02   6.45       6.66       6.17       671\n宝应                 ZZ    2026-03   6.61       6.87       6.34       717\n泾河                 ZQ    2026-02   6.48       6.71       6.17       670\n泾河                 ZQ    2026-03   6.65       6.93       6.31       719\n邵伯(大)             ZZ    2026-02   6.31       6.54       6.07       672\n邵伯(大)             ZZ    2026-03   6.42       6.70       6.13       718\n高邮(大)             ZZ    2026-02   6.39       6.62       6.16       672\n高邮(大)             ZZ    2026-03   6.50       6.79       6.20       719\n\n分析：\n- 3月份各站水位普遍比2月份上涨约0.1-0.2米\n- 泾河水文站水位最高，3月最高达6.93米\n- 邵伯站水位最低，2月最低仅6.07米\n- 各站暂未设置警戒水位和保证水位",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 5,
+        "response_length": 909
+      },
+      "total_score": 0.93,
+      "duration_sec": 185.38,
+      "error": ""
+    },
+    {
+      "index": 10,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询各水位站最新的水位值。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '最新水位(m)', r.tm AS '更新时间'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r GROUP BY stcd) latest\n  ON r.stcd = latest.stcd AND r.tm = latest.maxTm\nWHERE b.sttp = 'ZZ'\nORDER BY r.z DESC;",
+      "actual_response": "查询完成，共 77 个水位站有最新水位记录，以下是完整结果：\n\n==========================================================================\n  各水位站最新水位值\n==========================================================================\n\n共 77 个站点，按站码排序。数据来源: sl323.st_river_r\n\n【重点河道/湖泊站】\n\n  站码         站名              河名      水位(m)  时间\n  ----------------------------------------------------------------\n  50916500    蒋坝              洪泽湖     13.52    2026-03-31 18:00\n  51003600    岗板头            高邮湖      5.92    2026-03-31 19:00\n  51003650    高邮(高)          高邮湖      5.96    2026-03-31 19:00\n  51003800    六闸(三)          邵伯湖      5.06    2026-03-31 19:00\n  51005000    宝应              里运河      6.60    2026-03-31 19:00\n  51005200    高邮(大)          里运河      6.53    2026-03-31 19:00\n  51005250    邵伯(大)          里运河      6.40    2026-03-31 19:00\n  51006750    樊川(斜)          斜丰河      1.49    2026-03-31 19:00\n  51006900    高邮(北)          北澄子河    1.40    2026-03-31 19:00\n  51006950    三垛              北澄子河    1.39    2026-03-31 19:00\n  51008600    陆庄(扬州)        下引河      1.06    2026-03-31 19:00\n  51008700    射阳镇            射阳湖      1.03    2026-03-31 19:00\n\n【城区内河水位站（2026-03-31 数据）】\n\n  站名                              水位(m)\n  ----------------------------------------------------------------\n  瘦西湖水位站                        4.93\n  古运河水位站(三湾公园)                4.72\n  古运河水位站（新城河口）              4.72\n  古运河水位站（春江路）                4.78\n  古运河水位站(春江路)                  4.75\n  新城河(文昌路桥点)                    5.41\n  仪扬河水位站（润扬南路）              4.72\n  沙施河水位站（老沙河）                4.81\n  七里河水位站（东花园路）              4.74\n  玉带河水位站（史可法西路）            4.95\n  中心河水位站（站南路）                4.78\n  保障湖水位站（汉陵苑）                4.95\n  童套河水位站                         5.16\n  向阳河水位站（华声路）                3.19\n  向阳河水位站(建华路)                  3.20\n  四望亭河(邗江北路)水位站              5.58\n  周庄河水位站（华阳东路）              3.24\n  叶桥大沟水位站（叶桥路东）            7.81\n  大樟沟水位站                         4.85\n  龙涧河水位站                         4.85\n  龙河水位站                           4.73\n  土坝桥水位站                         2.87\n  施桥翻水站                           3.63\n  施桥港水位站（临江路）                3.11\n  春江河水位站（金春路）                2.69\n\n【其他站点】\n\n  站码         站名              水位(m)  时间\n  ----------------------------------------------------------------\n  00000001    滨湖涵涝站         2.77    2025-03-27 13:10\n  00000002    引潮河闸           5.73    2024-10-18 08:25\n  00000003    西银沟泵站         4.54    2025-03-27 12:15\n  00000004    桥头套闸           4.69    2025-03-27 12:15\n  00000007    大官桥漫水闸      12.46    2024-10-31 08:20\n  00000009    团结闸             3.93    2025-03-27 12:15\n  00000011    蒋口门闸           5.24    2024-10-30 10:45\n  22051901    青龙港闸           3.35    2025-03-27 12:15\n  22060701    乌塔沟             4.69    2025-03-27 12:15\n  1778384898  连兴港天文潮       2.49    2025-12-31 23:00\n\n  另有 20 余个 HT 开头的内部站点，水位多在 2.5~5.6m 范围。\n\n==========================================================================\n  说明\n==========================================================================\n- 水位保留两位小数\n- 大部分站点数据最新至 2026-03-31 19:00 左右\n- 部分站点数据较旧（2023~2025年），可能是停报或间歇上报\n- 白马闸、黄珏套闸等站点最新记录无水位值\n- 未查询到警戒/保证水位，如需超警判断请进一步关联 st_rvfcch_b 表\n\n如需对某个站点做详细分析（历史趋势、超警判断等），请告诉我。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 3,
+        "response_length": 3149
+      },
+      "total_score": 0.93,
+      "duration_sec": 50.01,
+      "error": ""
+    },
+    {
+      "index": 29,
+      "skill": "rainfall",
+      "level": "L2",
+      "question": "24年扬州城区降雨总量大概是多少？哪天降雨最大？",
+      "expected_sql": "SELECT\n  (SELECT SUM(drp) FROM sl323.st_pptn_r WHERE stcd = '58245' AND tm BETWEEN '2024-01-01' AND '2024-12-31' AND drp IS NOT NULL) AS '扬州城区2024年总降雨量',\n  (SELECT DATE(tm) FROM sl323.st_pptn_r WHERE stcd = '58245' AND tm BETWEEN '2024-01-01' AND '2024-12-31' GROUP BY DATE(tm) ORDER BY SUM(drp) DESC LIMIT 1) AS '最大降雨日期',\n  (SELECT SUM(drp) FROM sl323.st_pptn_r WHERE stcd = '58245' AND tm BETWEEN '2024-01-01' AND '2024-12-31' GROUP BY DATE(tm) ORDER BY SUM(drp) DESC LIMIT 1) AS '最大日降雨量';",
+      "actual_response": "根据查询结果，2024年扬州城区降雨情况如下：\n\n1. **总降雨量：1195.4毫米**\n2. **最大降雨日期：2024年8月20日**\n3. **当日最大降雨量：222.9毫米**\n\n该数据基于雨量站 stcd='58245'（扬州城区）的全年记录。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.4,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 2,
+        "response_length": 128
+      },
+      "total_score": 0.75,
+      "duration_sec": 67.26,
+      "error": ""
+    },
+    {
+      "index": 30,
+      "skill": "rainfall",
+      "level": "L2",
+      "question": "2024年扬州各区域累计降雨量最高的前三个区域。",
+      "expected_sql": "SELECT p.addvcd AS '行政区划码', AVG(p.drp) AS '累计降水量(mm)'\nFROM (\n  SELECT b.addvcd, b.stcd, SUM(p.drp) AS drp\n  FROM sl323.st_pptn_r p\n  JOIN sl323.st_stbprp_b b ON p.stcd = b.stcd\n  WHERE p.tm BETWEEN '2024-01-01' AND '2024-12-31'\n    AND p.drp IS NOT NULL\n    AND b.addvcd IS NOT NULL AND b.addvcd != ''\n  GROUP BY b.addvcd, b.stcd\n) p\nGROUP BY p.addvcd\nORDER BY AVG(p.drp) DESC\nLIMIT 3;",
+      "actual_response": "查询结果如下：\n\n2024年扬州各区域累计降雨量最高的前三个区域：\n\n  排名  行政区划码  区域名称    测站数  区域平均累计降雨量  最高站降雨量\n  ---- -------- --------  ------ ----------------  -----------\n  第1   321002   广陵区      7站    1248.5mm          1322.9mm\n  第2   320188   扬州城区   23站    1209.4mm          2296.0mm\n  第3   321081   仪征市     13站    1133.1mm          1324.4mm\n\n说明：\n- 排名依据各区域测站的平均累计降雨量（先计算每站全年降雨总量，再取区域平均）\n- 广陵区以 1248.5mm 的平均累计降雨量位居第一\n- 扬州城区测站数最多（23站），且有个别测站降雨量极高（2296.0mm），但区域平均值略低于广陵区\n- 仪征市排名第三，平均累计降雨量 1133.1mm",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 3,
+        "response_length": 467
+      },
+      "total_score": 0.93,
+      "duration_sec": 181.43,
+      "error": ""
+    },
+    {
+      "index": 31,
+      "skill": "rainfall",
+      "level": "L2",
+      "question": "查询最近三天各雨量站的累计降雨量。",
+      "expected_sql": "SELECT b.stnm AS '雨量站名称', SUM(p.drp) AS '累计降雨量(mm)'\nFROM sl323.st_pptn_r p\nJOIN sl323.st_stbprp_b b ON p.stcd = b.stcd\nWHERE b.sttp = 'PP'\n  AND p.tm >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)\n  AND p.drp IS NOT NULL\nGROUP BY b.stnm\nORDER BY SUM(p.drp) DESC;",
+      "actual_response": "查询完成！以下是最近三天各雨量站的累计降雨量（数据最新时间: 2026-03-31 18:05:00）：\n\n```\n站码                 | 站名                      | 行政区划 | 累计降雨量(mm)\n-----------------------------------------------------------------------\nHT0061071151000010 | 马港河雨量站                | 320188  | 13.5\nHT0061003103000013 | 团结河雨量站（小袁庄）        | 320188  | 13.0\nHT0061000000000001 | 响水河闸雨量站（利旧）        | 320188  | 12.5\nHT0061003110000016 | 乌塔沟雨量站（横沟闸站）      | 320188  | 11.5\nHT0061000000000003 | 太平闸站雨量站（利旧）        | 320188  | 11.5\nHT0061000000000004 | 念四闸站雨量站（利旧）        | 320188  | 11.0\nHT0061000000000002 | 沙施河南节制闸雨量站（利旧）   | 320188  | 11.0\nHT0061002005000019 | 吴庄河闸雨量站（胜利河）      | 320188  | 10.5\nHT0061003053000012 | 冷却河闸雨量站              | 320188  | 10.0\nHT0061002002000011 | 二道河雨量站（文昌中路）      | 320188  | 10.0\n```\n\n汇总说明：\n- 共 10 个雨量站有数据，均属于扬州城区（行政区划 320188）\n- 累计降雨量范围：10.0 ~ 13.5 mm\n- 降雨量最大的站点是马港河雨量站（13.5mm），其次是团结河雨量站（13.0mm）\n- ⚠️ 注意：数据最新时间为 2026-03-31，距今已约 50 天未更新，实际为 3月29-31日 的降雨数据",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 3,
+        "response_length": 938
+      },
+      "total_score": 0.93,
+      "duration_sec": 121.19,
+      "error": ""
+    },
+    {
+      "index": 46,
+      "skill": "water-quality",
+      "level": "L2",
+      "question": "帮我分析一下最近一个月瘦西湖水质变化趋势。",
+      "expected_sql": "SELECT DATE(d.spt) AS '日期',\n       AVG(d.dox) AS '平均溶解氧(mg/L)',\n       AVG(d.codmn) AS '平均CODMn(mg/L)',\n       AVG(d.nh3n) AS '平均氨氮(mg/L)',\n       AVG(d.tp) AS '平均总磷(mg/L)',\n       AVG(d.ph) AS '平均pH',\n       AVG(d.wtmp) AS '平均水温(℃)'\nFROM sl325.wq_pcp_d d\nJOIN sl323.st_stbprp_b b ON d.stcd = b.stcd\nWHERE b.stnm LIKE '%瘦西湖%' AND b.sttp = 'WQ'\n  AND d.spt >= DATE_SUB(NOW(), INTERVAL 1 MONTH)\n  AND d.spt <= NOW()\nGROUP BY DATE(d.spt)\nORDER BY DATE(d.spt);",
+      "actual_response": "查询完成！以下是瘦西湖水质站（化学法）最近一个月（2026年3月）的水质变化趋势分析：\n\n说明：该站最新数据截至 2026-03-31，4-5月暂无数据入库。\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n一、各指标变化趋势\n\n1. DO（溶解氧）\n   月均 7.53 mg/L，但呈明显下降趋势\n   月初 ~8.5 → 月末 ~5.0，下降约 28.8%\n   3月29-30日降至 3.98~4.96 mg/L，接近Ⅳ类水标准（≥3mg/L）\n\n2. CODMn（高锰酸盐指数）\n   异常突出！3月5日~23日持续维持 24.0 mg/L（劣Ⅴ类水平）\n   3月24日骤降至 2.0 mg/L，之后恢复正常（2~3 mg/L）\n   这是一个典型的突变事件，可能原因：\n   - 传感器故障/标定异常（连续18天锁定同一数值，高度可疑）\n   - 或 3月5日前后突发污染事件，24日消退\n\n3. NH3N（氨氮）\n   整体较低，月均 0.35 mg/L（Ⅱ类水平）\n   月末有上升趋势：从月初 0.17 升至月末 0.58 mg/L，涨幅 +36%\n   与水温升高和DO下降趋势吻合，可能是有机物分解加快所致\n\n4. TP（总磷）\n   月均 0.10 mg/L（Ⅲ类水平），全月波动很小，基本平稳\n\n5. pH\n   月均 8.07，在正常范围内（7.81~8.44），无异常\n\n6. 水温\n   从月初 14.3℃ 升至月末 22.3℃，上升 +51.2%\n   符合春季升温的自然规律\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n二、水质等级评定（单因子评价法）\n\n  指标          月均值        等级\n  ─────────────────────────────────\n  DO 溶解氧     7.53 mg/L    Ⅰ类\n  CODMn         16.47 mg/L   劣Ⅴ类 ← 受异常数据拉高\n  NH3N 氨氮     0.35 mg/L    Ⅱ类\n  TP 总磷       0.105 mg/L   Ⅲ类\n  pH            8.07         合格\n\n  >>> 综合水质等级：劣Ⅴ类（由 CODMn 决定）\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n三、重点关注\n\n⚠ CODMn 数据异常是本月最突出问题。3月5日~23日连续18天CODMn\n  精确锁定 24.00 mg/L，这种\"完美恒定\"在自然水体中极不正常，\n  高度怀疑传感器故障或数据采集系统异常，建议核实该时段监测\n  设备的标定记录和质控日志。\n\n⚠ 月末 DO 持续走低 + NH3N 上升，提示随着水温升高，水体耗氧\n  增强、自净能力可能下降，需关注进入夏季后的水质风险。\n\n如果需要我进一步绘制趋势图或对比历史同期数据，请告诉我。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 7,
+        "response_length": 1300
+      },
+      "total_score": 0.93,
+      "duration_sec": 137.94,
+      "error": ""
+    },
+    {
+      "index": 47,
+      "skill": "water-quality",
+      "level": "L2",
+      "question": "查询京杭运河水质站当前水质等级（单因子评价法）。",
+      "expected_sql": "SELECT b.stnm AS '测站',\n       d.codmn AS 'CODMn', d.dox AS 'DO', d.nh3n AS 'NH3N', d.tp AS 'TP',\n       CASE\n         WHEN d.codmn <= 2 THEN 'Ⅰ类' WHEN d.codmn <= 4 THEN 'Ⅱ类'\n         WHEN d.codmn <= 6 THEN 'Ⅲ类' WHEN d.codmn <= 10 THEN 'Ⅳ类'\n         WHEN d.codmn <= 15 THEN 'Ⅴ类' ELSE '劣Ⅴ类'\n       END AS 'CODMn评级',\n       CASE\n         WHEN d.dox >= 7.5 THEN 'Ⅰ类' WHEN d.dox >= 6 THEN 'Ⅱ类'\n         WHEN d.dox >= 5 THEN 'Ⅲ类' WHEN d.dox >= 3 THEN 'Ⅳ类'\n         WHEN d.dox >= 2 THEN 'Ⅴ类' ELSE '劣Ⅴ类'\n       END AS 'DO评级',\n       CASE\n         WHEN d.nh3n <= 0.15 THEN 'Ⅰ类' WHEN d.nh3n <= 0.5 THEN 'Ⅱ类'\n         WHEN d.nh3n <= 1 THEN 'Ⅲ类' WHEN d.nh3n <= 1.5 THEN 'Ⅳ类'\n         WHEN d.nh3n <= 2 THEN 'Ⅴ类' ELSE '劣Ⅴ类'\n       END AS 'NH3N评级',\n       CASE\n         WHEN d.tp <= 0.02 THEN 'Ⅰ类' WHEN d.tp <= 0.1 THEN 'Ⅱ类'\n         WHEN d.tp <= 0.2 THEN 'Ⅲ类' WHEN d.tp <= 0.3 THEN 'Ⅳ类'\n         WHEN d.tp <= 0.4 THEN 'Ⅴ类' ELSE '劣Ⅴ类'\n       END AS 'TP评级'\nFROM sl325.wq_pcp_d d\nJOIN sl323.st_stbprp_b b ON d.stcd = b.stcd\nWHERE b.stnm LIKE '%京杭运河%' AND b.sttp = 'WQ'\n  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd);",
+      "actual_response": "查询完成！以下是京杭运河水质站当前水质等级评定结果：\n\n================================================================\n  京杭运河水质站(化学法) — 单因子评价法水质等级\n================================================================\n\n  最新采样时间:  2026-03-31 17:55\n\n  各指标监测值及评级:\n  ─────────────────────────────────────\n  溶解氧 (DO)     : 10.3 mg/L  →  Ⅰ类  ✓\n  高锰酸盐指数(CODMn): 8.9 mg/L  →  Ⅳ类  ← 超标项\n  氨氮 (NH3N)     : 0.05 mg/L  →  Ⅰ类  ✓\n  总磷 (TP)       : 0.04 mg/L  →  Ⅱ类  ✓\n  ─────────────────────────────────────\n  pH              : 7.38\n  水温            : 16.8 ℃\n\n  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  ★ 单因子综合评级:  Ⅳ类\n    (取最差等级，由高锰酸盐指数 8.9 mg/L 决定)\n  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n说明:\n- 单因子评价法取四项指标中最差等级作为最终评价\n- 本次评级由 CODMn=8.9 mg/L (Ⅳ类) 拉低，其他三项均优于Ⅱ类\n- 数据截至 2026-03-31，距今约50天，近两个月无新数据入库",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 8,
+        "response_length": 746
+      },
+      "total_score": 0.93,
+      "duration_sec": 121.57,
+      "error": ""
+    },
+    {
+      "index": 48,
+      "skill": "water-quality",
+      "level": "L2",
+      "question": "查询所有水质站最新一条数据中，哪些指标劣于Ⅳ类。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', d.spt AS '采样时间',\n       d.codmn, d.dox, d.nh3n, d.tp,\n       CASE WHEN d.codmn > 10 THEN '超标' END AS 'CODMn状态',\n       CASE WHEN d.dox < 3 THEN '超标' END AS 'DO状态',\n       CASE WHEN d.nh3n > 1.5 THEN '超标' END AS 'NH3N状态',\n       CASE WHEN d.tp > 0.3 THEN '超标' END AS 'TP状态'\nFROM sl325.wq_pcp_d d\nJOIN sl323.st_stbprp_b b ON d.stcd = b.stcd\nWHERE b.sttp = 'WQ'\n  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd)\n  AND (d.codmn > 10 OR d.dox < 3 OR d.nh3n > 1.5 OR d.tp > 0.3);",
+      "actual_response": "查询完成！以下是结果汇总：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  水质站劣于Ⅳ类指标查询结果\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n水质站总数: 79 个\n存在劣于Ⅳ类指标的站点: 11 个\n\n━━━ 超标站点明细 ━━━\n\n 站点                      CODMn   DO    NH3N    TP     超标指标\n ─────────────────────────────────────────────────────────────\n 七里河                     6.10   8.80   ⚠8.00  ⚠8.00  NH3N, TP\n 万年大道桥                   3.80   ⚠0.00  0.56   0.11  DO\n 仪扬河上游水质站(光谱)        ⚠10.10   -    1.13   0.11  CODMn\n 入仪扬河口                  ⚠10.50  3.00   0.35   0.15  CODMn\n 向阳河                      -    10.20  ⚠8.00  ⚠8.00  NH3N, TP\n 向阳河水质站(光谱)            3.30    -    0.25  ⚠0.36  TP\n 安墩河闸内                   4.00   ⚠2.70  0.42   0.12  DO\n 小秦淮河水质站(化学法)         3.80   ⚠0.40  0.60    -   DO\n 望直电厂                     5.60  3.00   ⚠2.94  0.28  NH3N\n 杨庄河                      -    6.30   0.24  ⚠1.71  TP\n 红旗河闸内                   9.50   ⚠1.00  1.37   0.03  DO\n\n━━━ 按指标统计 ━━━\n\n  TP (总磷)    : 4 个站点超标 (Ⅴ类: >0.3 mg/L)\n  DO (溶解氧)   : 4 个站点超标 (Ⅴ类: <3 mg/L)\n  NH3N (氨氮)  : 3 个站点超标 (Ⅴ类: >1.5 mg/L)\n  CODMn (高锰酸盐): 2 个站点超标 (Ⅴ类: >10 mg/L)\n\n━━━ 重点关注 ━━━\n\n1. 七里河、向阳河 — NH3N 和 TP 双指标严重超标（8.00 mg/L），可能为异常值或设备故障，建议核实\n2. 杨庄河 — TP=1.71，远超Ⅴ类标准（>0.4）\n3. 望直电厂 — NH3N=2.94，达劣Ⅴ类（>2）\n\n所有数据最新采样时间集中在 2026-03-31，部分站点（向阳河、杨庄河）数据较旧（2025-12-27）。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 5,
+        "response_length": 1262
+      },
+      "total_score": 0.93,
+      "duration_sec": 96.53,
+      "error": ""
+    },
+    {
+      "index": 59,
+      "skill": "water-forecast",
+      "level": "L2",
+      "question": "预测未来24小时古运河水位站的水位变化趋势。",
+      "expected_sql": "SELECT r.tm AS '预报时间', r.vals AS '预报水位(m)'\nFROM slztk.st_mx_preset_cal_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%古运河%'\n  AND r.type = '1'\n  AND r.tm BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)\n  AND r.taskid = (SELECT taskid FROM slztk.st_mx_taskid_r WHERE stuts = '1' ORDER BY tm DESC LIMIT 1)\nORDER BY r.tm;",
+      "actual_response": "查询完毕，以下是古运河水位站的水位预测分析：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  古运河水位站（新城河口） — 水位预测报告\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n测站信息\n  站名: 古运河水位站（新城河口）\n  站码: HT0021071050000023\n  类型: 水位站 (ZZ)\n  警戒水位: 5.50m\n  保证水位: 未设置\n\n当前实时水位\n  最新实测: 4.72m（2026-03-31 19:00）\n  近期波动: 4.72 ~ 4.73m\n  距警戒水位: 尚有 0.78m 余量\n\n预测数据（未来24小时）\n  预测模型任务时间: 2026-03-31 17:00\n  预测覆盖时段: 2026-03-31 17:00 ~ 2026-04-01 05:15\n  预测水位: 4.76m（全程恒定）\n  预测时间粒度: 15分钟\n  预测记录数: 50条\n\n趋势判断: 水位预测保持平稳\n  预测值（4.76m）略高于实测值（4.72m），偏差约 0.04m，\n  未来24小时无明显涨落趋势，水位预计维持在 4.76m 左右。\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n⚠️  重要提示：预测数据来自 2026-03-31 的模型任务，\n   距今已有约 51 天，预测系统近期未更新运行。\n   当前日期为 2026-05-21，上述预测结果不代表\n   当前真实的未来水位变化，请以实时监测数据为准。\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n总结: 古运河站水位处于安全区间（低于警戒水位 5.50m 约 0.78m），最新可用预测显示水位将保持平稳，无明显涨落趋势。但预测模型数据较旧（3月31日），建议关注实时水位监测数据，如需最新预测请确认模型系统是否已更新运行。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 4,
+        "response_length": 868
+      },
+      "total_score": 0.93,
+      "duration_sec": 82.56,
+      "error": ""
+    },
+    {
+      "index": 60,
+      "skill": "water-forecast",
+      "level": "L2",
+      "question": "查询未来24小时所有站点的预测水位，按站分组显示最高/最低预测值。",
+      "expected_sql": "SELECT b.stnm AS '测站名称',\n       MIN(r.vals) AS '最低预测水位(m)',\n       MAX(r.vals) AS '最高预测水位(m)',\n       MIN(r.tm) AS '预测起始',\n       MAX(r.tm) AS '预测终止'\nFROM slztk.st_mx_preset_cal_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE r.type = '1'\n  AND r.tm BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)\n  AND r.taskid = (SELECT taskid FROM slztk.st_mx_taskid_r WHERE stuts = '1' ORDER BY tm DESC LIMIT 1)\nGROUP BY b.stnm\nORDER BY MAX(r.vals) DESC;",
+      "actual_response": "查询完成！以下是未来24小时各站点预测水位汇总：\n\n================================================================\n  未来24小时预测水位汇总（按站点分组）\n================================================================\n  任务ID: 19D431F068E51198FE\n  任务时间: 2026-03-31 17:00:00\n  任务状态: 已完成\n  预测时段: 2026-03-31 17:00 ~ 2026-04-01 17:00\n================================================================\n\n站名                                  站码                    最低(m)  最高(m)  变幅(m)  数据条数\n----------------------------------------------------------------------\n七里沟（北）水文站（福祥路南）        HT0021003002000011       4.57     4.57     0.00       97\n七里沟（南）水位水文站（韩庄）        HT0021003003000025       4.75     4.76     0.01       97\n七里河水位站（东花园路）              HT0031002005000027       4.78     4.79     0.01       97\n中心河水位站（站南路）                HT0031003009000010       4.75     4.76     0.01       97\n二道河水文站（文昌中路）              HT002100200200001X       4.89     4.96     0.07       97\n仪扬河下游水质站(光谱)                HT0051003103000022       4.75     4.76     0.01       97\n仪扬河水位站（润扬南路）              HT0021003103000011       4.75     4.76     0.01       97\n仪扬河闸                              HP0071003103000016       4.74     4.75     0.01       97\n保障湖水位站（汉陵苑）                HT0031003052000017       4.89     4.96     0.07       97\n古运河水位站（新城河口）              HT0021071050000023       4.75     4.76     0.01       97\n古运河水位站（春江路）                HT0031003103000021       4.75     4.76     0.01      291\n古运河水文站（扬子津体育公园）        HT0021071151000019       4.75     4.76     0.01       97\n古运河水文站（钞关泵站）              HT0021002001000010       4.75     4.76     0.01       97\n向阳河水位站(建华路)                  HT0031003103000036       3.07     3.08     0.01       97\n向阳河水位站（华声路）                HT0031003103000017       3.07     3.08     0.01       97\n吴庄河闸                              HP0071002005000026       4.78     4.79     0.01       97\n周庄河水位站（华阳东路）              HT0031071150000015       3.18     3.18     0.00       97\n四望亭河(邗江北路)水位站              HT0031003011000018       4.89     4.97     0.08       97\n引潮河闸站                            HP0071003002000054       4.75     4.97     0.22      194\n念四闸站                              HP0071003005000028       4.89     4.96     0.07       97\n扬州水利枢纽                          HP0071002004000012       5.06     5.06     0.00       97\n扬州闸水文站                          HT0021002004000018       4.76     4.76     0.00       97\n新城河(文昌路桥点)                    HT0031003001000018       4.89     4.97     0.08       97\n新城河水文站（兴城西路北）            HT0021003001000012       4.89     4.97     0.08       97\n施桥港水位站（临江路）                HT0031071151000014       3.18     3.18     0.00       97\n横沟河水文站（临江路）                HT002107115000001X       3.73     3.74     0.01       97\n沙施河水位站（老沙河）                HT0031002004000013       4.78     4.78     0.00       97\n沙施河水文站（沙施河南闸北）          HT0051002004000029       4.79     4.79     0.00       97\n泗源沟闸（水文）                      62705551                 4.74     4.75     0.01       97\n润扬河闸                              HP0071081100000017       4.74     4.75     0.01       97\n玉带河水位站（史可法西路）            HT0031003006000013       4.89     4.96     0.07       97\n瓜洲节制闸                            HP007100310300004X       4.75     4.76     0.01       97\n瘦西湖水位站                          HT0021003052000011       4.89     4.96     0.07       97\n赵家支沟水文站（同泰路南）            HT0021003009000015       4.75     4.76     0.01       97\n赵家支沟水文站（赵家河路）            HT0021003003000010       4.75     4.76     0.01       97\n通运闸站                              HP0071002004000031       4.78     4.79     0.01       97\n邗江河水文站(普照闸)                  HT0021071150000043       2.36     2.37     0.01       97\n邗沟水文站（史可法路东）              HT0021003053000010       4.89     4.97     0.08       97\n马港河水位站（华发路）                HT0031071151000052       2.36     2.37     0.01       97\n\n================================================================\n  统计摘要\n================================================================\n  预报站点总数: 39\n  预测时段: 2026-03-31 17:00 ~ 2026-04-01 17:00（24小时）\n  各站数据点: 97个（古运河春江路291个、引潮河闸站194个）\n  \n  水位最高站点: 扬州水利枢纽 (5.06m)\n  水位最低站点: 邗江河水文站/马港河水位站 (2.36m)\n  变幅最大站点: 引潮河闸站 (0.22m)\n  \n  ⚠️ 注意: 最新任务时间为 2026-03-31 17:00，非实时数据。\n================================================================",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 4,
+        "response_length": 4257
+      },
+      "total_score": 0.93,
+      "duration_sec": 188.79,
+      "error": ""
+    },
+    {
+      "index": 61,
+      "skill": "water-forecast",
+      "level": "L2",
+      "question": "查询最新的模型计算任务列表（已完成的）。",
+      "expected_sql": "SELECT taskid AS '任务ID', tm AS '调度时间', task_name AS '任务名称',\n       calTm AS '计算完成时间'\nFROM slztk.st_mx_taskid_r\nWHERE stuts = '1' AND type = '1'\nORDER BY tm DESC\nLIMIT 20;",
+      "actual_response": "查询完成。以下是最新已完成的模型计算任务列表（stuts=1, type=1 水位预测）：\n\n⚠️ 注意：最新任务时间为 2026-03-31，距今已超过 50 天，数据非实时。\n\n共 20 条记录（按时间倒序）：\n\n序号 | Task ID              | 任务时间             | 类型\n-----|----------------------|----------------------|------\n  1  | 19D431F068E51198FE   | 2026-03-31 17:00:00  | 水位预测\n  2  | 19D42E81DC3930E85    | 2026-03-31 16:00:00  | 水位预测\n  3  | 19D42B1298613BF4B1   | 2026-03-31 15:00:00  | 水位预测\n  4  | 19D427A3B031043687   | 2026-03-31 14:00:00  | 水位预测\n  5  | 19D42434C878632F3    | 2026-03-31 13:00:00  | 水位预测\n  6  | 19D420C5E055A9C5F8   | 2026-03-31 12:00:00  | 水位预测\n  7  | 19D41D56F8B393D609   | 2026-03-31 11:00:00  | 水位预测\n  8  | 19D419E81091A410EE   | 2026-03-31 10:00:00  | 水位预测\n  9  | 19D4167928B4C61DEF   | 2026-03-31 09:00:00  | 水位预测\n 10  | 19D4130A41A3676436   | 2026-03-31 08:00:00  | 水位预测\n 11  | 19D40F9B58F2B251B5   | 2026-03-31 07:00:00  | 水位预测\n 12  | 19D40C2C70F165BE80   | 2026-03-31 06:00:00  | 水位预测\n 13  | 19D408BD88A5465A57   | 2026-03-31 05:00:00  | 水位预测\n 14  | 19D4054EA123F97FBC   | 2026-03-31 04:00:00  | 水位预测\n 15  | 19D401DFB8D8F0B4F    | 2026-03-31 03:00:00  | 水位预测\n 16  | 19D3FE70D0B5E62E4F   | 2026-03-31 02:00:00  | 水位预测\n 17  | 19D3FB01E87E2B43C    | 2026-03-31 01:00:00  | 水位预测\n 18  | 19D3F79301A339E9A7   | 2026-03-31 00:00:00  | 水位预测\n 19  | 19D3F42418971A811    | 2026-03-30 23:00:00  | 水位预测\n 20  | 19D3F0B530C2689FA6   | 2026-03-30 22:00:00  | 水位预测\n\n说明：\n- 所有任务均为「水位预测」类型（type=1），状态均为「已完成」（stuts=1）\n- 任务频率为每小时一次，最近运行到 2026-03-31 17:00 后停止\n- 预测系统目前可能未在运行，最新数据已超过 50 天\n\n如需查看某个具体任务的预测结果数据，请告诉我 taskid。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 4,
+        "response_length": 1526
+      },
+      "total_score": 0.93,
+      "duration_sec": 94.89,
+      "error": ""
+    },
+    {
+      "index": 72,
+      "skill": "gate-pump-operation",
+      "level": "L2",
+      "question": "查询念四闸站最新的上下游水位和过闸流量。",
+      "expected_sql": "SELECT b.stnm AS '闸站名称', w.tm AS '更新时间',\n       w.upz AS '闸上水位(m)', w.dwz AS '闸下水位(m)',\n       w.tgtq AS '过闸流量(m³/s)',\n       w.upz - w.dwz AS '水位差(m)'\nFROM sl323.st_was_r w\nJOIN sl323.st_stbprp_b b ON w.stcd = b.stcd\nWHERE b.stnm = '念四闸站'\nORDER BY w.tm DESC\nLIMIT 1;",
+      "actual_response": "查询完成，以下是念四闸站的最新数据：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  念四闸站 (HP0071003005000028) - 最新堰闸水情\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  最新记录时间: 2026-03-31 18:05:00\n  上游水位:     5.370 m\n  下游水位:     4.980 m\n  过闸流量:     1.330 m³/s\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n近期趋势（最近5条记录，约30分钟内）:\n\n  时间            上游(m)  下游(m)  流量(m³/s)\n  ─────────────   ──────   ──────   ──────────\n  18:05:00        5.370    4.980    1.330\n  18:00:00        5.370    4.980    1.320\n  17:55:00        5.380    4.980    1.330\n  17:50:00        5.370    4.980    1.320\n  17:45:00        5.370    4.980    1.320\n\n上下游水位差约 0.39m，过闸流量较小且稳定在 1.32~1.33 m³/s，水位波动极小，运行状态平稳。\n\n注意：数据最新截止到 2026-03-31，距今已有段距离，可能是该站点近期未上报新数据。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 4,
+        "response_length": 699
+      },
+      "total_score": 0.93,
+      "duration_sec": 38.1,
+      "error": ""
+    },
+    {
+      "index": 73,
+      "skill": "gate-pump-operation",
+      "level": "L2",
+      "question": "查询泵站综合运行状态汇总。",
+      "expected_sql": "SELECT b.stnm AS '泵站名称',\n       SUM(CASE WHEN p.omcn > 0 THEN 1 ELSE 0 END) AS '运行泵数',\n       MAX(p.omcn) AS '开机台数',\n       SUM(p.pmpq) AS '总抽水流量(m³/s)',\n       CASE WHEN MAX(p.pdchcd) = '1' THEN '引水'\n            WHEN MAX(p.pdchcd) = '2' THEN '排水'\n            ELSE '未知' END AS '引排特征'\nFROM sl323.st_pump_r p\nJOIN sl323.st_stbprp_b b ON p.stcd = b.stcd\nWHERE b.sttp = 'DP'\n  AND p.tm = (SELECT MAX(p2.tm) FROM sl323.st_pump_r p2 WHERE p2.stcd = p.stcd)\nGROUP BY b.stnm;",
+      "actual_response": "[TIMEOUT after 300s]",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 0.5,
+        "has_domain_data": 0.0,
+        "has_numeric_data": 0.5,
+        "response_quality": 0.1,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 0,
+        "response_length": 20
+      },
+      "total_score": 0.25,
+      "duration_sec": 300.08,
+      "error": ""
+    },
+    {
+      "index": 74,
+      "skill": "gate-pump-operation",
+      "level": "L2",
+      "question": "查询润扬河闸各闸门最新开度。",
+      "expected_sql": "SELECT b.stnm AS '闸站', g.gtname AS '闸门名称', g.gtophgt AS '开度(m)',\n       g.gto AS '过闸流量(m³/s)', g.tm AS '时间',\n       CASE WHEN g.gtophgt > 0 THEN '开启' ELSE '关闭' END AS '状态'\nFROM sl323.st_gate_r g\nJOIN sl323.st_stbprp_b b ON g.stcd = b.stcd\nWHERE b.stnm = '润扬河闸'\n  AND g.tm = (SELECT MAX(g2.tm) FROM sl323.st_gate_r g2 WHERE g2.stcd = g.stcd)\nORDER BY g.gtname;",
+      "actual_response": "查询完成。润扬河闸各闸门最新开度如下：\n\n**润扬河闸（站码: HP0071081100000017）**\n闸门名称          开度(m)    过闸流量(m³/s)  时间\n润扬河闸1#上扉门    0.00       0.000       2025-05-19 20:35:00\n润扬河闸1#下扉门    0.00       0.000       2025-05-19 20:35:00\n润扬河闸2#上扉门    0.00       0.000       2025-05-19 20:35:00\n润扬河闸2#下扉门    0.00       0.000       2025-05-19 20:35:00\n润扬河闸3#上扉门    0.00       0.000       2025-05-19 20:35:00\n润扬河闸3#下扉门    0.00       0.000       2025-05-19 20:35:00\n\n总结: 共6个闸门，全部关闭（开度为0），总过闸流量为0.000 m³/s。\n\n另外发现还有\"润扬河闸（水文）\"站（站码: 510D4480），但该站没有闸门启闭数据记录。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 4,
+        "response_length": 515
+      },
+      "total_score": 0.93,
+      "duration_sec": 170.06,
+      "error": ""
+    },
+    {
+      "index": 87,
+      "skill": "water-warning",
+      "level": "L2",
+      "question": "扬州市重点河道水位实时情况（含超警戒判断）。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '实时水位(m)', r.tm AS '更新时间',\n       rv.WRZ AS '警戒水位(m)',\n       CASE WHEN r.z > rv.WRZ THEN '超警戒' ELSE '正常' END AS '状态'\nFROM sl323.st_river_r r\nINNER JOIN (\n  SELECT r.stcd, b.stnm, MAX(tm) AS maxTm\n  FROM sl323.st_river_r r\n  INNER JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\n  WHERE b.stnm IN ('古运河水位站（新城河口）', '新城河水文站（兴城西路北）',\n                    '七里河水位站（东花园路）', '赵家支沟水文站（赵家河路）', '瘦西湖水位站')\n  GROUP BY r.stcd, b.stnm\n) sub ON r.stcd = sub.stcd AND r.tm = sub.maxTm\nINNER JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD;",
+      "actual_response": "查询完成，以下是扬州市5个重点河道测站的实时水位情况：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  扬州市重点河道实时水位汇总（数据截至 2026-03-31 19:00）\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  测站名称                      实时水位(m)  警戒水位(m)  水势  状态\n  ─────────────────────────────────────────────────────────────────\n  新城河水文站（兴城西路北）         5.34       6.10      --   正常\n  瘦西湖水位站                    4.93       5.20      --   正常\n  赵家支沟水文站（赵家河路）         4.79       5.70      --   正常\n  七里河水位站（东花园路）           4.74       5.00      --   正常\n  古运河水位站（新城河口）           4.72       5.50      --   正常\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  结论：5个重点河道全部正常，无超警戒、无超保证情况。\n  各站距警戒水位尚有余量，其中：\n    - 七里河距警戒最近，差值 0.26m\n    - 古运河距警戒最远，差值 0.78m\n  注意：当前数据最后更新时间为 3月31日，如需查看最新实时数据请确认 SCADA 上报状态。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 2,
+        "response_length": 756
+      },
+      "total_score": 0.82,
+      "duration_sec": 84.06,
+      "error": ""
+    },
+    {
+      "index": 88,
+      "skill": "water-warning",
+      "level": "L2",
+      "question": "查询水质低于Ⅳ类的站点。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', d.spt AS '采样时间',\n       d.codmn AS 'CODMn', d.dox AS 'DO', d.nh3n AS 'NH3N', d.tp AS 'TP',\n       CASE\n         WHEN d.codmn > 10 OR d.dox < 3 OR d.nh3n > 1.5 OR d.tp > 0.3 THEN '劣于Ⅳ类'\n         ELSE '正常'\n       END AS '预警状态'\nFROM sl325.wq_pcp_d d\nJOIN sl323.st_stbprp_b b ON d.stcd = b.stcd\nWHERE b.sttp = 'WQ'\n  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd)\n  AND (d.codmn > 10 OR d.dox < 3 OR d.nh3n > 1.5 OR d.tp > 0.3);",
+      "actual_response": "查询完成！共找到 10 个水质低于Ⅳ类的站点，按评级从差到好汇总如下：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n【劣Ⅴ类 — 6个站点】\n\n1. 向阳河 (YZXYH000000001) — 2025-12-27\n   超标指标: NH3N=8.00, TP=8.00\n\n2. 杨庄河 (YZYZH000000001) — 2025-12-27\n   超标指标: TP=1.71\n\n3. 红旗河闸内 (wanyi123) — 2026-03-27\n   超标指标: DO=1.0（溶解氧极低）\n\n4. 望直电厂 (32102311000852) — 2026-03-31\n   超标指标: NH3N=2.94\n\n5. 七里河 (QLH000000001) — 2026-03-31\n   超标指标: NH3N=8.00, TP=8.00\n\n6. 小秦淮河水质站/化学法 (HT0051002002000016) — 2026-03-31\n   超标指标: DO=0.4（溶解氧极低）\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n【Ⅴ类 — 4个站点】\n\n7. 安墩河闸内 (YZGL2022004) — 2026-03-31\n   超标指标: DO=2.7\n\n8. 入仪扬河口 (MN20230425662) — 2026-03-31\n   超标指标: CODMn=10.5, DO=3.0\n\n9. 向阳河水质站/光谱 (HT0021003103000026) — 2026-03-31\n   超标指标: TP=0.36\n\n10. 仪扬河上游水质站/光谱 (HT0051003103000018) — 2026-03-31\n    超标指标: CODMn=10.1\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n主要问题分析：\n- 氨氮(NH3N)和总磷(TP)超标是最突出的问题，向阳河和七里河两项指标均为8.00\n- 溶解氧(DO)偏低在多个站点出现，小秦淮河仅0.4mg/L，红旗河闸内仅1.0mg/L\n- 所有结果均基于单因子评价法（取最差指标等级作为综合评级）",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.33,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 1,
+        "response_length": 970
+      },
+      "total_score": 0.73,
+      "duration_sec": 159.56,
+      "error": ""
+    },
+    {
+      "index": 89,
+      "skill": "water-warning",
+      "level": "L2",
+      "question": "扬州市重点河道指定测站当前水位如何。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '当前水位(m)', r.tm AS '更新时间',\n       rv.WRZ AS '警戒水位(m)', rv.GRZ AS '保证水位(m)',\n       CASE\n         WHEN r.z > rv.GRZ THEN '超保证'\n         WHEN r.z > rv.WRZ THEN '超警戒'\n         ELSE '正常'\n       END AS '预警状态'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r GROUP BY stcd) latest\n  ON r.stcd = latest.stcd AND r.tm = latest.maxTm\nWHERE b.stnm IN ('古运河水位站（新城河口）', '新城河水文站（兴城西路北）',\n                  '七里河水位站（东花园路）', '赵家支沟水文站（赵家河路）', '瘦西湖水位站');",
+      "actual_response": "查询完成！以下是扬州市5个重点河道测站的最新水位数据：\n\n注意: 数据库记录截止到 2026-03-31，以下为各站该日最新记录。\n\n===========================================================================\n  扬州市重点河道当前水位\n===========================================================================\n\n  测站名称                                  水位(m)   警戒水位   状态\n  ---------------------------------------------------------------------------\n  古运河水位站（新城河口）                       4.72     5.50     正常\n  新城河水文站（兴城西路北）                      5.34     6.10     正常\n  七里河水位站（东花园路）                        4.74     5.00     正常\n  赵家支沟水文站（赵家河路）                      4.79     5.70     正常\n  瘦西湖水位站                                 4.93     5.20     正常\n\n  监测时间: 2026-03-31 19:00:00\n===========================================================================\n\n分析:\n- 所有5个重点河道测站水位均处于正常范围，未超警戒水位\n- 新城河水位最高（5.34m），距警戒水位（6.10m）还有 0.76m 余量\n- 七里河水位（4.74m）距警戒水位（5.00m）最近，仅差 0.26m\n- 各站均无保证水位数据（防洪指标表中未配置）\n\n注意: 数据库中最新数据为 2026-03-31，距今已近2个月，可能需要确认实时数据是否正常入库。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 2,
+        "response_length": 958
+      },
+      "total_score": 0.82,
+      "duration_sec": 199.71,
+      "error": ""
+    }
+  ],
+  "summary": {
+    "total_duration_sec": 2475.91,
+    "avg_score": 0.8566666666666668,
+    "valid_response_rate": 0.9761904761904762,
+    "domain_data_rate": 0.8576190476190477,
+    "numeric_data_rate": 0.9761904761904762,
+    "pass_rate": 0.9523809523809523,
+    "by_skill": [
+      {
+        "skill": "gate-pump-operation",
+        "count": 3,
+        "avg_score": 0.7033333333333335,
+        "valid_response_rate": 0.8333333333333334,
+        "pass_rate": 0.6666666666666666,
+        "avg_duration": 169.41333333333333
+      },
+      {
+        "skill": "rainfall",
+        "count": 3,
+        "avg_score": 0.8700000000000001,
+        "valid_response_rate": 1.0,
+        "pass_rate": 1.0,
+        "avg_duration": 123.29333333333334
+      },
+      {
+        "skill": "water-forecast",
+        "count": 3,
+        "avg_score": 0.93,
+        "valid_response_rate": 1.0,
+        "pass_rate": 1.0,
+        "avg_duration": 122.08
+      },
+      {
+        "skill": "water-quality",
+        "count": 3,
+        "avg_score": 0.93,
+        "valid_response_rate": 1.0,
+        "pass_rate": 1.0,
+        "avg_duration": 118.67999999999999
+      },
+      {
+        "skill": "water-situation",
+        "count": 6,
+        "avg_score": 0.8866666666666667,
+        "valid_response_rate": 1.0,
+        "pass_rate": 1.0,
+        "avg_duration": 72.03
+      },
+      {
+        "skill": "water-warning",
+        "count": 3,
+        "avg_score": 0.79,
+        "valid_response_rate": 1.0,
+        "pass_rate": 1.0,
+        "avg_duration": 147.77666666666667
+      }
+    ],
+    "by_level": [
+      {
+        "level": "L2",
+        "count": 21,
+        "avg_score": 0.8566666666666668,
+        "valid_response_rate": 0.9761904761904762,
+        "pass_rate": 0.9523809523809523,
+        "avg_duration": 117.90047619047618
+      }
+    ]
+  }
+}

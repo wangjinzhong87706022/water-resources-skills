@@ -1,0 +1,46 @@
+(连库重算 98 题...)
+  ...10/98
+  ...20/98
+  ...30/98
+  ...40/98
+  ...50/98
+  ...60/98
+  ...70/98
+  ...80/98
+  ...90/98
+==============================================================
+离线重算 98 题  (run: reports/harness_baseline)
+==============================================================
+
+sql_correctness 分布(题数):
+  分          旧     新      变化
+  1.0        2     4      +2
+  0.5        5     1      -4
+  0.2       56     7     -49
+  skip      35    86     +51
+
+总分 avg:  旧 0.761  →  新 0.811  (Δ +0.051)
+
+按 skill(新 avg):
+  skill                    n    新avg
+  gate-pump-operation     15   0.838
+  rainfall                18   0.798
+  water-forecast          13   0.721
+  water-quality           13   0.831
+  water-situation         25   0.831
+  water-warning           14   0.830
+
+健全性: 非-SC verifier(sql_safety) 新旧不一致 = 0 (应为 0)
+
+=== triage: 修正后仍 0.2 的真实 mismatch = 7 题 ===
+  按 skill: {'water-situation': 7}
+  Q1 [water-situation] agent=11 exp=0 | 古运河有哪些水位测站？
+  Q2 [water-situation] agent=20 exp=2 | 查询宝应水位站的所属河流、水系、流域、测站类别。
+  Q3 [water-situation] agent=11 exp=1 | 查询测站总数。
+  Q4 [water-situation] agent=0 exp=18 | 查询水位站宝应最近30天水位数据。
+  Q11 [water-situation] agent=9 exp=7 | 2024年古运河平均水位。
+  Q13 [water-situation] agent=1 exp=2 | 请比较2023年和2024年古运河的平均水位。
+  Q15 [water-situation] agent=0 exp=1 | 查询水位站白马闸的实时水位是多少。
+
+✓ 已回写 corrected 基线 → reports/harness_baseline/eval_results_20260623_175514_corrected.json
+  summary: avg=0.811 pass=0.929 hard_fail=0

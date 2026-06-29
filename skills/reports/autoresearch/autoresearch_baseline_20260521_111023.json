@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "timestamp": "20260521_111023",
+    "phase": "baseline",
+    "skills": 1,
+    "total_runs": 3
+  },
+  "summary": [
+    {
+      "skill": "water-warning",
+      "runs": 3,
+      "pass_rate": 1.0,
+      "total_pass": 15,
+      "total_evals": 15
+    }
+  ],
+  "details": [
+    {
+      "skill": "water-warning",
+      "runs": [
+        {
+          "skill": "water-warning",
+          "prompt": "查询当前超警戒水位的站点",
+          "prompt_desc": "超警查询",
+          "response": "当前有 1 个站点超警戒水位，查询结果如下:\n\n------------------------------------------------------------------------------------------\n测站名称                    所属河流   当前水位  警戒水位  超出水位  状态\n------------------------------------------------------------------------------------------\n仪扬河下游水质站(光谱)        -         15.27     5.50     9.77    超警戒\n------------------------------------------------------------------------------------------\n\n备注:\n- 该站当前水位 15.27 米，超警戒水位 5.50 米达 9.77 米\n- 站名包含\"光谱\"标识，属于水质监测类站点\n- 数据为各站点最新一条记录的判断结果\n\n如需查看该站的详细历史水位变化趋势，或需要查询包含保证水位的完整防洪指标信息，请告诉我。",
+          "duration_sec": 75.52,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 预警/超警戒/超保证/防洪/水质?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            },
+            {
+              "name": "not_timeout",
+              "question": "Response does not contain TIMEOUT or ERROR markers?",
+              "passed": true
+            }
+          ],
+          "pass_count": 5,
+          "total_evals": 5,
+          "pass_rate": 1.0,
+          "keyword_hits": 3,
+          "num_count": 7
+        },
+        {
+          "skill": "water-warning",
+          "prompt": "扬州市重点河道水位实时情况（含超警戒判断）",
+          "prompt_desc": "多站预警汇总",
+          "response": "查询完成！以下是扬州市 5 个重点河道水位站的实时水位情况：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  扬州市重点河道实时水位\n  数据更新时间: 2026-03-31 19:00:00\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  测站名称                          实时水位(m)  警戒水位(m)  水位状态\n  ─────────────────────────────────────────────────────────────\n  七里河水位站（东花园路）            4.74        5.00       正常 ✓\n  古运河水位站（新城河口）            4.72        5.50       正常 ✓\n  新城河水文站（兴城西路北）           5.34        6.10       正常 ✓\n  瘦西湖水位站                        4.93        5.20       正常 ✓\n  赵家支沟水文站（赵家河路）           4.79        5.70       正常 ✓\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n综合判断: 5 个重点河道水位站均处于 正常 状态，无超警戒、超保证情况。\n\n各站距警戒水位余量:\n  - 七里河:   距警戒 0.26m\n  - 古运河:   距警戒 0.78m\n  - 新城河:   距警戒 0.76m\n  - 瘦西湖:   距警戒 0.27m（余量最小，需关注）\n  - 赵家支沟: 距警戒 0.91m（余量最充裕）",
+          "duration_sec": 94.41,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 预警/超警戒/超保证/防洪/水质?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            },
+            {
+              "name": "not_timeout",
+              "question": "Response does not contain TIMEOUT or ERROR markers?",
+              "passed": true
+            }
+          ],
+          "pass_count": 5,
+          "total_evals": 5,
+          "pass_rate": 1.0,
+          "keyword_hits": 2,
+          "num_count": 23
+        },
+        {
+          "skill": "water-warning",
+          "prompt": "查询水质低于Ⅳ类的站点",
+          "prompt_desc": "跨库水质预警",
+          "response": "查询完成。以下是水质低于Ⅳ类的站点（共 14 个）：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n【劣Ⅴ类】(8 个站点 — 最严重)\n\n  1. 望直电厂 (32102311000852)\n     采样时间: 2026-03-31 08:00\n     CODMn=5.6  DO=3.0  NH3N=2.94↑  TP=0.28\n     超标项: 氨氮严重超标\n\n  2. 小秦淮河水质站(化学法) (HT0051002002000016)\n     采样时间: 2026-03-31 17:30\n     CODMn=3.8  DO=0.4↓  NH3N=0.6  TP=无数据\n     超标项: 溶解氧严重不足\n\n  3. 万年大道桥 (MN20230402599)\n     采样时间: 2026-03-31 12:00\n     CODMn=3.8  DO=0.0↓  NH3N=0.56  TP=0.11\n     超标项: 溶解氧为零\n\n  4. 七里河 (QLH000000001)\n     采样时间: 2026-03-31 12:00\n     CODMn=6.1  DO=8.8  NH3N=8.0↑↑  TP=8.0↑↑\n     超标项: 氨氮、总磷严重超标（均为Ⅴ类限值的20倍）\n\n  5. 红旗河闸内 (wanyi123)\n     采样时间: 2026-03-27 12:00\n     CODMn=9.5  DO=1.0↓  NH3N=1.37  TP=0.03\n     超标项: 溶解氧严重不足\n\n  6. YZGL2022008 (无站名)\n     采样时间: 2026-03-31 12:00\n     CODMn=3.5  DO=0.3↓  NH3N=0.03  TP=0.2\n     超标项: 溶解氧严重不足\n\n  7. 向阳河 (YZXYH000000001)\n     采样时间: 2025-12-27 12:00\n     DO=10.2  NH3N=8.0↑↑  TP=8.0↑↑  CODMn=无数据\n     超标项: 氨氮、总磷严重超标\n\n  8. 杨庄河 (YZYZH000000001)\n     采样时间: 2025-12-27 12:00\n     DO=6.3  NH3N=0.24  TP=1.71↑↑  CODMn=无数据\n     超标项: 总磷严重超标\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n【Ⅴ类】(6 个站点)\n\n  9. 七里沟(生环) (HJDBSXM2020001)\n     采样时间: 2024-11-10 16:00\n     CODMn=10.7↑  DO=6.0  NH3N=0.17  TP=0.07\n\n  10. 杨寿宏星桥站(生环) (HJDBSXM2021008)\n      采样时间: 2024-11-10 16:00\n      CODMn=4.6  DO=2.6↓  NH3N=0.14  TP=0.09\n\n  11. 向阳河水质站(光谱) (HT0021003103000026)\n      采样时间: 2026-03-31 16:55\n      CODMn=3.3  DO=无数据  NH3N=0.25  TP=0.36↑\n\n  12. 仪扬河上游水质站(光谱) (HT0051003103000018)\n      采样时间: 2026-03-31 18:00\n      CODMn=10.1↑  DO=无数据  NH3N=1.13  TP=0.11\n\n  13. 入仪扬河口 (MN20230425662)\n      采样时间: 2026-03-31 12:00\n      CODMn=10.5↑  DO=3.0  NH3N=0.35  TP=0.15\n\n  14. 安墩河闸内 (YZGL2022004)\n      采样时间: 2026-03-31 08:00\n      CODMn=4.0  DO=2.7↓  NH3N=0.42  TP=0.12\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n【预警总结】\n\n  • 劣Ⅴ类站点 8 个，Ⅴ类站点 6 个\n  • 主要超标项：氨氮(NH3N) 和 溶解氧(DO)\n  • 重点关注：七里河 — 氨氮 8.0 mg/L、总磷 8.0 mg/L（远超劣Ⅴ类限值）\n  • 万年大道桥、YZGL2022008 — 溶解氧接近零，水体严重缺氧\n  • 部分站点数据较旧（2024年、2025年12月），建议核实是否仍在监测",
+          "duration_sec": 154.73,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 预警/超警戒/超保证/防洪/水质?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            },
+            {
+              "name": "not_timeout",
+              "question": "Response does not contain TIMEOUT or ERROR markers?",
+              "passed": true
+            }
+          ],
+          "pass_count": 5,
+          "total_evals": 5,
+          "pass_rate": 1.0,
+          "keyword_hits": 2,
+          "num_count": 176
+        }
+      ],
+      "total_pass": 15,
+      "total_evals": 15,
+      "pass_rate": 1.0
+    }
+  ]
+}

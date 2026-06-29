@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# SkillOpt / 编辑器备份
+*.skillopt_backup
+
+# 运行时产物(本地 eval 重新跑会再生,不入库)
+skills/reports/**/_recompute_cache.pkl
+
+# 临时/垃圾
+rv.GRZ
+rv.WRZ
+
+# 本地环境变量(含真实 DB 密码,切勿提交)
+.env

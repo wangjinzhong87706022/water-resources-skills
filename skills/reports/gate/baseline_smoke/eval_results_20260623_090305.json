@@ -1,0 +1,510 @@
+{
+  "meta": {
+    "timestamp": "20260623_090305",
+    "total_cases": 3,
+    "total_duration_sec": 1050.12
+  },
+  "results": [
+    {
+      "index": 26,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询扬州城区今日降雨量。",
+      "expected_sql": "SELECT DATE(p.tm) AS '日期', SUM(p.drp) AS '日降雨量(mm)'\nFROM sl323.st_pptn_r p\nWHERE p.stcd = '58245'\n  AND DATE(p.tm) = CURDATE()\n  AND p.drp IS NOT NULL\nGROUP BY DATE(p.tm);",
+      "actual_response": "现在情况很清楚了。以下是查询结果汇总：\n\n---\n\n## 扬州城区今日降雨量查询\n\n| 项目 | 内容 |\n|------|------|\n| **查询日期** | 2026-06-23（星期二） |\n| **测站** | 扬州 (stcd=58245) |\n| **今日降雨量** | **无数据** |\n\n### 数据说明\n\n- **st_pptn_r 表数据截止于 2026-06-11**（距今约12天），今日（06-23）暂无降雨记录\n- **扬州站 (58245) 最后一条记录停在 2025-11-26**，该测站数据采集已中断近7个月\n- 表中其他测站最新数据为 2026-06-11（部分自动雨量站仍在上报）\n\n### 结论\n\n**扬州城区雨量站（58245）数据采集已中断**，今日无法提供实时降雨量。建议：\n1. 联系设备运维确认扬州站自动雨量计是否离线\n2. 如需了解是否有降雨，可参考周边仍在线的自动雨量站数据（如 HT006 系列站点）\n\n是否需要我查一下周边雨量站今天的降雨情况？",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 2,
+        "response_length": 455,
+        "verifiers": [
+          {
+            "name": "domain_coverage",
+            "layer": "final_answer",
+            "score": 0.67,
+            "passed": true,
+            "weight": 0.15,
+            "detail": {
+              "keyword_hits": 2,
+              "keywords": [
+                "降雨",
+                "雨量",
+                "降水",
+                "雨站",
+                "mm",
+                "暴雨",
+                "大雨"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "numeric_presence",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "number_count": 22
+            },
+            "error": ""
+          },
+          {
+            "name": "response_validity",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "length": 455,
+              "is_error": false
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_correctness",
+            "layer": "sql_execution",
+            "score": 0.2,
+            "passed": false,
+            "weight": 0.15,
+            "detail": {
+              "agent_rows": 37,
+              "expected_rows": 0
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_executes",
+            "layer": "sql_execution",
+            "score": 0.71,
+            "passed": false,
+            "weight": 0.35,
+            "detail": {
+              "sql_count": 7,
+              "succeeded": 5,
+              "failed": 2
+            },
+            "error": ""
+          },
+          {
+            "name": "tool_trace_sanity",
+            "layer": "trace",
+            "score": 0.8,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "db_called": true,
+              "failure_rate": 0.29,
+              "fabricated_numbers": [
+                "006",
+                "1.",
+                "12",
+                "2.",
+                "2025",
+                "26"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_safety",
+            "layer": "policy",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.05,
+            "detail": {
+              "issues": [],
+              "sql_count": 7
+            },
+            "error": ""
+          }
+        ],
+        "layer_scores": {
+          "final_answer": 0.859,
+          "sql_execution": 0.557,
+          "trace": 0.8,
+          "policy": 1.0
+        },
+        "hard_fail": false
+      },
+      "total_score": 0.709,
+      "duration_sec": 200.24,
+      "error": "",
+      "engine": "harness",
+      "trajectory_path": "reports/gate/baseline_smoke/trajectories/rainfall_026.jsonl",
+      "tool_stats": {
+        "execute_code": {
+          "count": 6,
+          "success": 4,
+          "failure": 2
+        },
+        "terminal": {
+          "count": 1,
+          "success": 1,
+          "failure": 0
+        },
+        "search_files": {
+          "count": 2,
+          "success": 2,
+          "failure": 0
+        },
+        "read_file": {
+          "count": 1,
+          "success": 1,
+          "failure": 0
+        }
+      },
+      "completed": false,
+      "api_calls": 10,
+      "loaded_skills": [
+        "rainfall"
+      ],
+      "missing_skills": []
+    },
+    {
+      "index": 27,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询2025年扬州城区降雨总量。",
+      "expected_sql": "SELECT SUM(p.drp) AS '2025年累计降雨量(mm)'\nFROM sl323.st_pptn_r p\nWHERE p.stcd = '58245'\n  AND p.tm BETWEEN '2025-01-01' AND '2025-12-31'\n  AND p.drp IS NOT NULL;",
+      "actual_response": "## 2025年扬州城区降雨总量查询结果\n\n**测站：** 58245（扬州城区）\n**查询时间：** 2025-01-01 ~ 2025-12-31\n**数据单位：** mm\n\n---\n\n### 📊 年度总览\n\n| 指标 | 数值 |\n|------|------|\n| **★ 年降雨总量** | **1,213.20 mm** |\n| 降雨天数 | 97 天（占全年 26.6%） |\n| 最大时段降雨 | 17.30 mm |\n| 有降雨时段数 | 1,758 个 |\n\n---\n\n### 📅 分月降雨统计\n\n| 月份 | 月降雨量 (mm) | 降雨时段数 | 最大时段 (mm) |\n|------|--------------|-----------|-------------|\n| 1月 | 5.90 | 17 | 1.10 |\n| 2月 | 3.10 | 7 | 0.90 |\n| 3月 | 44.10 | 49 | 9.90 |\n| 4月 | 22.30 | 38 | 6.60 |\n| 5月 | 150.90 | 231 | 7.50 |\n| **6月** | **320.20** | 443 | 14.00 |\n| 7月 | 154.70 | 230 | 10.80 |\n| 8月 | 276.20 | 218 | **17.30** |\n| 9月 | 168.00 | 228 | 9.80 |\n| 10月 | 48.90 | 176 | 4.50 |\n| 11月 | 18.90 | 121 | 0.70 |\n\n> 注：12月无降雨记录（可能数据尚未入库或该月尚未到）。\n\n---\n\n### 🌧️ 日降雨量 Top 5\n\n| 排名 | 日期 | 日降雨量 (mm) |\n|------|------|-------------|\n| 1 | 2025-06-07 | 138.00 |\n| 2 | 2025-09-24 | 104.00 |\n| 3 | 2025-08-30 | 83.70 |\n| 4 | 2025-05-08 | 56.10 |\n| 5 | 2025-08-11 | 48.30 |\n\n---\n\n### 💡 简要分析\n\n- **1,213.20 mm** 的年降雨量符合长江中下游地区常年偏多的气候特征。\n- **6月（320.20 mm）** 为降雨最丰沛月份，正值梅雨季。\n- **8月（276.20 mm）** 次之，主要受台风/副高影响。\n- 全年降雨集中在 **5~9月（汛期）**，五个月合计约 1,070 mm，占总量的 88%。\n- 最强单日降雨为 **6月7日的 138 mm**，属大暴雨级别。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 4,
+        "response_length": 1133,
+        "verifiers": [
+          {
+            "name": "domain_coverage",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.15,
+            "detail": {
+              "keyword_hits": 4,
+              "keywords": [
+                "降雨",
+                "雨量",
+                "降水",
+                "雨站",
+                "mm",
+                "暴雨",
+                "大雨"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "numeric_presence",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "number_count": 100
+            },
+            "error": ""
+          },
+          {
+            "name": "response_validity",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "length": 1133,
+              "is_error": false
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_correctness",
+            "layer": "sql_execution",
+            "score": 0.2,
+            "passed": false,
+            "weight": 0.15,
+            "detail": {
+              "agent_rows": 310,
+              "expected_rows": 1
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_executes",
+            "layer": "sql_execution",
+            "score": 0.79,
+            "passed": false,
+            "weight": 0.35,
+            "detail": {
+              "sql_count": 14,
+              "succeeded": 11,
+              "failed": 3
+            },
+            "error": ""
+          },
+          {
+            "name": "tool_trace_sanity",
+            "layer": "trace",
+            "score": 0.8,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "db_called": true,
+              "failure_rate": 0.14,
+              "fabricated_numbers": [
+                "070",
+                "138",
+                "213.20",
+                "26.6",
+                "6",
+                "758",
+                "8",
+                "88"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_safety",
+            "layer": "policy",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.05,
+            "detail": {
+              "issues": [],
+              "sql_count": 14
+            },
+            "error": ""
+          }
+        ],
+        "layer_scores": {
+          "final_answer": 1.0,
+          "sql_execution": 0.613,
+          "trace": 0.8,
+          "policy": 1.0
+        },
+        "hard_fail": false
+      },
+      "total_score": 0.786,
+      "duration_sec": 451.65,
+      "error": "",
+      "engine": "harness",
+      "trajectory_path": "reports/gate/baseline_smoke/trajectories/rainfall_027.jsonl",
+      "tool_stats": {
+        "execute_code": {
+          "count": 6,
+          "success": 4,
+          "failure": 2
+        },
+        "terminal": {
+          "count": 1,
+          "success": 1,
+          "failure": 0
+        },
+        "search_files": {
+          "count": 3,
+          "success": 3,
+          "failure": 0
+        }
+      },
+      "completed": false,
+      "api_calls": 10,
+      "loaded_skills": [
+        "rainfall"
+      ],
+      "missing_skills": []
+    },
+    {
+      "index": 28,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询各雨量站的平均日降雨量。",
+      "expected_sql": "SELECT b.stnm AS '雨量站名称', AVG(p.drp) AS '平均日降雨量(mm)'\nFROM sl323.st_pptn_r p\nJOIN sl323.st_stbprp_b b ON p.stcd = b.stcd\nWHERE b.sttp = 'PP' AND p.drp IS NOT NULL\nGROUP BY b.stnm;",
+      "actual_response": "查询完成。以下是查询结果的汇总：\n\n---\n\n## 各雨量站平均日降雨量查询结果\n\n### 整体统计\n\n| 指标 | 数值 |\n|------|------|\n| **雨量站总数** | 102 个 |\n| **全站平均时段降水量** | 0.031 mm |\n| **全站平均日降水量** | ≈ 0.000 mm |\n| **全区域累计总降水量** | 280,764.2 mm |\n| **数据区间** | 2023-05-08 ~ 2026-06-11 |\n\n### 各区域汇总\n\n| 区域编码 | 雨量站数 | 平均时段降水(mm) | 平均日降水(mm) | 累计总降水(mm) | 数据截止 |\n|----------|---------|-----------------|---------------|---------------|---------|\n| 321012 | 14 | 0.04 | 0.00 | 39,584.4 | 2025-11-26 |\n| 321084 | 18 | 0.03 | 0.00 | 47,805.1 | 2025-11-26 |\n| 321081 | 13 | 0.03 | 0.00 | 35,380.1 | 2025-11-26 |\n| 321023 | 19 | 0.03 | 0.00 | 43,986.5 | 2025-11-26 |\n| 321003 | 8 | 0.03 | 0.00 | 22,873.6 | 2025-11-26 |\n| 321002 | 7 | 0.03 | 0.00 | 20,219.7 | 2025-11-26 |\n| **320188** (扬州城区) | **23** | **0.02** | **0.00** | **70,914.8** | **2026-06-11** |\n\n### 说明\n\n1. **平均时段降水量** 约 0.03mm：这是将每条时段记录（多数为小时级或半小时级）的 `drp` 取平均。由于绝大部分时段无降雨（值为 0），平均值很低。\n\n2. **平均日降水量** 显示为 0.00mm：因为 `dyp` 字段大部分为空（NULL），只有日降雨量 >0 的日子才有值，所以直接 AVG 接近 0。这反映的是**大部分时段无降水**的常态。\n\n3. **各站差异不大**：排名靠前的站点（江都大桥镇、高邮卸甲八桥等）平均时段降水量为 0.04mm，其余基本在 0.01~0.03mm 之间。\n\n4. **数据更新情况**：\n   - 大部分站点数据截止于 **2025-11-26**\n   - 扬州城区的 23 个站点（HT 开头的智能雨量站）持续更新至 **2026-06-11**，数据最新\n\n如需进一步了解（如**有降雨日的平均降雨量**、**最大降雨日**、或**某特定测站的详细趋势**），可以继续查询。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 4,
+        "response_length": 1226,
+        "verifiers": [
+          {
+            "name": "domain_coverage",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.15,
+            "detail": {
+              "keyword_hits": 4,
+              "keywords": [
+                "降雨",
+                "雨量",
+                "降水",
+                "雨站",
+                "mm",
+                "暴雨",
+                "大雨"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "numeric_presence",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "number_count": 93
+            },
+            "error": ""
+          },
+          {
+            "name": "response_validity",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "length": 1226,
+              "is_error": false
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_correctness",
+            "layer": "sql_execution",
+            "score": -1.0,
+            "passed": true,
+            "weight": 0.15,
+            "detail": {
+              "reason": "expected_sql exec failed: (2013, 'Lost connection to MySQL server during query (timed out)')"
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_executes",
+            "layer": "sql_execution",
+            "score": 0.5,
+            "passed": false,
+            "weight": 0.35,
+            "detail": {
+              "sql_count": 6,
+              "succeeded": 3,
+              "failed": 3
+            },
+            "error": ""
+          },
+          {
+            "name": "tool_trace_sanity",
+            "layer": "trace",
+            "score": 0.5,
+            "passed": false,
+            "weight": 0.1,
+            "detail": {
+              "db_called": true,
+              "failure_rate": 0.5,
+              "fabricated_numbers": [
+                "1.",
+                "2.",
+                "219.7",
+                "22",
+                "280",
+                "3.",
+                "380.1",
+                "39",
+                "4.",
+                "43"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_safety",
+            "layer": "policy",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.05,
+            "detail": {
+              "issues": [],
+              "sql_count": 6
+            },
+            "error": ""
+          }
+        ],
+        "layer_scores": {
+          "final_answer": 1.0,
+          "sql_execution": 0.5,
+          "trace": 0.5,
+          "policy": 1.0
+        },
+        "hard_fail": false
+      },
+      "total_score": 0.735,
+      "duration_sec": 398.23,
+      "error": "",
+      "engine": "harness",
+      "trajectory_path": "reports/gate/baseline_smoke/trajectories/rainfall_028.jsonl",
+      "tool_stats": {
+        "skill_view": {
+          "count": 2,
+          "success": 2,
+          "failure": 0
+        },
+        "execute_code": {
+          "count": 4,
+          "success": 2,
+          "failure": 2
+        }
+      },
+      "completed": true,
+      "api_calls": 6,
+      "loaded_skills": [
+        "rainfall"
+      ],
+      "missing_skills": []
+    }
+  ],
+  "summary": {
+    "total_duration_sec": 1050.12,
+    "avg_score": 0.7433333333333333,
+    "valid_response_rate": 1.0,
+    "domain_data_rate": 0.89,
+    "numeric_data_rate": 1.0,
+    "pass_rate": 1.0,
+    "by_skill": [
+      {
+        "skill": "rainfall",
+        "count": 3,
+        "avg_score": 0.7433333333333333,
+        "valid_response_rate": 1.0,
+        "pass_rate": 1.0,
+        "avg_duration": 350.03999999999996
+      }
+    ],
+    "by_level": [
+      {
+        "level": "L1",
+        "count": 3,
+        "avg_score": 0.7433333333333333,
+        "valid_response_rate": 1.0,
+        "pass_rate": 1.0,
+        "avg_duration": 350.03999999999996
+      }
+    ]
+  }
+}

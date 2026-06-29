@@ -1,0 +1,265 @@
+解析到 98 个测试用例
+
+开始执行 98 个测试用例 (超时 300s/题, engine=harness, model=Qwen3.6-27B-Q4_K_S.gguf)...
+======================================================================
+
+[1/98] Q1 [water-situation/L1] 古运河有哪些水位测站？
+  → 总分=0.86 | SQL:No | 67.2s | skill=water-situation | calls=2
+
+[2/98] Q2 [water-situation/L1] 查询宝应水位站的所属河流、水系、流域、测站类别。
+  → 总分=0.68 | SQL:No | 138.2s | skill=water-situation | calls=4
+
+[3/98] Q3 [water-situation/L1] 查询测站总数。
+  → 总分=0.88 | SQL:No | 78.4s | skill=water-situation | calls=3
+
+[4/98] Q4 [water-situation/L1] 查询水位站宝应最近30天水位数据。
+  → 总分=0.69 | SQL:No | 221.2s | skill=water-situation | calls=5
+
+[5/98] Q5 [water-situation/L2] 查询古运河(河流名称)水位站的数量。
+  → 总分=0.80 | SQL:No | 70.3s | skill=water-situation | calls=2
+
+[6/98] Q6 [water-situation/L2] 查询建站最早和最晚的测站名称及其建站时间。
+  → 总分=0.70 | SQL:No | 204.6s | skill=water-situation | calls=4
+
+[7/98] Q7 [water-situation/L2] 查询水位站数量最多、最少的河流。
+  → 总分=0.88 | SQL:No | 91.7s | skill=water-situation | calls=2
+
+[8/98] Q8 [water-situation/L2] 查询古运河历史最高/低水位。
+  → 总分=0.86 | SQL:No | 119.4s | skill=water-situation | calls=4
+
+[9/98] Q9 [water-situation/L2] 查询里运河（河流）最近两个月的水位数据。
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+  → 总分=0.86 | SQL:No | 351.9s | skill=water-situation | calls=6
+
+[12/98] Q12 [water-situation/L3] 古运河2024年2、3月份水位对比。
+  → 总分=0.81 | SQL:No | 246.6s | skill=water-situation | calls=5
+
+[13/98] Q13 [water-situation/L3] 请比较2023年和2024年古运河的平均水位。
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+  → 总分=0.64 | SQL:No | 463.2s | skill=water-situation | calls=7
+
+[15/98] Q15 [water-situation/L3] 查询水位站白马闸的实时水位是多少。
+  → 总分=0.78 | SQL:No | 83.6s | skill=water-situation | calls=2
+
+[16/98] Q16 [water-situation/L3] 查询各类型测站的数量。
+  → 总分=0.93 | SQL:No | 32.1s | skill=water-situation | calls=2
+
+[17/98] Q17 [water-situation/L3] 查询全部测站的名称（分页展示前20条）。
+  → 总分=0.66 | SQL:No | 166.1s | skill=water-situation | calls=4
+
+[18/98] Q18 [water-situation/L3] 古运河水情（模糊查询，用户只输入"古运河"三个字）。
+  → 总分=0.98 | SQL:No | 478.1s | skill=water-situation | calls=7
+
+[19/98] Q19 [water-situation/L3] 查询2025年古运河水位站点的数量。
+  → 总分=0.88 | SQL:No | 105.3s | skill=water-situation | calls=2
+
+[20/98] Q20 [water-situation/L3] 扬州水利枢纽3月份平均水位。
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+  → 总分=0.48 | SQL:No | 303.6s | skill=water-situation | calls=5
+
+[23/98] Q23 [water-situation/L3] 查询水位站宝应本月内水位数据变化趋势。
+  → 总分=0.86 | SQL:No | 152.4s | skill=water-situation | calls=4
+
+[24/98] Q24 [water-situation/L3] 古运河8月的水位数据与扬州闸6月的水位数据对比，各自的平均水位、最高水位和最低水位分别是多少？
+  → 总分=0.77 | SQL:No | 75.3s | skill=rainfall | calls=3
+
+[28/98] Q28 [rainfall/L1] 查询各雨量站的平均日降雨量。
+  → 总分=0.73 | SQL:No | 148.2s | skill=rainfall | calls=3
+
+[29/98] Q29 [rainfall/L2] 24年扬州城区降雨总量大概是多少？哪天降雨最大？
+  → 总分=0.86 | SQL:No | 167.8s | skill=rainfall | calls=4
+
+[30/98] Q30 [rainfall/L2] 2024年扬州各区域累计降雨量最高的前三个区域。
+  → 总分=0.86 | SQL:No | 330.9s | skill=rainfall | calls=7
+
+[31/98] Q31 [rainfall/L2] 查询最近三天各雨量站的累计降雨量。
+  → 总分=0.66 | SQL:No | 319.9s | skill=rainfall | calls=6
+
+[32/98] Q32 [rainfall/L3] 查询未来2小时短临扬州市区降雨预测。
+  → 总分=0.70 | SQL:No | 399.3s | skill=rainfall | calls=8
+
+[33/98] Q33 [rainfall/L3] 查询2024年扬州城区哪天降雨量最大。
+  → 总分=0.86 | SQL:No | 59.1s | skill=rainfall | calls=3
+
+[34/98] Q34 [rainfall/L3] 扬州城区历史最大单日降雨量是多少？出现在哪一天？
+  → 总分=0.60 | SQL:No | 64.7s | skill=rainfall | calls=3
+
+[35/98] Q35 [rainfall/L3] 查询最近三年各雨量站的年降雨量。
+  → 总分=0.73 | SQL:No | 210.2s | skill=rainfall | calls=6
+
+[36/98] Q36 [rainfall/L3] 查询各雨量站的2026年的累计降雨量（预期结果为空）。
+  → 总分=0.68 | SQL:No | 87.1s | skill=rainfall | calls=4
+
+[37/98] Q37 [rainfall/L3] 查询2024年扬州城区累计降雨量最高的前三天。
+  → 总分=0.78 | SQL:No | 66.9s | skill=rainfall | calls=5
+
+[38/98] Q38 [rainfall/L3] 查询2026年累计降雨量最多/最少的测站（预期结果为空，测试空结果处理）。
+  → 总分=0.66 | SQL:No | 69.9s | skill=rainfall | calls=3
+
+[39/98] Q39 [rainfall/L3] 请帮我查询一下24年扬州城区降雨总量，按月统计。
+  → 总分=0.71 | SQL:No | 52.6s | skill=rainfall | calls=3
+
+[40/98] Q40 [rainfall/L3] 对比2023年和2024年扬州城区各月降雨量。
+  → 总分=0.86 | SQL:No | 75.7s | skill=rainfall | calls=3
+
+[41/98] Q41 [rainfall/L3] 查询今天有没有下雨？扬州城区当前降雨情况。
+  → 总分=0.59 | SQL:No | 57.0s | skill=rainfall | calls=3
+
+[42/98] Q42 [rainfall/L3] 查询最近一周扬州市各雨量站的累计降雨量排名。
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+  → 总分=0.66 | SQL:No | 253.2s | skill=rainfall | calls=5
+
+[44/98] Q44 [water-quality/L1] 瘦西湖水质当前如何。
+  → 总分=0.83 | SQL:No | 337.8s | skill=water-quality | calls=8
+
+[46/98] Q46 [water-quality/L2] 帮我分析一下最近一个月瘦西湖水质变化趋势。
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+  → 总分=1.00 | SQL:No | 493.9s | skill=water-quality | calls=10
+
+[53/98] Q53 [water-quality/L3] 查询京杭运河最近一周每天的CODMn变化。
+  → 总分=0.86 | SQL:No | 128.9s | skill=water-quality | calls=6
+
+[54/98] Q54 [water-quality/L3] 查询宝带河水质站的最新水质数据及综合评级。
+  → 总分=1.00 | SQL:No | 70.3s | skill=water-quality | calls=4
+
+[55/98] Q55 [water-quality/L3] 帮我分析一下最近一个月仪扬河上游水质变化趋势。
+  → 总分=0.86 | SQL:No | 222.6s | skill=water-quality | calls=8
+
+[56/98] Q56 [water-quality/L3] 查询有哪些水质站？分别属于哪条河流？
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+  → 总分=0.76 | SQL:No | 509.1s | skill=water-forecast | calls=5
+
+[62/98] Q62 [water-forecast/L3] 对比当前水位与未来24小时预测水位的差异。
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+  → 总分=0.81 | SQL:No | 828.1s | skill=water-forecast | calls=10
+
+[63/98] Q63 [water-forecast/L3] 查询河道断面数据（某任务下的所有断面水位）。
+  → 总分=0.98 | SQL:No | 482.2s | skill=water-forecast | calls=9
+
+[64/98] Q64 [water-forecast/L3] 查询最新已完成任务的预测起止时间。
+  → 总分=0.71 | SQL:No | 912.2s | skill=water-forecast | calls=7
+
+[65/98] Q65 [water-forecast/L3] 查询未来24小时所有站点的预测流量（type='2'）。
+  → 总分=0.67 | SQL:No | 511.4s | skill=water-forecast | calls=5
+
+[66/98] Q66 [water-forecast/L3] 查询历史上有多少次预测任务已完成。
+  → 总分=0.72 | SQL:No | 172.1s | skill=water-forecast | calls=4
+
+[67/98] Q67 [water-forecast/L3] 预测瘦西湖未来24小时水位变化。
+  → 总分=0.53 | SQL:No | 507.6s | skill=water-forecast | calls=5
+
+[68/98] Q68 [water-forecast/L3] 查询最新任务中预测水位最高和最低的站点。
+  → 总分=0.80 | SQL:No | 421.4s | skill=water-forecast | calls=8
+
+[69/98] Q69 [water-forecast/L3] 查询今天有哪些预测任务，分别是什么状态？
+  → 总分=0.81 | SQL:No | 68.2s | skill=water-forecast | calls=3
+
+[70/98] Q70 [gate-pump-operation/L1] 查询所有闸站的最新启闭状态。
+  → 总分=0.57 | SQL:No | 216.8s | skill=gate-pump-operation | calls=5
+
+[71/98] Q71 [gate-pump-operation/L1] 查询当前开启状态的泵站最新水情数据。
+⚠️ Iteration budget exhausted (10/10) — asking model to summarise
+⚠️  Reached maximum iterations (10). Requesting summary...
+  → 总分=0.86 | SQL:No | 95.7s | skill=gate-pump-operation | calls=4
+
+[77/98] Q77 [gate-pump-operation/L3] 查询军桥站各泵的最新工情数据（电压、电流、功率）。
+  → 总分=0.86 | SQL:No | 108.1s | skill=gate-pump-operation | calls=4
+
+[78/98] Q78 [gate-pump-operation/L3] 查询当前所有正在引水的泵站及其引水量。
+  → 总分=0.98 | SQL:No | 59.4s | skill=gate-pump-operation | calls=3
+
+[79/98] Q79 [gate-pump-operation/L3] 查询戴庄排涝站闸门的开度历史记录（最近10条）。
+  → 总分=0.88 | SQL:No | 81.5s | skill=gate-pump-operation | calls=4
+
+[80/98] Q80 [gate-pump-operation/L3] 查询新城河闸上下游水位及过闸流量（堰闸水情）。
+  → 总分=0.71 | SQL:No | 129.9s | skill=gate-pump-operation | calls=5
+
+[81/98] Q81 [gate-pump-operation/L3] 查询所有闸门的开启孔数统计。
+  → 总分=0.88 | SQL:No | 157.6s | skill=gate-pump-operation | calls=5
+
+[82/98] Q82 [gate-pump-operation/L3] 统计当前有多少闸门处于开启状态、多少处于关闭状态。
+  → 总分=0.76 | SQL:No | 113.5s | skill=gate-pump-operation | calls=4
+
+[83/98] Q83 [gate-pump-operation/L3] 查询有哪些闸站和泵站？分别属于哪个管理区域？
+  → 总分=0.64 | SQL:No | 151.2s | skill=gate-pump-operation | calls=5
+
+[84/98] Q84 [gate-pump-operation/L3] 查询扬州水利枢纽泵站当前的运行状态。
+  → 总分=0.94 | SQL:No | 202.4s | skill=gate-pump-operation | calls=4
+
+[85/98] Q85 [water-warning/L1] 查询当前超警戒水位的站点。
+  → 总分=0.60 | SQL:No | 242.5s | skill=water-warning | calls=4
+
+[86/98] Q86 [water-warning/L1] 查询防洪预警汇总（多少站正常、超警戒、超保证）。
+  → 总分=0.73 | SQL:No | 262.0s | skill=water-warning | calls=4
+
+[87/98] Q87 [water-warning/L2] 扬州市重点河道水位实时情况（含超警戒判断）。
+  → 总分=1.00 | SQL:No | 160.8s | skill=water-warning | calls=3
+
+[88/98] Q88 [water-warning/L2] 查询水质低于Ⅳ类的站点。
+  → 总分=0.84 | SQL:No | 370.2s | skill=water-warning | calls=5
+
+[89/98] Q89 [water-warning/L2] 扬州市重点河道指定测站当前水位如何。
+  → 总分=0.83 | SQL:No | 366.9s | skill=water-warning | calls=5
+
+[90/98] Q90 [water-warning/L3] 24年8月20号左右，扬州古运河、新城河、瘦西湖最高水位及是否超标。
+  → 总分=0.79 | SQL:No | 341.8s | skill=water-warning | calls=6
+
+[91/98] Q91 [water-warning/L3] 查询所有站点的预警水位配置（有警戒水位的站）。
+  → 总分=0.71 | SQL:No | 193.5s | skill=water-warning | calls=4
+
+[92/98] Q92 [water-warning/L3] 综合查询：当前有多少闸站超警戒水位、哪些泵站正在排水、整体防洪形势。
+  → 总分=0.79 | SQL:No | 581.5s | skill=water-warning | calls=7
+
+[93/98] Q93 [water-warning/L3] 查询当前所有站点的预警状态一览（包含正常站）。
+  → 总分=0.70 | SQL:No | 420.6s | skill=water-warning | calls=6
+
+[94/98] Q94 [water-warning/L3] 查询最近30天内是否有站点曾超警戒水位。
+  → 总分=0.91 | SQL:No | 55.5s | skill=water-warning | calls=2
+
+[95/98] Q95 [water-warning/L3] 扬州市重点河道（古运河、新城河、瘦西湖、沿山河等）实时水位情况。
+  → 总分=0.63 | SQL:No | 353.9s | skill=water-warning | calls=6
+
+[96/98] Q96 [water-warning/L3] 查询所有水质站的最新水质综合评级，标注低于Ⅲ类的站点。
+  → 总分=0.62 | SQL:No | 231.2s | skill=water-warning | calls=4
+
+[97/98] Q97 [water-warning/L3] 2024年8月扬州城区降雨量最大的那天，各重点河道水位是否超警戒？
+  → 总分=0.75 | SQL:No | 199.5s | skill=water-warning | calls=7
+
+[98/98] Q98 [water-warning/L3] 查询历史上超保证水位（GRZ）的站点及出现时间。
+  → 总分=0.88 | SQL:No | 112.4s | skill=water-warning | calls=4
+
+======================================================================
+评估完成!
+  平均分:       0.76
+  有效回答率:   99.5%
+  领域数据率:   90.5%
+  数值数据率:   99.5%
+  通过率(≥0.6): 88.8%
+  总耗时:       27190.2s
+
+报告文件:
+  JSON: reports/harness_baseline/eval_results_20260623_175514.json
+  MD:   reports/harness_baseline/eval_report_20260623_175514.md

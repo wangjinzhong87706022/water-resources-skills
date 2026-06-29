@@ -1,0 +1,255 @@
+{
+  "phase": "verify",
+  "mutation": "增强融合分析输出指导+扩展关键词映射",
+  "timestamp": "20260522_161825",
+  "summary": {
+    "avg_score": 0.9,
+    "avg_domain_completeness": 1.0,
+    "avg_fusion_quality": 0.667,
+    "pass_rate": 1.0,
+    "total_duration": 1770.0,
+    "count": 8
+  },
+  "results": [
+    {
+      "id": "F1",
+      "question": "综合查询古运河水位和降雨情况",
+      "skill": "water-fusion",
+      "fusion_type": "时间对齐",
+      "expected_domains": [
+        "水位",
+        "降雨"
+      ],
+      "duration_sec": 204.4,
+      "response_preview": "综合查询完成，以下是古运河水位和降雨情况汇总：\n\n============================================================\n  古运河水位综合报告（数据截至 2026-03-31）\n============================================================\n\n一、各站点实时水位（最新）\n---------...",
+      "response_length": 1903,
+      "scores": {
+        "valid_response": 1.0,
+        "domain_completeness": 1.0,
+        "domain_hits": [
+          "水位",
+          "降雨"
+        ],
+        "domain_misses": [],
+        "fusion_quality": 1.0,
+        "fusion_keywords_found": [
+          "综合",
+          "趋势",
+          "回落"
+        ],
+        "has_numeric": 1.0,
+        "total": 1.0
+      }
+    },
+    {
+      "id": "F2",
+      "question": "分析最近降雨对古运河水位的影响",
+      "skill": "water-fusion",
+      "fusion_type": "业务逻辑",
+      "expected_domains": [
+        "水位",
+        "降雨"
+      ],
+      "duration_sec": 277.1,
+      "response_preview": "根据2025年11月的数据分析，降雨对古运河水位有明显影响：\n\n**分析概况**\n- 分析时段：2025年11月1日至30日\n- 降雨数据源：扬州城区雨量站\n- 水位数据源：古运河水位站（新城河口）\n- 防洪指标：警戒水位5.50m\n\n**降雨统计**\n- 总降雨量：18.90mm\n- 降雨天数：5天\n- 最大日降雨量：11.80mm（11月7日）\n\n**水位统计**\n- 平均水位：4.73m\n-...",
+      "response_length": 762,
+      "scores": {
+        "valid_response": 1.0,
+        "domain_completeness": 1.0,
+        "domain_hits": [
+          "水位",
+          "降雨"
+        ],
+        "domain_misses": [],
+        "fusion_quality": 1.0,
+        "fusion_keywords_found": [
+          "影响",
+          "相关",
+          "导致",
+          "分析",
+          "上涨",
+          "下降",
+          "变化",
+          "响应",
+          "涨幅"
+        ],
+        "has_numeric": 1.0,
+        "total": 1.0
+      }
+    },
+    {
+      "id": "F3",
+      "question": "查询古运河实时水位，并判断是否超过警戒水位",
+      "skill": "water-fusion",
+      "fusion_type": "业务逻辑",
+      "expected_domains": [
+        "水位",
+        "警戒"
+      ],
+      "duration_sec": 88.9,
+      "response_preview": "查询完成！以下是古运河实时水位情况：\n\n══════════════════════════════════════════════════════════════\n  古运河实时水位查询结果（数据时间: 2026-03-31）\n══════════════════════════════════════════════════════════════\n\n  警戒水位: 5.50 m（各站统一）\n...",
+      "response_length": 1079,
+      "scores": {
+        "valid_response": 1.0,
+        "domain_completeness": 1.0,
+        "domain_hits": [
+          "水位",
+          "警戒"
+        ],
+        "domain_misses": [],
+        "fusion_quality": 0.0,
+        "fusion_keywords_found": [],
+        "has_numeric": 1.0,
+        "total": 0.7
+      }
+    },
+    {
+      "id": "F4",
+      "question": "查询瘦西湖最新水质数据，判断水质等级",
+      "skill": "water-fusion",
+      "fusion_type": "业务逻辑",
+      "expected_domains": [
+        "水质",
+        "等级"
+      ],
+      "duration_sec": 133.2,
+      "response_preview": "查询完成！以下是瘦西湖最新水质数据及等级评定结果：\n\n============================================================\n瘦西湖最新水质监测数据及等级评定\n============================================================\n采样时间: 2026-03-31 17:30:00\n--------...",
+      "response_length": 821,
+      "scores": {
+        "valid_response": 1.0,
+        "domain_completeness": 1.0,
+        "domain_hits": [
+          "水质",
+          "等级"
+        ],
+        "domain_misses": [],
+        "fusion_quality": 0.0,
+        "fusion_keywords_found": [],
+        "has_numeric": 1.0,
+        "total": 0.7
+      }
+    },
+    {
+      "id": "F5",
+      "question": "查询古运河沿线水位及附近闸站运行情况",
+      "skill": "water-fusion",
+      "fusion_type": "空间对齐",
+      "expected_domains": [
+        "水位",
+        "闸",
+        "泵"
+      ],
+      "duration_sec": 261.7,
+      "response_preview": "根据查询结果，为您整理古运河沿线水位及附近闸站运行情况如下：\n\n## 古运河沿线水位情况\n\n**数据更新时间：2026年3月31日 19:00左右**\n\n| 测站名称 | 实时水位(m) | 警戒水位(m) | 水位状态 |\n|---------|------------|------------|---------|\n| 古运河水位站（新城河口） | 4.72 | 5.50 | 正常 |\n| 古...",
+      "response_length": 1173,
+      "scores": {
+        "valid_response": 1.0,
+        "domain_completeness": 1.0,
+        "domain_hits": [
+          "水位",
+          "闸",
+          "泵"
+        ],
+        "domain_misses": [],
+        "fusion_quality": 0.6666666666666666,
+        "fusion_keywords_found": [
+          "综合",
+          "分析"
+        ],
+        "has_numeric": 1.0,
+        "total": 0.9
+      }
+    },
+    {
+      "id": "F6",
+      "question": "扬州市防洪形势综合分析：当前水位、降雨、闸泵运行和预警状态",
+      "skill": "water-fusion",
+      "fusion_type": "混合",
+      "expected_domains": [
+        "水位",
+        "降雨",
+        "闸",
+        "泵",
+        "预警"
+      ],
+      "duration_sec": 597.5,
+      "response_preview": "所有数据已获取完毕。现在输出完整的综合分析报告。\n\n---\n\n╔══════════════════════════════════════════════════════════════════╗\n║             扬 州 市 防 洪 形 势 综 合 分 析 报 告               ║\n║                    数据时间: 2025-05-31 23:55 ...",
+      "response_length": 3820,
+      "scores": {
+        "valid_response": 1.0,
+        "domain_completeness": 1.0,
+        "domain_hits": [
+          "水位",
+          "降雨",
+          "闸",
+          "泵",
+          "预警"
+        ],
+        "domain_misses": [],
+        "fusion_quality": 1.0,
+        "fusion_keywords_found": [
+          "影响",
+          "综合",
+          "分析"
+        ],
+        "has_numeric": 1.0,
+        "total": 1.0
+      }
+    },
+    {
+      "id": "F7",
+      "question": "2024年8月扬州城区降雨量最大的那天，各重点河道水位是否超警戒",
+      "skill": "water-fusion",
+      "fusion_type": "时间对齐",
+      "expected_domains": [
+        "降雨",
+        "水位",
+        "警戒"
+      ],
+      "duration_sec": 134.9,
+      "response_preview": "查询完成，以下是综合分析结果：\n\n======================================================\n  2024年8月扬州城区降雨与水情分析\n======================================================\n\n【降雨情况】\n  8月降雨量最大日: 2024-08-20\n  当日总降雨量:   222.9 mm（...",
+      "response_length": 1121,
+      "scores": {
+        "valid_response": 1.0,
+        "domain_completeness": 1.0,
+        "domain_hits": [
+          "降雨",
+          "水位",
+          "警戒"
+        ],
+        "domain_misses": [],
+        "fusion_quality": 0.6666666666666666,
+        "fusion_keywords_found": [
+          "综合",
+          "分析"
+        ],
+        "has_numeric": 1.0,
+        "total": 0.9
+      }
+    },
+    {
+      "id": "F8",
+      "question": "查询古运河最新水位",
+      "skill": "water-situation",
+      "fusion_type": "单域（不应触发融合）",
+      "expected_domains": [
+        "水位"
+      ],
+      "duration_sec": 72.3,
+      "response_preview": "古运河最新水位查询结果如下：\n\n测站名称：古运河水位站（新城河口）\n测站编码：HT0021071050000023\n\n最新数据时间：2026-03-31 19:00\n当前水位：4.72 米\n警戒水位：5.50 米\n\n状态：正常，未超警戒（4.72 < 5.50）\n\n最近5条记录水位均为 4.72 米，水势平稳。",
+      "response_length": 156,
+      "scores": {
+        "valid_response": 1.0,
+        "domain_completeness": 1.0,
+        "domain_hits": [
+          "水位"
+        ],
+        "domain_misses": [],
+        "fusion_quality": 1.0,
+        "fusion_keywords_found": [],
+        "has_numeric": 1.0,
+        "total": 1.0
+      }
+    }
+  ]
+}

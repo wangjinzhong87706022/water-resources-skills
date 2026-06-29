@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "timestamp": "20260521_113443",
+    "phase": "verify",
+    "skills": 1,
+    "total_runs": 3
+  },
+  "summary": [
+    {
+      "skill": "rainfall",
+      "runs": 3,
+      "pass_rate": 0.83,
+      "total_pass": 10,
+      "total_evals": 12
+    }
+  ],
+  "details": [
+    {
+      "skill": "rainfall",
+      "runs": [
+        {
+          "skill": "rainfall",
+          "prompt": "查询扬州城区今日降雨量",
+          "prompt_desc": "单站实时查询",
+          "response": "查询结果如下：\n\n  测站名称: 扬州 (stcd=58245)\n  测站类型: 雨量站\n  查询日期: 今日 (2026-05-21)\n\n  结果: 今日暂无降雨记录，该雨量站未监测到降水。\n\n  补充说明: 数据库中该站最新一条记录时间为 2025-11-26 11:20，说明数据\n  尚未更新至当前日期。如需查看历史降雨数据，请指定具体日期范围。",
+          "duration_sec": 84.73,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 降雨/雨量/降水/雨站/mm/暴雨?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": false
+            }
+          ],
+          "pass_count": 3,
+          "total_evals": 4,
+          "pass_rate": 0.75,
+          "keyword_hits": 3,
+          "num_count": 9
+        },
+        {
+          "skill": "rainfall",
+          "prompt": "24年扬州城区降雨总量大概是多少？哪天降雨最大？",
+          "prompt_desc": "年度聚合+极值",
+          "response": "查询完成！以下是扬州城区（站号58245，站名\"扬州\"）2024年降雨情况：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  2024年扬州城区降雨总量\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  全年累计降雨量:  1195.4 mm\n  有雨天数:        100 天\n  数据记录数:      2102 条\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  最大降雨日 TOP5\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  2024-08-20  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  222.9 mm  ← 全年最大！\n  2024-07-10  ▓▓▓▓▓▓▓▓                   84.0 mm\n  2024-06-29  ▓▓▓▓▓▓                      60.7 mm\n  2024-06-21  ▓▓▓▓▓▓                      59.5 mm\n  2024-09-11  ▓▓▓▓▓                       56.0 mm\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  月度降雨分布 (mm)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n   1月   18.6 mm  ██\n   2月   78.6 mm  ███████\n   3月    3.4 mm  ▏\n   4月   41.2 mm  ████\n   5月   44.1 mm  ████\n   6月  225.5 mm  █████████████████████\n   7月  156.3 mm  ███████████████\n   8月  284.4 mm  ████████████████████████████  ← 最多\n   9月  177.1 mm  █████████████████\n  10月  131.8 mm  █████████████\n  11月   34.4 mm  ███\n  12月    无数据\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n说明：\n- 测站: 扬州（58245），类型: 雨量站(PP)\n- 2024年全年降雨量约 1195.4 mm，有雨天数 100 天\n- 降雨最大日为 2024年8月20日，当日降雨量高达 222.9 mm，远超其他日期（是第二名的近3倍），属于极端强降雨事件\n- 降雨集中在 6-9 月（汛期），占全年总量约 70%，其中 8 月降雨最多（284.4 mm）\n- 12月数据暂缺",
+          "duration_sec": 254.17,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": false
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 降雨/雨量/降水/雨站/mm/暴雨?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            }
+          ],
+          "pass_count": 3,
+          "total_evals": 4,
+          "pass_rate": 0.75,
+          "keyword_hits": 3,
+          "num_count": 65
+        },
+        {
+          "skill": "rainfall",
+          "prompt": "查询最近三天各雨量站的累计降雨量",
+          "prompt_desc": "多站累计",
+          "response": "查询完成，以下是结果：\n\n========================================================================\n  最近三天（2026-03-29 ~ 2026-03-31）各雨量站累计降雨量\n  数据库最新日期: 2026-03-31（距当前约7周延迟）\n========================================================================\n\n  共 10 个雨量站有降雨数据\n\n  序号  测站名称                      测站编码                  累计降雨量(mm)\n  ----  ----                      ------                  ----------\n   1  马港河雨量站                     HT0061071151000010      13.5\n   2  团结河雨量站（小袁庄）             HT0061003103000013      13.0\n   3  响水河闸雨量站（利旧）             HT0061000000000001      12.5\n   4  乌塔沟雨量站（横沟闸站）           HT0061003110000016      11.5\n   5  太平闸站雨量站（利旧）             HT0061000000000003      11.5\n   6  念四闸站雨量站（利旧）             HT0061000000000004      11.0\n   7  沙施河南节制闸雨量站（利旧）        HT0061000000000002      11.0\n   8  吴庄河闸雨量站（胜利河）           HT0061002005000019      10.5\n   9  冷却河闸雨量站                   HT0061003053000012      10.0\n  10  二道河雨量站（文昌中路）           HT0061002002000011      10.0\n\n  统计摘要:\n  - 全部站点合计: 114.5 mm\n  - 最大降雨: 马港河雨量站 13.5 mm\n  - 最小降雨: 二道河雨量站（文昌中路）/ 冷却河闸雨量站 10.0 mm\n  - 平均降雨: 11.4 mm\n  - 所有站点均位于行政区划码 320188（扬州）\n\n  说明: 数据库中降雨数据最新截止到 2026-03-31，\n  因此实际查询的是 3月29日~31日 的数据。\n  10个站点降雨量分布较均匀（10.0~13.5 mm），\n  无极端值，属于小到中雨量级。",
+          "duration_sec": 96.4,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 降雨/雨量/降水/雨站/mm/暴雨?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            }
+          ],
+          "pass_count": 4,
+          "total_evals": 4,
+          "pass_rate": 1.0,
+          "keyword_hits": 3,
+          "num_count": 55
+        }
+      ],
+      "total_pass": 10,
+      "total_evals": 12,
+      "pass_rate": 0.83
+    }
+  ]
+}

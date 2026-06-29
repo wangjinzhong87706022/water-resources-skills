@@ -1,0 +1,348 @@
+{
+  "meta": {
+    "timestamp": "20260520_194357",
+    "total_cases": 15,
+    "total_duration_sec": 15.24
+  },
+  "results": [
+    {
+      "index": 1,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "古运河有哪些水位测站？",
+      "expected_sql": "SELECT stcd AS '测站编码', stnm AS '测站名称', sttp AS '测站类型'\nFROM sl323.st_stbprp_b\nWHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ';",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 1.08,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 2,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询宝应水位站的所属河流、水系、流域、测站类别。",
+      "expected_sql": "SELECT stnm AS '测站名称', rvnm AS '河流', hnnm AS '水系', bsnm AS '流域', sttp AS '测站类别'\nFROM sl323.st_stbprp_b\nWHERE stnm = '宝应';",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 1.02,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 3,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询测站总数。",
+      "expected_sql": "SELECT COUNT(*) AS '测站总数'\nFROM sl323.st_stbprp_b;",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 1.14,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 4,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询水位站宝应最近30天水位数据。",
+      "expected_sql": "SELECT r.tm AS '时间', r.z AS '水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)\n  AND r.z IS NOT NULL\nORDER BY r.tm;",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 0.99,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 26,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询扬州城区今日降雨量。",
+      "expected_sql": "SELECT DATE(p.tm) AS '日期', SUM(p.drp) AS '日降雨量(mm)'\nFROM sl323.st_pptn_r p\nWHERE p.stcd = '58245'\n  AND DATE(p.tm) = CURDATE()\n  AND p.drp IS NOT NULL\nGROUP BY DATE(p.tm);",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 0.98,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 27,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询2025年扬州城区降雨总量。",
+      "expected_sql": "SELECT SUM(p.drp) AS '2025年累计降雨量(mm)'\nFROM sl323.st_pptn_r p\nWHERE p.stcd = '58245'\n  AND p.tm BETWEEN '2025-01-01' AND '2025-12-31'\n  AND p.drp IS NOT NULL;",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 0.99,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 28,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询各雨量站的平均日降雨量。",
+      "expected_sql": "SELECT b.stnm AS '雨量站名称', AVG(p.drp) AS '平均日降雨量(mm)'\nFROM sl323.st_pptn_r p\nJOIN sl323.st_stbprp_b b ON p.stcd = b.stcd\nWHERE b.sttp = 'PP' AND p.drp IS NOT NULL\nGROUP BY b.stnm;",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 0.96,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 44,
+      "skill": "water-quality",
+      "level": "L1",
+      "question": "瘦西湖水质当前如何。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', d.spt AS '采样时间',\n       d.dox AS '溶解氧(mg/L)', d.codmn AS 'CODMn(mg/L)',\n       d.nh3n AS '氨氮(mg/L)', d.tp AS '总磷(mg/L)',\n       d.ph AS 'pH', d.wtmp AS '水温(℃)'\nFROM sl325.wq_pcp_d d\nJOIN sl323.st_stbprp_b b ON d.stcd = b.stcd\nWHERE b.stnm LIKE '%瘦西湖%' AND b.sttp = 'WQ'\n  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd);",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 0.93,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 45,
+      "skill": "water-quality",
+      "level": "L1",
+      "question": "查询京杭运河水质站的最新水质指标。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', d.spt AS '采样时间',\n       d.dox AS 'DO(mg/L)', d.codmn AS 'CODMn(mg/L)',\n       d.nh3n AS 'NH3N(mg/L)', d.tp AS 'TP(mg/L)', d.ph AS 'pH'\nFROM sl325.wq_pcp_d d\nJOIN sl323.st_stbprp_b b ON d.stcd = b.stcd\nWHERE b.stnm LIKE '%京杭运河%' AND b.sttp = 'WQ'\n  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd);",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 1.03,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 57,
+      "skill": "water-forecast",
+      "level": "L1",
+      "question": "查询未来24小时扬州市重点河道水位预测。",
+      "expected_sql": "SELECT taskid, r.stcd AS '测站编码', REPLACE(b.stnm, '计算水位', '') AS '测站名称',\n       tm AS '预报时间', vals AS '预报值'\nFROM slztk.st_mx_preset_cal_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm IN ('古运河水位站（新城河口）', '新城河水文站（兴城西路北）',\n                  '七里河水位站（东花园路）', '赵家支沟水文站（赵家河路）', '瘦西湖水位站')\n  AND tm >= NOW() AND tm <= DATE_ADD(NOW(), INTERVAL 24 HOUR)\n  AND type = '1'\n  AND r.taskid = (SELECT taskid FROM slztk.st_mx_taskid_r WHERE stuts = '1' ORDER BY tm DESC LIMIT 1)\nORDER BY tm;",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 1.07,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 58,
+      "skill": "water-forecast",
+      "level": "L1",
+      "question": "查询最新预测任务的状态。",
+      "expected_sql": "SELECT taskid AS '任务ID', tm AS '调度开始时间',\n       CASE WHEN stuts = '0' THEN '未完成' WHEN stuts = '1' THEN '已完成' END AS '状态',\n       CASE WHEN type = '1' THEN '滚动预报' WHEN type = '2' THEN '模型计算' END AS '任务类型'\nFROM slztk.st_mx_taskid_r\nORDER BY tm DESC\nLIMIT 10;",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 1.09,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 70,
+      "skill": "gate-pump-operation",
+      "level": "L1",
+      "question": "查询所有闸站的最新启闭状态。",
+      "expected_sql": "SELECT b.stnm AS '闸站名称', g.gtname AS '闸门名称', g.tm AS '更新时间',\n       g.gtophgt AS '闸门开度(m)', g.gto AS '过闸流量(m³/s)',\n       CASE WHEN g.gtophgt > 0 THEN '已开启' ELSE '已关闭' END AS '状态'\nFROM sl323.st_gate_r g\nJOIN sl323.st_stbprp_b b ON g.stcd = b.stcd\nJOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_gate_r GROUP BY stcd) latest\n  ON g.stcd = latest.stcd AND g.tm = latest.maxTm\nWHERE b.sttp = 'DD'\nORDER BY g.tm DESC;",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 0.94,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 71,
+      "skill": "gate-pump-operation",
+      "level": "L1",
+      "question": "查询当前开启状态的泵站最新水情数据。",
+      "expected_sql": "SELECT p.tm AS '时间', b.stnm AS '泵站名称', p.pumpname AS '泵名称',\n       p.ppupz AS '站上水位(m)', p.ppdwz AS '站下水位(m)',\n       p.omcn AS '开机台数', p.pmpq AS '抽水流量(m³/s)',\n       CASE WHEN p.pdchcd = '1' THEN '引水' WHEN p.pdchcd = '2' THEN '排水' ELSE '未知' END AS '引排特征'\nFROM sl323.st_pump_r p\nJOIN sl323.st_stbprp_b b ON p.stcd = b.stcd\nWHERE b.sttp = 'DP'\n  AND p.tm = (SELECT MAX(p2.tm) FROM sl323.st_pump_r p2 WHERE p2.stcd = p.stcd)\n  AND p.omcn > 0\nORDER BY p.tm DESC;",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 0.98,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 85,
+      "skill": "water-warning",
+      "level": "L1",
+      "question": "查询当前超警戒水位的站点。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '当前水位(m)', rv.WRZ AS '警戒水位(m)',\n       rv.GRZ AS '保证水位(m)', r.tm AS '更新时间',\n       CASE\n         WHEN r.z > rv.GRZ THEN '红色预警（超保证）'\n         WHEN r.z > rv.WRZ THEN '黄色预警（超警戒）'\n         ELSE '正常'\n       END AS '预警等级'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r GROUP BY stcd) latest\n  ON r.stcd = latest.stcd AND r.tm = latest.maxTm\nWHERE r.z > rv.WRZ\nORDER BY r.z - rv.WRZ DESC;",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 1.03,
+      "error": "未能从回答中提取 SQL"
+    },
+    {
+      "index": 86,
+      "skill": "water-warning",
+      "level": "L1",
+      "question": "查询防洪预警汇总（多少站正常、超警戒、超保证）。",
+      "expected_sql": "SELECT\n  COUNT(*) AS '监测站点总数',\n  SUM(CASE WHEN r.z > rv.WRZ THEN 1 ELSE 0 END) AS '超警戒站点数',\n  SUM(CASE WHEN r.z > rv.GRZ THEN 1 ELSE 0 END) AS '超保证站点数',\n  SUM(CASE WHEN r.z <= rv.WRZ THEN 1 ELSE 0 END) AS '正常站点数'\nFROM sl323.st_river_r r\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r GROUP BY stcd) latest\n  ON r.stcd = latest.stcd AND r.tm = latest.maxTm\nWHERE rv.WRZ IS NOT NULL;",
+      "actual_response": "[STDERR]: usage: hermes [-h] [--version] [-z PROMPT] [-m MODEL] [--provider PROVIDER]\n              [-t TOOLSETS] [--resume SESSION] [--continue [SESSION_NAME]]\n              [--worktree] [--accept-hooks] [--skills SKILLS] [--yolo]\n              [--pass-session-id] [--ignore-user-config] [--ignore-rules]\n              [--tui] [--dev]\n              {chat,model,fallback,gateway,lsp,setup,whatsapp,slack,login,logout,auth,status,cron,webhook,kanban,hooks,doctor,dump,debug,backup,checkpoints,import,config,pairing,skills,plugins,curator,memory,tools,computer-use,mcp,sessions,insights,claw,version,update,uninstall,acp,profile,completion,dashboard,logs}\n              ...\nhermes: error: argument -z/--oneshot: expected one argument",
+      "actual_sql": "",
+      "scores": {
+        "sql_generated": 0.0,
+        "sql_similarity": 0.0,
+        "sql_safe": 0.0,
+        "has_result": 0.0
+      },
+      "total_score": 0.0,
+      "duration_sec": 1.01,
+      "error": "未能从回答中提取 SQL"
+    }
+  ],
+  "summary": {
+    "total_duration_sec": 15.24,
+    "avg_score": 0.0,
+    "sql_gen_rate": 0.0,
+    "avg_similarity": 0.0,
+    "safety_rate": 0.0,
+    "result_rate": 0.0,
+    "pass_rate": 0.0,
+    "by_skill": [
+      {
+        "skill": "gate-pump-operation",
+        "count": 2,
+        "avg_score": 0.0,
+        "sql_gen_rate": 0.0,
+        "pass_rate": 0.0,
+        "avg_duration": 0.96
+      },
+      {
+        "skill": "rainfall",
+        "count": 3,
+        "avg_score": 0.0,
+        "sql_gen_rate": 0.0,
+        "pass_rate": 0.0,
+        "avg_duration": 0.9766666666666666
+      },
+      {
+        "skill": "water-forecast",
+        "count": 2,
+        "avg_score": 0.0,
+        "sql_gen_rate": 0.0,
+        "pass_rate": 0.0,
+        "avg_duration": 1.08
+      },
+      {
+        "skill": "water-quality",
+        "count": 2,
+        "avg_score": 0.0,
+        "sql_gen_rate": 0.0,
+        "pass_rate": 0.0,
+        "avg_duration": 0.98
+      },
+      {
+        "skill": "water-situation",
+        "count": 4,
+        "avg_score": 0.0,
+        "sql_gen_rate": 0.0,
+        "pass_rate": 0.0,
+        "avg_duration": 1.0575
+      },
+      {
+        "skill": "water-warning",
+        "count": 2,
+        "avg_score": 0.0,
+        "sql_gen_rate": 0.0,
+        "pass_rate": 0.0,
+        "avg_duration": 1.02
+      }
+    ],
+    "by_level": [
+      {
+        "level": "L1",
+        "count": 15,
+        "avg_score": 0.0,
+        "sql_gen_rate": 0.0,
+        "pass_rate": 0.0,
+        "avg_duration": 1.016
+      }
+    ]
+  }
+}

@@ -4,6 +4,11 @@
 
 ## 河道水位
 
+> ⚠️ **写 SQL 前先看这条反例。** 提到具体测站名(宝应/白马闸/古运河)时,**所有正确示例都用 `JOIN st_stbprp_b ... WHERE stnm LIKE '%站名%'` 按名直查**。**不要**写 `stcd='{stcd}'`、`DATE(tm)='{dt}'` 这种未填值的占位符——会匹配 0 行。时间窗用 `DATE_SUB(CURDATE(), INTERVAL N DAY/MONTH)`,不要写窄(30 天≠单天)。
+>
+> ❌ 错(占位符污染,0 行): `WHERE stcd='{stcd}' AND DATE(tm)='{dt}'`
+> ✅ 对(按名 JOIN): `JOIN st_stbprp_b b ON r.stcd=b.stcd WHERE b.stnm LIKE '%宝应%' AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)`
+
 ### Q: 2024年古运河平均水位？
 
 ```sql

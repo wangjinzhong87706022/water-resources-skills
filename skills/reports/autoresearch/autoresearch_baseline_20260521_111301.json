@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "timestamp": "20260521_111301",
+    "phase": "baseline",
+    "skills": 1,
+    "total_runs": 3
+  },
+  "summary": [
+    {
+      "skill": "gate-pump-operation",
+      "runs": 3,
+      "pass_rate": 0.67,
+      "total_pass": 10,
+      "total_evals": 15
+    }
+  ],
+  "details": [
+    {
+      "skill": "gate-pump-operation",
+      "runs": [
+        {
+          "skill": "gate-pump-operation",
+          "prompt": "查询所有闸站最新启闭状态",
+          "prompt_desc": "闸站列表",
+          "response": "查询完成！以下是所有闸站最新启闭状态汇总（数据时间：2025-05-19）：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n 全部闸站最新启闭状态  (共 37 个闸站, 107 个闸门)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n【已开启闸门】(开度 > 0)\n\n  便益门闸站 (20:35)\n    - 全部10个闸门 关闭 (开度=0)\n\n  钞关闸站 (16:50)\n    - 节制闸: 开度 0.04 (微开)\n\n  响水河闸 (20:35)\n    - 开度 0.2 (微开)\n\n  二道沟船闸 (20:35)\n    - 1号东北人字门: 开度 1.63\n    - 2号东南人字门: 开度 1.64\n    - 4号西南人字门: 关闭\n\n  安墩闸站 (20:35)\n    - 3#进水闸门: 开度 0.04 (微开)\n    - 节制闸: 开度 0.2\n    - 其余闸门: 关闭\n\n  扬州水利枢纽 (20:35)\n    - 3#上游事故门(左/右): 开度 4.2\n    - 4#上游事故门(左/右): 开度 4.2\n    - 4#上游工作门(左/右): 4.20 / 4.21\n    - 4#下游工作门(左/右): 4.23 / 4.22\n    - 船闸上闸首南液压阀: 开度 3.93\n    - 船闸下闸首闸门(左/右): 3.94 / 3.93\n    - 其余闸门: 关闭\n\n  通运闸站 (20:35)\n    - 东闸: 开度 0.94\n    - 西涵闸: 开度 1.28\n    - 东涵闸、西闸: 关闭\n\n  太平闸站 (20:35)\n    - 出水闸门: 开度 1.0\n    - 节制闸: 关闭\n\n  曲江闸站 (20:35)\n    - 2#工作闸门: 2.00  |  3#: 1.99  |  5#: 2.17\n    - 6#: 2.20  |  7#: 1.83  |  8#: 2.00  |  9#: 2.02\n    - 1#/4#/节制闸: 关闭\n\n  七里闸站 (20:35)\n    - 液压闸门(左/右行程): 2.61 / 2.62\n    - 开启角度: 33° | 门顶高度: 2.37\n\n  吴庄河闸 (20:30) — 开度 0.07 (微开)\n  太平河闸 (20:35) — 开度 0.03 (微开)\n  甪里闸 (20:30) — 开度 0.03 (微开)\n  新城河闸 (20:35) — 开度 0.70\n  念四闸站 (20:35) — 节制闸: 开度 0.62\n  高桥闸站 (20:35) — 节制闸: 开度 0.13\n  赵家支沟涵闸 (20:35) — 开度 0.11\n  盐亭子闸 (20:35) — 1#/2#闸门: 各 2.80\n  冷却河闸 (20:30) — 开度 2.13\n  四望亭河闸 (20:35) — 开度 0.21\n\n  黄金坝闸站 (20:35)\n    - 1#进水: 2.58 | 2#进水: 2.46 | 3#进水: 2.93 | 4#进水: 2.56\n    - 3#出水: 3.08 | 2#出水: 0.03 | 节制闸: 0.15\n    - 1#/4#出水: 关闭\n\n  官河节制闸 (20:35) — 开度 1.0\n\n  仪扬河闸 (20:35)\n    - 北涵闸: 3.26 | 南涵闸: 3.56\n    - 右岸人字门: 4.10 | 左岸人字门: 4.14\n\n  江阳路节制闸 (20:35) — 左/右行程: 2.15 / 2.14\n  西沙河闸站 (20:35) — 节制闸: 0.50\n  吕桥河闸 (20:30) — 开度 1.93\n  普照闸站 (20:30) — 开度 0.47\n  马港河闸 (20:35) — 闸位 0.56\n\n  各泵站出水闸门:\n    - 徐庄泵站: 0.78 | 军桥泵站: 0.48 | 大湾东泵站: 0.43\n    - 胜利泵站: 0.63 | 石街河泵站: 0.55 | 焦庄泵站: 0.61\n    - 滩田河泵站: 0.50\n\n【完全关闭】(开度=0)\n\n  便益门闸站(全部) | 沙施河南节制闸 | 杨庄河闸站 | 竹西闸\n  郭庄闸 | 西银沟闸站 | 黄泥沟涵闸 | 幸福河闸\n  沿山河西闸站 | 青龙港闸站 | 夏坝闸站 | 邗江河闸站\n  柴港河闸站 | 施桥港闸站 | 褚坝闸站 | 卞港排涝站\n  王小河闸站 | 卞庄北涵 | 吕桥泵站 | 润扬河闸(全部)\n  泗源沟节制闸(全部5孔) | 跃进闸 | 五里庵闸 | 丁家河闸\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n要点总结:\n• 大型水闸开启较明显: 扬州水利枢纽(3#/4#开度4.2m)、仪扬河闸(3.3~4.1m)、盐亭子闸(2.8m)\n• 曲江闸站多数闸门开启(2#~9#开度1.8~2.2m)\n• 多数小型涵闸处于关闭或微开状态(开度<0.3m)\n• 所有过闸流量字段均为空值，该指标未采集",
+          "duration_sec": 156.03,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 闸/泵/开度/流量/启闭/上下游/堰?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            },
+            {
+              "name": "not_timeout",
+              "question": "Response does not contain TIMEOUT or ERROR markers?",
+              "passed": true
+            }
+          ],
+          "pass_count": 5,
+          "total_evals": 5,
+          "pass_rate": 1.0,
+          "keyword_hits": 5,
+          "num_count": 168
+        },
+        {
+          "skill": "gate-pump-operation",
+          "prompt": "查询念四闸站最新的上下游水位和过闸流量",
+          "prompt_desc": "单站详情",
+          "response": "查询完成，以下是念四闸站的最新数据：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  念四闸站 最新堰闸水情\n  站码: HP0071003005000028 (闸站 DD)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  最新时间:  2026-03-31 18:05\n  上游水位:  5.37 m\n  下游水位:  4.98 m\n  过闸流量:  1.33 m³/s\n  水位落差:  0.39 m\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n说明：\n- 数据来源于 sl323.st_was_r（堰闸水情表），最新记录时间为 2026-03-31 18:05\n- 上下游水位差 0.39m，过闸流量较小，说明闸门开度不大\n- 另外该站还关联了一个泵站（sttp=DP），如需查看泵站运行状态也可以继续查询",
+          "duration_sec": 38.0,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 闸/泵/开度/流量/启闭/上下游/堰?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            },
+            {
+              "name": "not_timeout",
+              "question": "Response does not contain TIMEOUT or ERROR markers?",
+              "passed": true
+            }
+          ],
+          "pass_count": 5,
+          "total_evals": 5,
+          "pass_rate": 1.0,
+          "keyword_hits": 6,
+          "num_count": 17
+        },
+        {
+          "skill": "gate-pump-operation",
+          "prompt": "查询泵站综合运行状态汇总",
+          "prompt_desc": "泵站聚合（L2超时题）",
+          "response": "[TIMEOUT after 300s]",
+          "duration_sec": 300.1,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": false
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 闸/泵/开度/流量/启闭/上下游/堰?",
+              "passed": false
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": false
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": false
+            },
+            {
+              "name": "not_timeout",
+              "question": "Response does not contain TIMEOUT or ERROR markers?",
+              "passed": false
+            }
+          ],
+          "pass_count": 0,
+          "total_evals": 5,
+          "pass_rate": 0.0,
+          "keyword_hits": 0,
+          "num_count": 1
+        }
+      ],
+      "total_pass": 10,
+      "total_evals": 15,
+      "pass_rate": 0.67
+    }
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "meta": {
+    "timestamp": "20260521_200007",
+    "phase": "verify",
+    "skills": 1,
+    "total_runs": 4
+  },
+  "summary": [
+    {
+      "skill": "water-forecast",
+      "runs": 4,
+      "pass_rate": 0.94,
+      "total_pass": 15,
+      "total_evals": 16
+    }
+  ],
+  "details": [
+    {
+      "skill": "water-forecast",
+      "runs": [
+        {
+          "skill": "water-forecast",
+          "prompt": "查询最新预测任务的状态",
+          "prompt_desc": "任务状态查询",
+          "response": "查询完成！最新预测任务状态如下：\n\n**最新5条预测任务记录**（截至 2026-03-31 18:00）\n\n1. **任务ID:** 19D4355F5094F98F08\n   - 时间: 2026-03-31 18:00:00\n   - 状态: 未完成 (stuts=0)\n   - 类型: 1 (水位预测)\n\n2. **任务ID:** 19D431F068E51198FE\n   - 时间: 2026-03-31 17:00:00\n   - 状态: 已完成 (stuts=1)\n   - 类型: 1 (水位预测)\n\n3. **任务ID:** 19D42E81DC3930E85\n   - 时间: 2026-03-31 16:00:00\n   - 状态: 已完成 (stuts=1)\n   - 类型: 1 (水位预测)\n\n4. **任务ID:** 19D42B1298613BF4B1\n   - 时间: 2026-03-31 15:00:00\n   - 状态: 已完成 (stuts=1)\n   - 类型: 1 (水位预测)\n\n5. **任务ID:** 19D427A3B031043687\n   - 时间: 2026-03-31 14:00:00\n   - 状态: 已完成 (stuts=1)\n   - 类型: 1 (水位预测)\n\n**注意:** 最新任务（18:00）仍在执行中（未完成），上一次成功完成的任务是 17:00 的。数据时间距今约 2 个月（当前为 2026-05-21），预测系统可能未持续运行。",
+          "duration_sec": 107.47,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 预测/预报/任务/模型/断面/水位?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            }
+          ],
+          "pass_count": 4,
+          "total_evals": 4,
+          "pass_rate": 1.0,
+          "keyword_hits": 3,
+          "num_count": 82
+        },
+        {
+          "skill": "water-forecast",
+          "prompt": "预测未来24小时古运河水位站的水位变化趋势",
+          "prompt_desc": "单站预测",
+          "response": "根据查询结果，以下是古运河水位站未来24小时的水位预测分析：\n\n## 古运河水位站未来24小时水位预测报告\n\n### 数据来源\n- 预测任务ID：19D431F068E51198FE\n- 任务时间：2026-03-31 17:00:00\n- 预测范围：2026-03-31 17:00 至 2026-04-01 17:00（完整24小时）\n\n### 古运河水位站列表（共6个）\n1. 古运河水文站（钞关泵站）\n2. 古运河水文站（新城河口）\n3. 古运河水文站（扬子津体育公园）\n4. 古运河水位站3(扬子江南路)\n5. 古运河水位站（春江路）\n6. 古运河水文站（扬子江南路古运河大桥）\n\n### 预测趋势分析\n以古运河水文站（钞关泵站）为代表站：\n\n**关键时间节点：**\n- 2026-03-31 17:00  4.760m（预测起始）\n- 2026-04-01 00:00  4.760m（午夜）\n- 2026-04-01 06:00  4.760m（清晨）\n- 2026-04-01 12:00  4.760m（正午）\n- 2026-04-01 14:00  4.750m（水位开始下降）\n- 2026-04-01 17:00  4.750m（预测结束）\n\n**统计特征：**\n- 最高水位：4.760m\n- 最低水位：4.750m\n- 平均水位：4.758m\n- 水位变幅：0.010m\n- 变化趋势：平稳偏降\n\n### 重要说明\n1. **数据时效性**：预测数据生成于2026-03-31，距当前已超过50天，数据已过期\n2. **仅供参考**：实际水位可能因降雨、调度等因素发生变化\n3. **建议**：查询实时水位数据以获取最新情况\n4. **整体趋势**：所有古运河站点预测趋势一致，显示系统整体平稳\n\n如需查看最新实时水位数据，可使用 `/water-situation` 技能查询当前水情。",
+          "duration_sec": 132.14,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 预测/预报/任务/模型/断面/水位?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            }
+          ],
+          "pass_count": 4,
+          "total_evals": 4,
+          "pass_rate": 1.0,
+          "keyword_hits": 3,
+          "num_count": 79
+        },
+        {
+          "skill": "water-forecast",
+          "prompt": "查询未来24小时所有站点的预测水位，按站分组显示最高/最低预测值",
+          "prompt_desc": "多站聚合",
+          "response": "查询完成！以下是结果汇总：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⚠️  数据说明\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n最新已完成任务: 19D431F068E51198FE\n任务时间: 2026-03-31 17:00:00（距今约52天，数据非实时）\n\n由于当前未来24小时（NOW ~ NOW+24h）内无预测数据，\n以下展示该任务的完整预测数据（2026-03-31 17:00 ~ 2026-04-01 17:00）\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n未来水位预测汇总（按站点分组，共 39 个站点）\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n水位较高的站点（≥5.0m）：\n  扬州水利枢纽         5.060 ~ 5.060m (97点)\n\n水位中等的站点（4.8~5.0m）：\n  四望亭河(邗江北路)    4.890 ~ 4.970m\n  新城河/新城河水文站   4.890 ~ 4.970m\n  邗沟水文站            4.890 ~ 4.970m\n  引潮河闸站            4.750 ~ 4.970m (194点，含闸位变化)\n  二道河水文站/保障湖    4.890 ~ 4.960m\n  瘦西湖/玉带河/念四闸   4.890 ~ 4.960m\n\n水位正常的站点（4.7~4.8m）：\n  多数古运河、仪扬河、赵家支沟等站点  4.750 ~ 4.790m\n\n水位较低的站点（<4.7m）：\n  向阳河（建华路/华声路）  3.070 ~ 3.080m\n  施桥港/周庄河            3.180m\n  横沟河                   3.730 ~ 3.740m\n  邗江河/马港河             2.360 ~ 2.370m（最低）\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n⚠️ 提醒：预测系统最新任务停留在 2026-03-31，距今已超过50天。\n建议确认预测调度任务是否正常运行，或联系运维人员触发新的预测计算。",
+          "duration_sec": 76.5,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 预测/预报/任务/模型/断面/水位?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            }
+          ],
+          "pass_count": 4,
+          "total_evals": 4,
+          "pass_rate": 1.0,
+          "keyword_hits": 3,
+          "num_count": 59
+        },
+        {
+          "skill": "water-forecast",
+          "prompt": "对比当前水位与未来24小时预测水位的差异",
+          "prompt_desc": "预测vs实际对比（L3超时题）",
+          "response": "查询完成！以下是当前水位与未来24小时预测水位的对比分析结果：\n\n=========================================================================================================\n  扬州市重点河道 — 当前水位 vs 未来24小时预测水位 对比分析\n  (基准时间: 2026-03-31 19:00 | 预测任务: 19D431F068E51198FE @ 2026-03-31 17:00)\n=========================================================================================================\n\n【重要说明】数据最新时间为 2026-03-31，距今约2个月，预测系统近期未运行。\n\n【有预测数据的站点】共15站，分三种趋势：\n\n▲ 预计上涨 (4站):\n  施桥港水位站（临江路）: +0.07m (当前3.11m → 预测3.18m)\n  七里河水位站（东花园路）: +0.04m (当前4.74m → 预测4.78m)\n  仪扬河水位站（润扬南路）: +0.03m (当前4.72m → 预测4.75m)\n  古运河水位站（新城河口）: +0.03m (当前4.72m → 预测4.75m)\n\n▼ 预计下降 (11站)，降幅较大的：\n  四望亭河(邗江北路): -0.69m (当前5.58m → 预测4.89m) ⬇ 降幅最大\n  新城河(文昌路桥点): -0.52m (当前5.41m → 预测4.89m)\n  向阳河水位站(建华路): -0.13m (当前3.20m → 预测3.07m)\n  向阳河水位站（华声路）: -0.12m (当前3.19m → 预测3.07m)\n  保障湖/玉带河/瘦西湖等: -0.04~0.06m（小幅下降）\n\n【无预测数据】21站（含高邮、宝应、邵伯等大型站点及部分小型站点）\n\n【防洪预警】✅ 所有站点当前水位及预测水位均在安全范围内，无超警戒/超保证风险。\n\n整体来看，多数城区内河水位预计小幅下降，四望亭河和新城河降幅较明显（可能与闸门调度有关），少数站点略有上涨但幅度很小。系统整体处于安全平稳状态。",
+          "duration_sec": 208.64,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": false
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 预测/预报/任务/模型/断面/水位?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            }
+          ],
+          "pass_count": 3,
+          "total_evals": 4,
+          "pass_rate": 0.75,
+          "keyword_hits": 3,
+          "num_count": 50
+        }
+      ],
+      "total_pass": 15,
+      "total_evals": 16,
+      "pass_rate": 0.94
+    }
+  ]
+}

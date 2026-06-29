@@ -1,0 +1,183 @@
+{
+  "meta": {
+    "timestamp": "20260521_201746",
+    "phase": "verify",
+    "skills": 1,
+    "total_runs": 4
+  },
+  "summary": [
+    {
+      "skill": "gate-pump-operation",
+      "runs": 4,
+      "pass_rate": 0.95,
+      "total_pass": 19,
+      "total_evals": 20
+    }
+  ],
+  "details": [
+    {
+      "skill": "gate-pump-operation",
+      "runs": [
+        {
+          "skill": "gate-pump-operation",
+          "prompt": "查询所有闸站最新启闭状态",
+          "prompt_desc": "闸站列表",
+          "response": "查询完成！以下是所有闸站最新启闭状态汇总：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  闸站启闭状态总览\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  数据时间: 2025-05-19 20:35 (距今超过1年，数据已过期)\n  闸站总数: 58 个\n  闸门总数: 150 扇\n  状态统计: 开启 67 扇 | 关闭 83 扇\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n【开启状态的闸站（部分）】\n• 七里闸站 — 液压闸门开启(开度2.62m)\n• 二道沟船闸 — 1号/2号人字门开启(1.63m/1.64m)\n• 仪扬河闸 — 北涵/南涵/左右人字门全部开启(3.26~4.14m)\n• 扬州水利枢纽 — 3#/4#闸门多扇开启(4.20~4.23m)\n• 曲江闸站 — 2#/3#/5#/6#/7#/8#/9#工作闸门开启(1.83~2.20m)\n• 通运闸站 — 东闸(0.94m)、西涵闸(1.28m)开启\n• 黄金坝闸站 — 1~4#进水闸门全部开启(2.46~2.93m)\n\n【关闭状态的闸站（部分）】\n• 丁家河闸站、五里庵闸站、卞庄北涵 — 完全关闭\n• 便益门闸站 — 全部10扇闸门关闭\n• 润扬河闸 — 全部6扇闸门关闭\n• 泗源沟节制闸 — 全部5扇闸门关闭\n• 扬州水利枢纽 — 1#/2#闸门全部关闭\n\n⚠️ 注意: 过闸流量(gto)字段全部为空，最新数据时间为 2025-05-19，距今已超过1年，建议确认数据源是否正常采集。",
+          "duration_sec": 91.16,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 闸/泵/开度/流量/启闭/上下游/堰?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            },
+            {
+              "name": "not_timeout",
+              "question": "Response does not contain TIMEOUT or ERROR markers?",
+              "passed": true
+            }
+          ],
+          "pass_count": 5,
+          "total_evals": 5,
+          "pass_rate": 1.0,
+          "keyword_hits": 4,
+          "num_count": 45
+        },
+        {
+          "skill": "gate-pump-operation",
+          "prompt": "查询念四闸站最新的上下游水位和过闸流量",
+          "prompt_desc": "单站详情",
+          "response": "查询完成！以下是念四闸站的最新水情数据：\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  念四闸站 (站码: HP0071003005000028)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n  最新数据时间: 2026-03-31 18:05:00\n\n  ┌──────────────┬──────────────┐\n  │ 指标         │ 数值         │\n  ├──────────────┼──────────────┤\n  │ 上游水位     │ 5.370 m      │\n  │ 下游水位     │ 4.980 m      │\n  │ 过闸流量     │ 1.330 m³/s   │\n  └──────────────┴──────────────┘\n\n  上下游水位差: 0.390 m\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n说明：\n- 最新数据截止到 2026-03-31，近两个月（4-5月）暂无新数据上报\n- 近5条数据显示该时段水位和流量较为稳定\n- 上游水位在 5.370-5.380 m 之间波动，下游稳定在 4.980 m\n- 过闸流量在 1.320-1.330 m³/s 之间",
+          "duration_sec": 108.35,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 闸/泵/开度/流量/启闭/上下游/堰?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            },
+            {
+              "name": "not_timeout",
+              "question": "Response does not contain TIMEOUT or ERROR markers?",
+              "passed": true
+            }
+          ],
+          "pass_count": 5,
+          "total_evals": 5,
+          "pass_rate": 1.0,
+          "keyword_hits": 3,
+          "num_count": 22
+        },
+        {
+          "skill": "gate-pump-operation",
+          "prompt": "查询泵站综合运行状态汇总",
+          "prompt_desc": "泵站聚合（L2超时题）",
+          "response": "查询完成！以下是泵站综合运行状态汇总：\n\n```\n═══════════════════════════════════════════════════════════════\n                    泵站综合运行状态汇总\n═══════════════════════════════════════════════════════════════\n\n数据时间: 2026-03-31 18:00-18:05\n统计范围: 最近7天数据\n\n───────────────────────────────────────────────────────────────\n统计汇总:\n  泵站总数: 55 个（有数据的站点）\n  运行中:   3 个\n  停机:     52 个\n───────────────────────────────────────────────────────────────\n\n当前运行的泵站 (3个):\n  1. 北水关桥泵站\n     - 开机台数: 2 台\n     - 抽水流量: 0.400 m³/s\n     - 下游水位: 5.622 m\n\n  2. 平山堂泵站\n     - 开机台数: 2 台\n     - 抽水流量: 5.000 m³/s\n     - 上游水位: 4.937 m\n     - 下游水位: 7.499 m\n\n  3. 黄金坝闸站\n     - 开机台数: 1 台\n     - 抽水流量: 4.500 m³/s\n     - 上游水位: 4.713 m\n     - 下游水位: 4.944 m\n\n───────────────────────────────────────────────────────────────\n运行泵站合计:\n  总开机: 5 台\n  总流量: 9.900 m³/s\n═══════════════════════════════════════════════════════════════\n\n说明:\n  - 泵站类型 (sttp='DP') 共有 75 个注册站点\n  - 本次查询有数据的站点 55 个\n  - 大部分站点处于停机状态，仅 3 个站点在运行\n  - 运行中的泵站主要承担排涝或引水功能\n```",
+          "duration_sec": 183.9,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": false
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 闸/泵/开度/流量/启闭/上下游/堰?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            },
+            {
+              "name": "not_timeout",
+              "question": "Response does not contain TIMEOUT or ERROR markers?",
+              "passed": true
+            }
+          ],
+          "pass_count": 4,
+          "total_evals": 5,
+          "pass_rate": 0.8,
+          "keyword_hits": 3,
+          "num_count": 31
+        },
+        {
+          "skill": "gate-pump-operation",
+          "prompt": "查询当前所有堰闸的水位差排名（上下游水位差最大的前10）",
+          "prompt_desc": "堰闸排名（L3超时题）",
+          "response": "查询完成！以下是截至 2026-03-31 18:00 各堰闸最新数据的上下游水位差排名：\n\n堰闸上下游水位差 TOP 10\n============================================================\n排名  站名                  上游水位(m)  下游水位(m)  水位差(m)  过闸流量(m³/s)  时间\n------------------------------------------------------------\n 1   三河闸(闸上游)（水文）      13.510      7.520      5.99       -         2026-03-31 18:00\n 2   芒稻闸（水文）              6.420      3.140      3.28       -         2026-03-31 18:00\n 3   槐泗河保水闸                8.070      4.850      3.22       -         2026-03-31 18:00\n 4   大官桥漫水闸               15.020     12.460      2.56       -         2026-03-31 18:00\n 5   沿山河西闸站                7.310      4.770      2.54      0.01       2026-03-31 18:05\n 6   黄泥沟涵闸                  7.370      5.250      2.12      0.00       2026-03-31 18:05\n 7   新城河闸（水文）             7.370      5.457      1.91       -         2026-03-31 18:00\n 8   新城河闸                    7.350      5.440      1.91      0.43       2026-03-31 18:05\n 9   泗源沟闸（水文）             4.770      3.150      1.62       -         2026-03-31 18:00\n10   瓜洲节制闸                  4.760      3.200      1.56      0.00       2026-03-31 18:00\n------------------------------------------------------------\n\n要点总结：\n- 三河闸水位差最大，达 5.99m，上游 13.51m / 下游 7.52m，远超其他站点\n- 芒稻闸和槐泗河保水闸分列二、三位，水位差分别为 3.28m 和 3.22m\n- 大官桥漫水闸虽然上游水位最高（15.02m），但下游水位也高（12.46m），水位差仅 2.56m\n- 有部分站点过闸流量为 0 或未记录，说明闸门可能处于关闭状态\n- 数据截至 2026-03-31 18:00，目前该时间点为系统最新数据",
+          "duration_sec": 175.53,
+          "evals": [
+            {
+              "name": "completes_fast",
+              "question": "Response completes within 180 seconds?",
+              "passed": true
+            },
+            {
+              "name": "has_domain_kw",
+              "question": "Contains 2+ of: 闸/泵/开度/流量/启闭/上下游/堰?",
+              "passed": true
+            },
+            {
+              "name": "has_numbers",
+              "question": "Contains 3+ numeric values?",
+              "passed": true
+            },
+            {
+              "name": "response_detailed",
+              "question": "Response is longer than 200 characters?",
+              "passed": true
+            },
+            {
+              "name": "not_timeout",
+              "question": "Response does not contain TIMEOUT or ERROR markers?",
+              "passed": true
+            }
+          ],
+          "pass_count": 5,
+          "total_evals": 5,
+          "pass_rate": 1.0,
+          "keyword_hits": 4,
+          "num_count": 114
+        }
+      ],
+      "total_pass": 19,
+      "total_evals": 20,
+      "pass_rate": 0.95
+    }
+  ]
+}

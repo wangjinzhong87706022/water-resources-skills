@@ -1,0 +1,475 @@
+{
+  "meta": {
+    "timestamp": "20260623_091712",
+    "total_cases": 3,
+    "total_duration_sec": 404.03
+  },
+  "results": [
+    {
+      "index": 26,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询扬州城区今日降雨量。",
+      "expected_sql": "SELECT DATE(p.tm) AS '日期', SUM(p.drp) AS '日降雨量(mm)'\nFROM sl323.st_pptn_r p\nWHERE p.stcd = '58245'\n  AND DATE(p.tm) = CURDATE()\n  AND p.drp IS NOT NULL\nGROUP BY DATE(p.tm);",
+      "actual_response": "## 扬州城区今日降雨量\n\n| 项目 | 内容 |\n|------|------|\n| **测站** | 扬州 (stcd: 58245) |\n| **查询日期** | 2026-06-23 |\n| **降雨量** | **今日无降雨记录** |\n\n### 数据新鲜度提醒 ⚠️\n\n- **扬州站最新数据：** 2025-11-26 11:20:00（距今已中断约7个月）\n- **全表最新数据：** 2026-06-11（其他测站有数据，距今约12天）\n\n**结论：** 扬州站（58245）数据采集已中断约7个月，该站点当前已无实时数据。今日无降雨记录可能是因为该测站已离线，而非实际无降雨。建议联系运维人员检查该雨量站设备运行状态。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 2,
+        "response_length": 319,
+        "verifiers": [
+          {
+            "name": "domain_coverage",
+            "layer": "final_answer",
+            "score": 0.67,
+            "passed": true,
+            "weight": 0.15,
+            "detail": {
+              "keyword_hits": 2,
+              "keywords": [
+                "降雨",
+                "雨量",
+                "降水",
+                "雨站",
+                "mm",
+                "暴雨",
+                "大雨"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "numeric_presence",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "number_count": 17
+            },
+            "error": ""
+          },
+          {
+            "name": "response_validity",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "length": 319,
+              "is_error": false
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_correctness",
+            "layer": "sql_execution",
+            "score": 0.2,
+            "passed": false,
+            "weight": 0.15,
+            "detail": {
+              "agent_rows": 5,
+              "expected_rows": 0
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_executes",
+            "layer": "sql_execution",
+            "score": 0.5,
+            "passed": false,
+            "weight": 0.35,
+            "detail": {
+              "sql_count": 2,
+              "succeeded": 1,
+              "failed": 1
+            },
+            "error": ""
+          },
+          {
+            "name": "tool_trace_sanity",
+            "layer": "trace",
+            "score": 0.5,
+            "passed": false,
+            "weight": 0.1,
+            "detail": {
+              "db_called": true,
+              "failure_rate": 0.5,
+              "fabricated_numbers": [
+                "12",
+                "58245",
+                "7"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_safety",
+            "layer": "policy",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.05,
+            "detail": {
+              "issues": [],
+              "sql_count": 2
+            },
+            "error": ""
+          }
+        ],
+        "layer_scores": {
+          "final_answer": 0.859,
+          "sql_execution": 0.41,
+          "trace": 0.5,
+          "policy": 1.0
+        },
+        "hard_fail": false
+      },
+      "total_score": 0.606,
+      "duration_sec": 72.86,
+      "error": "",
+      "engine": "harness",
+      "trajectory_path": "reports/gate/candidate_smoke1/trajectories/rainfall_026.jsonl",
+      "tool_stats": {
+        "execute_code": {
+          "count": 2,
+          "success": 1,
+          "failure": 1
+        }
+      },
+      "completed": true,
+      "api_calls": 3,
+      "loaded_skills": [
+        "rainfall"
+      ],
+      "missing_skills": []
+    },
+    {
+      "index": 27,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询2025年扬州城区降雨总量。",
+      "expected_sql": "SELECT SUM(p.drp) AS '2025年累计降雨量(mm)'\nFROM sl323.st_pptn_r p\nWHERE p.stcd = '58245'\n  AND p.tm BETWEEN '2025-01-01' AND '2025-12-31'\n  AND p.drp IS NOT NULL;",
+      "actual_response": "## 2025年扬州城区降雨总量查询结果\n\n| 项目 | 内容 |\n|------|------|\n| **测站** | 扬州城区 (stcd: 58245) |\n| **2025年降雨总量** | **1213.20 mm** |\n| **数据范围** | 2025-01-01 ~ 2025-11-26 11:20:00 |\n| **单位** | 毫米 (mm) |\n\n⚠️ **数据提示：** 扬州站最新记录截止于 **2025年11月26日**，2025年11月26日之后至年底的数据尚未采集或数据库未更新，因此该总量为 **2025年1月~11月26日** 的实际累计值，非完整年度数据。",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 2,
+        "response_length": 299,
+        "verifiers": [
+          {
+            "name": "domain_coverage",
+            "layer": "final_answer",
+            "score": 0.67,
+            "passed": true,
+            "weight": 0.15,
+            "detail": {
+              "keyword_hits": 2,
+              "keywords": [
+                "降雨",
+                "雨量",
+                "降水",
+                "雨站",
+                "mm",
+                "暴雨",
+                "大雨"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "numeric_presence",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "number_count": 23
+            },
+            "error": ""
+          },
+          {
+            "name": "response_validity",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "length": 299,
+              "is_error": false
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_correctness",
+            "layer": "sql_execution",
+            "score": 0.2,
+            "passed": false,
+            "weight": 0.15,
+            "detail": {
+              "agent_rows": 4,
+              "expected_rows": 1
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_executes",
+            "layer": "sql_execution",
+            "score": 0.67,
+            "passed": false,
+            "weight": 0.35,
+            "detail": {
+              "sql_count": 3,
+              "succeeded": 2,
+              "failed": 1
+            },
+            "error": ""
+          },
+          {
+            "name": "tool_trace_sanity",
+            "layer": "trace",
+            "score": 0.7,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "db_called": true,
+              "failure_rate": 0.33,
+              "fabricated_numbers": [
+                "01"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_safety",
+            "layer": "policy",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.05,
+            "detail": {
+              "issues": [],
+              "sql_count": 3
+            },
+            "error": ""
+          }
+        ],
+        "layer_scores": {
+          "final_answer": 0.859,
+          "sql_execution": 0.529,
+          "trace": 0.7,
+          "policy": 1.0
+        },
+        "hard_fail": false
+      },
+      "total_score": 0.685,
+      "duration_sec": 104.61,
+      "error": "",
+      "engine": "harness",
+      "trajectory_path": "reports/gate/candidate_smoke1/trajectories/rainfall_027.jsonl",
+      "tool_stats": {
+        "execute_code": {
+          "count": 2,
+          "success": 1,
+          "failure": 1
+        }
+      },
+      "completed": true,
+      "api_calls": 3,
+      "loaded_skills": [
+        "rainfall"
+      ],
+      "missing_skills": []
+    },
+    {
+      "index": 28,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询各雨量站的平均日降雨量。",
+      "expected_sql": "SELECT b.stnm AS '雨量站名称', AVG(p.drp) AS '平均日降雨量(mm)'\nFROM sl323.st_pptn_r p\nJOIN sl323.st_stbprp_b b ON p.stcd = b.stcd\nWHERE b.sttp = 'PP' AND p.drp IS NOT NULL\nGROUP BY b.stnm;",
+      "actual_response": "## 各雨量站平均日降雨量查询结果\n\n共 **108 个雨量站**，基于 `drp`（时段降水量）按日聚合后计算平均值。\n\n### 排名 Top 10\n\n| 排名 | 测站名称 | 测站编码 | 平均日降雨量 (mm) | 最大日降雨 (mm) | 有雨天数 | 总观测天数 |\n|------|----------|----------|-------------------|-----------------|----------|------------|\n| 1 | 陆洲泵站雨量站 | HT0061003003000012 | **16.63** | 205.00 | 3,947 | 1,016 |\n| 2 | 二道河雨量站（文昌中路） | HT0061002002000011 | **14.30** | 214.00 | 2,258 | 1,098 |\n| 3 | 江都武坚镇 | M5443 | **13.76** | 209.90 | 3,774 | 903 |\n| 4 | 江都大桥镇 | M3421 | **13.75** | 236.90 | 3,953 | 931 |\n| 5 | 扬州杭集镇 | M6585 | **13.56** | 197.20 | 3,236 | 578 |\n| 6 | 乌塔沟 | 22060701 | **13.44** | 170.20 | 1,828 | 272 |\n| 7 | 扬州李典镇 | M6584 | **13.42** | 135.60 | 3,191 | 578 |\n| 8 | **扬州城区** | **58245** | **13.36** | 222.90 | 5,252 | 911 |\n| 9 | 高邮 | 58241 | **13.31** | 108.60 | 3,734 | 903 |\n| 10 | 高邮卸甲八桥 | M5423 | **13.15** | 166.30 | 3,934 | 911 |\n\n### 总体统计\n\n- **所有站点平均日降雨量均值：11.96 mm**\n- **区域分布特征：**\n  - **江都区**站点平均日降雨量较高（12~14mm），包括武坚镇、大桥镇、邵伯镇等\n  - **扬州城区/邗江区**居中（11~13mm）\n  - **宝应县**站点相对较低（9~12mm），其中宝应山阳镇最低（9.69 mm）\n  - **仪征市**分布较均匀（11~13mm）\n\n### 说明\n\n- 计算方式：将 `drp`（时段降水量）按测站+日期 `SUM` 聚合为日降雨量，再对每个测站的日降雨量取 `AVG`（仅统计有降雨的日期）\n- 数据来源：sl323.st_pptn_r，共 402,917 条有效降水记录\n- 平均日降雨量仅基于有雨的日期计算（不含 0 降水日）",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 4,
+        "response_length": 1197,
+        "verifiers": [
+          {
+            "name": "domain_coverage",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.15,
+            "detail": {
+              "keyword_hits": 4,
+              "keywords": [
+                "降雨",
+                "雨量",
+                "降水",
+                "雨站",
+                "mm",
+                "暴雨",
+                "大雨"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "numeric_presence",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "number_count": 88
+            },
+            "error": ""
+          },
+          {
+            "name": "response_validity",
+            "layer": "final_answer",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "length": 1197,
+              "is_error": false
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_correctness",
+            "layer": "sql_execution",
+            "score": -1.0,
+            "passed": true,
+            "weight": 0.15,
+            "detail": {
+              "reason": "expected_sql exec failed: (2013, 'Lost connection to MySQL server during query (timed out)')"
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_executes",
+            "layer": "sql_execution",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.35,
+            "detail": {
+              "sql_count": 5,
+              "succeeded": 5,
+              "failed": 0
+            },
+            "error": ""
+          },
+          {
+            "name": "tool_trace_sanity",
+            "layer": "trace",
+            "score": 0.8,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "db_called": true,
+              "failure_rate": 0.0,
+              "fabricated_numbers": [
+                "016",
+                "098",
+                "1",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "191",
+                "2"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_safety",
+            "layer": "policy",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.05,
+            "detail": {
+              "issues": [],
+              "sql_count": 5
+            },
+            "error": ""
+          }
+        ],
+        "layer_scores": {
+          "final_answer": 1.0,
+          "sql_execution": 1.0,
+          "trace": 0.8,
+          "policy": 1.0
+        },
+        "hard_fail": false
+      },
+      "total_score": 0.976,
+      "duration_sec": 226.56,
+      "error": "",
+      "engine": "harness",
+      "trajectory_path": "reports/gate/candidate_smoke1/trajectories/rainfall_028.jsonl",
+      "tool_stats": {
+        "skill_view": {
+          "count": 2,
+          "success": 2,
+          "failure": 0
+        },
+        "execute_code": {
+          "count": 5,
+          "success": 4,
+          "failure": 1
+        }
+      },
+      "completed": true,
+      "api_calls": 7,
+      "loaded_skills": [
+        "rainfall"
+      ],
+      "missing_skills": []
+    }
+  ],
+  "summary": {
+    "total_duration_sec": 404.03,
+    "avg_score": 0.7556666666666666,
+    "valid_response_rate": 1.0,
+    "domain_data_rate": 0.7799999999999999,
+    "numeric_data_rate": 1.0,
+    "pass_rate": 1.0,
+    "by_skill": [
+      {
+        "skill": "rainfall",
+        "count": 3,
+        "avg_score": 0.7556666666666666,
+        "valid_response_rate": 1.0,
+        "pass_rate": 1.0,
+        "avg_duration": 134.67666666666665
+      }
+    ],
+    "by_level": [
+      {
+        "level": "L1",
+        "count": 3,
+        "avg_score": 0.7556666666666666,
+        "valid_response_rate": 1.0,
+        "pass_rate": 1.0,
+        "avg_duration": 134.67666666666665
+      }
+    ]
+  }
+}

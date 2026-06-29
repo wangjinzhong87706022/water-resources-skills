@@ -30,7 +30,7 @@ metadata:
 ## Prerequisites
 
 - **数据库:** MySQL 192.168.100.103:3306，数据库 sl323（只读）
-- **连接:** pymysql, host='192.168.100.103', port=3306, user='root', password='123456aA.', database='sl323'
+- **连接:** pymysql, host='192.168.100.103', port=3306, user='root', password='<SL323_DB_PASSWORD>', database='sl323'
 - **pymysql:** execute_code 环境可能未安装，首次使用需先运行 `pip install pymysql`
 - **DB 助手模块:** 使用 `from db import query, query_multi`（见 shared/db_connection.md），自动处理连接管理、30s 超时、空结果提示。**不要手写 pymysql 连接代码。**
 - 参考 `references/schema.md` — 完整表结构（来源: 实际 MySQL DDL）
@@ -43,8 +43,22 @@ metadata:
 
 1. **识别查询场景。** 河道水位→st_river_r; 水库水位→st_rsvr_r; 防洪指标→st_rvfcch_b。
 2. **识别测站/河道实体。** 参照重点河道映射（business_rules.md）。
-3. **确定时间范围。** "实时/最新"→MAX(tm); "某天左右"→前后3天; "最近"→3天; "当前"→10天。
+3. **确定时间范围。** "实时/最新"→MAX(tm); "某天左右"→前后3天; "最近"→3天; "当前"→10天; "最近30天"→`tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)`; "最近2个月"→`INTERVAL 2 MONTH`。不要把窗口写窄(如把"最近30天"写成单天)。
 4. **生成 SQL。** JOIN st_stbprp_b 获取名称，LEFT JOIN st_rvfcch_b 获取警戒/保证水位。
+
+> ⚠️ **按站名直查,禁止占位符(高频错误)。** 当题目提到具体测站/河道名(宝应、白马闸、古运河…),**必须** `JOIN st_stbprp_b b ON r.stcd=b.stcd WHERE b.stnm LIKE '%站名%'` 按名直接查。**严禁**"先查 stcd 再用变量代入"的两步法——它会产生 `{stcd}`/`{dt}` 这类**未填值的占位符**,匹配 0 行。
+>
+> ❌ 错误(占位符污染,返回 0 行):
+> ```sql
+> SELECT z FROM st_river_r WHERE stcd='{stcd}' AND DATE(tm)='{dt}'
+> ```
+> ✅ 正确(按名 JOIN):
+> ```sql
+> SELECT r.tm, r.z FROM st_river_r r JOIN st_stbprp_b b ON r.stcd=b.stcd
+> WHERE b.stnm LIKE '%宝应%' AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+> ```
+> 生成 SQL 后自检:**SQL 里不许出现 `{` `}` 占位符**;若有,立即改用 JOIN 按名查。
+
 5. **超警戒判断。** z > WRZ→超警戒; z > GRZ→超保证。
 6. **水位保留两位小数。**
 7. **质量自检。** 执行 SQL 前确认符合安全规则（只读、有 WHERE、有 LIMIT）。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。返回数值做合理性检查（水位 -1~20m）。

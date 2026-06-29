@@ -1,0 +1,63 @@
+{
+  "patch_id": "smoke1",
+  "overall_passed": true,
+  "selection": {
+    "gate": "selection",
+    "passed": true,
+    "metrics": {
+      "count": 3,
+      "avg_score": 0.756,
+      "pass_rate": 1.0,
+      "hard_fail_rate": 0.0,
+      "hard_fail_count": 0,
+      "by_skill_avg": {
+        "rainfall": 0.756
+      },
+      "by_skill_pass": {
+        "rainfall": 1.0
+      }
+    },
+    "baseline": null,
+    "deltas": {},
+    "violations": [],
+    "hard_fail_count": 0
+  },
+  "regression": {
+    "gate": "regression",
+    "passed": true,
+    "metrics": {
+      "count": 3,
+      "avg_score": 0.756,
+      "pass_rate": 1.0,
+      "hard_fail_rate": 0.0,
+      "hard_fail_count": 0,
+      "by_skill_avg": {
+        "rainfall": 0.756
+      },
+      "by_skill_pass": {
+        "rainfall": 1.0
+      }
+    },
+    "baseline": {
+      "count": 3,
+      "avg_score": 0.743,
+      "pass_rate": 1.0,
+      "hard_fail_rate": 0.0,
+      "hard_fail_count": 0,
+      "by_skill_avg": {
+        "rainfall": 0.743
+      },
+      "by_skill_pass": {
+        "rainfall": 1.0
+      }
+    },
+    "deltas": {
+      "rainfall": {
+        "avg_score_delta": 0.013,
+        "pass_rate_delta": 0.0
+      }
+    },
+    "violations": [],
+    "hard_fail_count": 0
+  }
+}

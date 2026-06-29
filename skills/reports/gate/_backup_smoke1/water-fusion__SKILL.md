@@ -1,0 +1,105 @@
+---
+name: water-fusion
+description: "水利跨域智能融合查询 — 编排多个水利 skill 的协同查询、数据关联、智能融合和冲突消解。基于专利方案的三维关联（时间/空间/业务）+ 融合图 + 对齐策略。"
+version: 1.0.0
+author: dataagent-water-resources
+license: MIT
+platforms: [linux, macos, windows]
+metadata:
+  hermes:
+    tags: [water, fusion, cross-domain, orchestration, correlation]
+    category: water-resources
+---
+
+# 水利跨域智能融合查询 (Water Fusion)
+
+编排多个水利 skill 的协同查询，通过三维关联（时间/空间/业务）实现数据智能融合。
+
+## When to Use
+
+| Scenario | Use This Skill |
+|----------|---------------|
+| 查询涉及 2+ 个业务域（水位+降雨、水质+预警等） | Yes |
+| 需要"综合分析"、"对比"、"影响分析" | Yes |
+| 单一业务域查询 | **No，用对应 skill** |
+
+## Prerequisites
+
+- **DB 助手模块:** `from db import query`（见 shared/db_connection.md）
+- **执行策略模块:** `from planner import plan_execution`（见 lib/planner.py）
+- **融合模块:** `from fusion import correlate, fuse, detect_conflicts, resolve_conflicts`（见 lib/fusion.py）
+- 参考 `references/business_rules.md` — 业务关联规则和依赖关系
+- 参考 `shared/sql_safety_rules.md` — SQL 安全规则
+
+## Workflow
+
+1. **识别涉及 Skill。** 根据用户问题判断涉及哪些业务域。参考下方关键词映射。
+2. **规划执行策略。** 调用 `plan_execution(skills)` 获取串行/并行执行计划。
+   ```python
+   import sys
+   sys.path.insert(0, '/opt/git/hermes-agent/skills/water-resources/lib')
+   from planner import plan_execution
+   plan = plan_execution(["rainfall", "water-situation", "water-warning"])
+   # plan["steps"] = [["rainfall", "water-situation"], ["water-warning"]]
+   ```
+3. **执行查询。** 按执行计划调用各 skill 的 db.py 获取数据。同一并行组内的查询可依次快速执行。
+   ```python
+   from db import query
+   rainfall_rows = query("SELECT ...", db='sl323')
+   water_rows = query("SELECT ...", db='sl323')
+   warning_rows = query("SELECT ...", db='sl323')
+   ```
+4. **关联分析。** 调用 `correlate()` 识别三维关联。
+   ```python
+   from fusion import correlate, fuse
+   correlations = correlate({"rainfall": rainfall_rows, "water-situation": water_rows})
+   # 返回: {"time": [...], "spatial": [...], "business": [...]}
+   ```
+5. **智能融合。** 调用 `fuse()` 执行时间/空间/业务对齐合并。
+   ```python
+   fused = fuse({"rainfall": rainfall_rows, "water-situation": water_rows}, correlations)
+   # fused["strategy_used"] = "time" | "spatial" | "business"
+   # fused["data"] = 合并后的数据列表
+   ```
+6. **冲突消解。** 如有冲突，检测并消解。
+   ```python
+   from fusion import detect_conflicts, resolve_conflicts
+   conflicts = detect_conflicts(fused["data"])
+   resolved, log = resolve_conflicts(fused["data"], conflicts, strategy="latest")
+   ```
+7. **输出综合报告。** 格式化融合结果，必须包含以下全部段落：
+   - **数据摘要**: 各 skill 的查询结果摘要
+   - **融合分析**: 用"关联""影响""对比""综合分析""因果"等词汇描述跨域数据关系（如"降雨对水位的影响""水位与预警的关联"）
+   - **融合策略**: 说明使用的时间对齐/空间对齐/业务逻辑策略
+   - **综合数据表格**: 融合后的数据（表格形式）
+   - **结论**: 一句话总结跨域查询的综合结论
+
+## Skill 关键词映射
+
+| 关键词 | Skill |
+|--------|-------|
+| 水位/水情/水文/河流/实时水位 | water-situation |
+| 降雨/雨量/降水/暴雨 | rainfall |
+| 水质/溶解氧/氨氮/CODMn/总磷/评级/等级 | water-quality |
+| 预测/预报/未来水位/模型 | water-forecast |
+| 闸/泵/开度/流量/启闭 | gate-pump-operation |
+| 预警/超警戒/超保证/防洪/警戒水位/判断等级 | water-warning |
+
+## 融合策略选择
+
+| 场景 | 策略 | 说明 |
+|------|------|------|
+| 不同 skill 数据有相同时间范围 | 时间对齐 | 按时间粒度合并同时间点数据 |
+| 不同 skill 涉及相同测站 | 空间对齐 | 按站名归一化后合并 |
+| 有业务因果规则匹配 | 业务逻辑 | 分析因果关联（如降雨→水位） |
+| 多维度同时存在 | 自动选择 | 选最强关联维度作为主策略 |
+
+## Related Skills
+
+- `water-situation` — 水位查询
+- `rainfall` — 降雨查询
+- `water-quality` — 水质查询
+- `water-forecast` — 水位预测
+- `gate-pump-operation` — 闸泵工况
+- `water-warning` — 水利预警
+- `water-visualization` — 水利可视化

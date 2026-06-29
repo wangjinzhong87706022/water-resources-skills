@@ -1,0 +1,39 @@
+解析到 98 个测试用例
+  过滤 skill=rainfall: 18 题
+  过滤 level=L1: 3 题
+
+开始执行 3 个测试用例 (超时 300s/题, engine=harness, model=Qwen3.6-27B-Q4_K_S.gguf)...
+======================================================================
+
+[1/3] Q26 [rainfall/L1] 查询扬州城区今日降雨量。
+  → 总分=0.61 | SQL:No | 72.9s | skill=rainfall | calls=3
+
+[2/3] Q27 [rainfall/L1] 查询2025年扬州城区降雨总量。
+  → 总分=0.69 | SQL:No | 104.6s | skill=rainfall | calls=3
+
+[3/3] Q28 [rainfall/L1] 查询各雨量站的平均日降雨量。
+  → 总分=0.98 | SQL:No | 226.6s | skill=rainfall | calls=7
+
+======================================================================
+评估完成!
+  平均分:       0.76
+  有效回答率:   100.0%
+  领域数据率:   78.0%
+  数值数据率:   100.0%
+  通过率(≥0.6): 100.0%
+  总耗时:       404.03s
+
+报告文件:
+  JSON: reports/gate/candidate_smoke1/eval_results_20260623_091712.json
+  MD:   reports/gate/candidate_smoke1/eval_report_20260623_091712.md
+[1/5] backup 35 skill 文件 → reports/gate/_backup_smoke1
+[2/5] (skill patch 应已手工应用) 跑 candidate evaluate...
+  [run_eval] /opt/git/hermes-agent/venv/bin/python3 /opt/git/hermes-agent/skills/water-resources/scripts/evaluate_skills.py --engine harness --model Qwen3.6-27B-Q4_K_S.gguf --output reports/gate/candidate_smoke1 --timeout 300 --skill rainfall --level L1
+[3/5] gate 判定
+  selection : passed=True  violations=[]
+  regression: passed=True  deltas={'rainfall': {'avg_score_delta': 0.013, 'pass_rate_delta': 0.0}}
+[4/5] gate 通过,不写 buffer
+[5/5] decision → reports/gate/gate_decision_smoke1.json
+
+✅ PATCH 通过 gate
+(restored 35 skill 文件)
