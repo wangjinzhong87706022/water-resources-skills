@@ -74,6 +74,3 @@ metadata:
 - `water-situation` — 实时水位查询
 - `water-warning` — 防洪预警
 - `water-visualization` — 闸泵运行状态面板图
-
-<!-- SLOW_UPDATE_START -->
-<!-- SLOW_UPDATE_END -->

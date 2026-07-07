@@ -37,7 +37,7 @@ metadata:
 2. **规划执行策略。** 调用 `plan_execution(skills)` 获取串行/并行执行计划。
    ```python
    import sys
-   sys.path.insert(0, '/opt/git/hermes-agent/skills/water-resources/lib')
+   sys.path.insert(0, str(Path(__file__).parent / 'lib'))
    from planner import plan_execution
    plan = plan_execution(["rainfall", "water-situation", "water-warning"])
    # plan["steps"] = [["rainfall", "water-situation"], ["water-warning"]]
