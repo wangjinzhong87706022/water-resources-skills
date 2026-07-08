@@ -31,6 +31,9 @@ metadata:
 - **DB 助手模块:** 使用 `from db import query, query_multi`（见 shared/db_connection.md），自动处理连接管理、30s 超时、空结果提示。**不要手写 pymysql 连接代码。**
 - 参考 `shared/sql_safety_rules.md` — SQL 安全规则（所有 skill 通用）
 - 参考 `shared/sql_quality_check.md` — SQL 质量审查流程（所有 skill 通用）
+- 参考 `shared/statistical_methods.md` — 统计分析方法（预测精度评估、偏差分析）
+- 参考 `shared/sql_patterns.md` — SQL 通用查询模式（预测 vs 实测跨表对齐）
+- 参考 `shared/analysis_validation.md` — 分析验证（预测结果的可信度评定）
 
 ## Pitfalls
 

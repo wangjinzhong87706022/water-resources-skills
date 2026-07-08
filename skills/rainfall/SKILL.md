@@ -36,6 +36,9 @@ metadata:
 - 参考 `references/few_shots.md` — SQL 示例（来源: domains/sqls.txt）
 - 参考 `shared/sql_safety_rules.md` — SQL 安全规则（所有 skill 通用）
 - 参考 `shared/sql_quality_check.md` — SQL 质量审查流程（所有 skill 通用）
+- 参考 `shared/statistical_methods.md` — 统计分析方法（降雨量异常检测、移动平均、分布描述）
+- 参考 `shared/sql_patterns.md` — SQL 通用查询模式（滚动累加、分组 Top-N）
+- 参考 `shared/analysis_validation.md` — 分析验证（降雨统计的合理性检查）
 
 ## Workflow
 
