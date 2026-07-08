@@ -1,3 +1,6 @@
+<!-- SOURCE: adapted from knowledge-work-plugins/data/skills/explore-data/SKILL.md
+     UPSTREAM_LINES: 325 | ADAPTED_LINES: ~240 | MIGRATION: COMPLETE | DATE: 2026-07-08
+     注：通用数据画像/质量评估框架已水利化；本次补字符串/日期列画像、外键候选与冗余列探测。 -->
 # 数据画像与质量评估
 
 > 遇到新数据集时，在分析前系统理解数据形状、质量和潜力。
@@ -64,6 +67,34 @@ SELECT z, ntile_val FROM (
 SELECT sttp, COUNT(*) AS cnt
 FROM st_stbprp_b
 GROUP BY sttp ORDER BY cnt DESC;
+
+-- 字符串列：长度分布 + 空串 + 大小写/空格一致性（5.7 可跑）
+SELECT
+    COUNT(*) AS n,
+    SUM(stnm IS NULL OR stnm = '') AS empty_cnt,
+    MIN(CHAR_LENGTH(stnm)) AS min_len,
+    MAX(CHAR_LENGTH(stnm)) AS max_len,
+    ROUND(AVG(CHAR_LENGTH(stnm)),1) AS avg_len,
+    SUM(stnm = TRIM(stnm)) AS no_padding_cnt,     -- 前后空格探测
+    SUM(stnm <> UPPER(stnm) AND stnm <> LOWER(stnm)) AS mixed_case_cnt  -- 大小写混用
+FROM st_stbprp_b;
+
+-- 日期/时间列：范围 + 未来值 + 空值（分区表务必带 tm 范围，否则全分区扫描）
+SELECT
+    COUNT(*) AS n,
+    SUM(tm IS NULL) AS null_cnt,
+    MIN(tm) AS earliest, MAX(tm) AS latest,
+    SUM(tm > NOW()) AS future_cnt                   -- 未来时间 → 时钟不同步
+FROM st_river_r
+WHERE tm >= DATE_SUB(NOW(), INTERVAL 30 DAY);
+
+-- 布尔/标志列：真值率（水利表常把布尔存为 0/1 或状态码）
+SELECT
+    COUNT(*) AS n,
+    SUM(gtophgt > 0) AS open_cnt,                   -- 例：闸门开启（gtophgt>0 视为开）
+    ROUND(AVG(gtophgt > 0) * 100, 1) AS open_rate_pct
+FROM st_gate_r
+WHERE tm >= DATE_SUB(NOW(), INTERVAL 1 DAY);
 ```
 
 ### Python 快速画像脚本
@@ -190,3 +221,33 @@ GROUP BY stcd;
 ```
 
 > 注意：相关 ≠ 因果。水位和流量同步上升可能是降雨共同驱动。
+
+### 外键候选探测
+
+判断某列是否是指向另一表主键的外键（命中率高 → 大概率是外键）：
+
+```sql
+-- st_river_r.stcd 是否指向 st_stbprp_b.stcd
+SELECT
+    COUNT(*) AS total,
+    SUM(b.stcd IS NOT NULL) AS matched,
+    ROUND(SUM(b.stcd IS NOT NULL)/COUNT(*)*100, 1) AS match_rate_pct
+FROM st_river_r r
+LEFT JOIN st_stbprp_b b ON r.stcd = b.stcd
+WHERE r.tm >= DATE_SUB(NOW(), INTERVAL 7 DAY);
+-- match_rate ≈ 100% → 是外键；远低于 → 编码体系不同（见 analysis_validation「测站编码多体系」陷阱）
+```
+
+### 冗余列探测
+
+检查两列是否携带重复信息（值分布高度一致 → 可去其一）：
+
+```sql
+SELECT
+    COUNT(*) AS n,
+    SUM(col_a = col_b) AS identical_cnt,            -- 两列逐行相同
+    SUM(col_a IS NULL OR col_b IS NULL) AS null_either
+FROM 某表
+WHERE tm >= DATE_SUB(NOW(), INTERVAL 7 DAY);
+-- identical_cnt/n 接近 1 且 null 少 → 两列冗余
+```
