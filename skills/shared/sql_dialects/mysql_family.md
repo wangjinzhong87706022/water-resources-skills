@@ -10,6 +10,7 @@
 |------|:---:|:---:|------|
 | 窗口函数 `ROW_NUMBER/LAG/LEAD/RANK/FIRST_VALUE … OVER` | ❌ | ✅ | 去重/排名/差分/移动平均/首末值 无法用纯 SQL |
 | CTE `WITH … AS` | ❌ | ✅ | 多步查询只能内联成子查询或临时表 |
+| 集合操作 `INTERSECT` / `EXCEPT` | ❌ | ✅(8.0.31) | 求交集/差集用 INNER JOIN / LEFT JOIN…IS NULL 子查询替代（见 2.6） |
 | `LATERAL` 派生表 | ❌ | ✅(8.0.14) | 关联子查询在 FROM 子句无法表达 |
 | `JSON_TABLE` | ❌ | ✅(8.0.14) | JSON 数组展开需应用层处理 |
 | `JSON_EXTRACT` / `->` / `->>` | ✅ | ✅ | 可用 |
@@ -111,6 +112,22 @@ SELECT stcd, tm, z,
                     ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS z_ma_7d
 FROM st_river_r
 WHERE stcd = '50801450' AND tm >= DATE_SUB(NOW(), INTERVAL 30 DAY);
+```
+
+### 2.6 集合操作：交集 / 差集（5.7 无 INTERSECT/EXCEPT）
+
+> `INTERSECT`/`EXCEPT` 是 MySQL **8.0.31+** 特性。5.7 用 JOIN 子查询替代。
+
+```sql
+-- 交集（INTERSECT 的 5.7 等价写法）：河道站 ∩ 水质站
+SELECT COUNT(*) FROM (
+   SELECT DISTINCT stcd FROM st_river_r WHERE tm >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+) a JOIN (SELECT DISTINCT stcd FROM sl325.wq_pcp_d) b ON a.stcd = b.stcd;
+
+-- 差集（EXCEPT 的 5.7 等价写法）：在 a 但不在 b
+SELECT a.stcd FROM (SELECT DISTINCT stcd FROM 表A) a
+LEFT JOIN (SELECT DISTINCT stcd FROM 表B) b ON a.stcd = b.stcd
+WHERE b.stcd IS NULL;
 ```
 
 ## 3. MySQL 族内部差异（TiDB / OceanBase）
