@@ -30,6 +30,8 @@ metadata:
 - **融合模块:** `from fusion import correlate, fuse, detect_conflicts, resolve_conflicts`（见 lib/fusion.py）
 - 参考 `references/business_rules.md` — 业务关联规则和依赖关系
 - 参考 `shared/sql_safety_rules.md` — SQL 安全规则
+- 参考 `shared/analysis_validation.md` — 分析验证（融合输出的置信度评定和陷阱检查）
+- 参考 `shared/sql_patterns.md` — SQL 通用查询模式（跨表 JOIN、窗口函数对齐）
 
 ## Workflow
 
@@ -73,6 +75,49 @@ metadata:
    - **融合策略**: 说明使用的时间对齐/空间对齐/业务逻辑策略
    - **综合数据表格**: 融合后的数据（表格形式）
    - **结论**: 一句话总结跨域查询的综合结论
+8. **输出验证。** 交付前按 shared/analysis_validation.md 做置信度评定。
+
+## Validation Gate
+
+**每个融合查询交付前必须通过以下验证。** 未通过项标注在报告末尾。
+
+### 行数合理性检查
+
+```python
+# 预期范围: 输入 skill 数量 × 时间窗口天数 × 站数 × 0.5~2
+n_input = len([rainfall_rows, water_rows, warning_rows])  # 输入 skill 数
+days = (tm_max - tm_min).days if 'tm_max' in dir() else 30
+stations = len(set(r['stcd'] for r in water_rows))
+expected_min = n_input * min(days, 90)  # 上限 ~90 天
+if len(fused["data"]) > expected_min * 10:
+    mark("WARN: 融合后行数异常膨胀 ({}行 > {}行预期)".format(len(fused["data"]), expected_min * 10))
+if len(fused["data"]) < max(1, n_input):
+    mark("WARN: 融合后行数过少 ({}行)，可能 JOIN 丢失数据".format(len(fused["data"])))
+```
+
+### 数值合理性检查
+
+| 指标 | 合理范围 | 常见问题 |
+|------|---------|---------|
+| 水位 z | -1 ~ 20m | 跨表对齐时错位到异常值 |
+| 降雨 drp | 0 ~ 600mm/d | 融合后的均值被暴雨极值拉偏 |
+| CODMn | 0 ~ 50mg/L | 多站平均时被污染站拉高 |
+| DO | 0 ~ 20mg/L | 时间对齐后取值错位 |
+
+### 检查清单（6 项）
+
+- [ ] **行数检查**: 融合结果未异常膨胀或过少
+- [ ] **数值范围**: 所有数值落在业务合理区间
+- [ ] **时间对齐**: 跨 skill 数据使用相同时间粒度（日/时/月）
+- [ ] **站名一致性**: 相同测站在所有 skill 中使用同一名称
+- [ ] **均值检查**: 融合后的均值未被极端值拉偏（与中位数对比）
+- [ ] **空值检查**: 融合结果没有因 JOIN 注入意外 NULL
+
+### 置信度评定
+
+通过 6 项检查 → **高置信度**；1-2 项未通过 → **有保留**（报告中标注具体问题）；3+ 项未通过 → **需修订**（返回步骤 4 重新融合）。
+
+
 
 ## Skill 关键词映射
 

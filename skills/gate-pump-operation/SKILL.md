@@ -31,6 +31,8 @@ metadata:
 - **pymysql:** execute_code 环境可能未安装，首次使用需先运行 `pip install pymysql`
 - 参考 `shared/sql_safety_rules.md` — SQL 安全规则（所有 skill 通用）
 - 参考 `shared/sql_quality_check.md` — SQL 质量审查流程（所有 skill 通用）
+- 参考 `shared/sql_patterns.md` — SQL 通用查询模式（窗口函数处理时序数据）
+- 参考 `shared/analysis_validation.md` — 分析验证（综合汇总结果的检查清单）
 
 ## Pitfalls
 

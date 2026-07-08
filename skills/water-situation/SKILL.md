@@ -56,6 +56,10 @@ metadata:
 - 参考 `references/water_balance_check.md` — 水量平衡检查方法（所需表、编码映射、替代方案）
 - 参考 `shared/sql_safety_rules.md` — SQL 安全规则（所有 skill 通用）
 - 参考 `shared/sql_quality_check.md` — SQL 质量审查流程（所有 skill 通用）
+- 参考 `shared/statistical_methods.md` — 统计分析方法（水位百分位、趋势分析、异常检测）
+- 参考 `shared/sql_patterns.md` — SQL 通用查询模式（窗口函数、移动平均、分组 Top-N）
+- 参考 `shared/analysis_validation.md` — 分析验证（质量检查清单、常见陷阱、置信度评定）
+- 参考 `shared/data_profiling.md` — 数据画像方法（探索新表时的系统化方法）
 
 ## Workflow
 
@@ -93,6 +97,8 @@ metadata:
 6. **超警戒判断。** z > WRZ→超警戒; z > GRZ→超保证。
 7. **水位保留两位小数。**
 8. **质量自检。** 执行 SQL 前确认符合安全规则（只读、有 WHERE、有 LIMIT）。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。返回数值做合理性检查（水位 -1~20m）。
+9. **统计增强（可选）。** 如需百分位分布、移动平均趋势、水位变率异常检测，参考 shared/statistical_methods.md。需窗口函数时参考 shared/sql_patterns.md。
+10. **输出验证。** 交付前按 shared/analysis_validation.md 做置信度评定——特别是同比时注意不完整周期和均值之均值陷阱。
 
 ## Key Tables
 

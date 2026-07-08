@@ -34,6 +34,9 @@ metadata:
 - **DB 助手模块:** 使用 `from db import query, query_multi`（见 shared/db_connection.md），自动处理连接管理、30s 超时、空结果提示。**不要手写 pymysql 连接代码。**
 - 参考 `shared/sql_safety_rules.md` — SQL 安全规则（所有 skill 通用）
 - 参考 `shared/sql_quality_check.md` — SQL 质量审查流程（所有 skill 通用）
+- 参考 `shared/statistical_methods.md` — 统计分析方法（趋势分析、异常检测、描述统计）
+- 参考 `shared/sql_patterns.md` — SQL 通用查询模式（窗口函数、CTE 分步构建）
+- 参考 `shared/analysis_validation.md` — 分析验证（质量检查清单、常见陷阱、置信度评定）
 
 ## Workflow
 
@@ -43,6 +46,8 @@ metadata:
 4. **水质预测。** 获取最新 taskid，type 映射（103=DO, 104=CODMn, 105=TP, 128=NH3N）。
 5. **跨库查询需带库名前缀:** sl325.wq_pcp_d, slztk.st_mx_preset_r_shj_auto 等。
 6. **质量自检。** 执行 SQL 前确认符合安全规则。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。返回数值做合理性检查（CODMn 0~50mg/L, DO 0~20mg/L）。
+7. **统计增强（可选）。** 如需趋势分析或异常检测，参考 shared/statistical_methods.md（移动平均、IQR 异常检测、水质指标分布描述）。
+8. **输出验证。** 交付前按 shared/analysis_validation.md 做置信度评定——特别是同比/环比结论的陷阱检查（不完整周期、分母漂移、均值之均值）。
 
 ## Key Tables
 
