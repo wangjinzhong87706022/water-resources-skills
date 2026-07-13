@@ -46,6 +46,14 @@ metadata:
 - **无汛限水位字段。** st_rvfcch_b 仅有 WRZ（警戒水位）和 GRZ（保证水位），无"汛限水位"字段。水库防洪参数表 st_rsvrfcch_b 为空，因此系统中无法查询水库汛限水位。用户询问"距汛限水位多少米"时需说明该数据缺失。
 - **数据库仅覆盖扬州地区。** st_stbprp_b 行政区划码以 3210xx 为主（扬州），不包含其他省市站点。用户询问非扬州地区的水库（如三岔水库、千岛湖等）时，应第一时间说明覆盖范围限制，避免无意义的多次模糊搜索。可用 `SELECT DISTINCT addvcd FROM st_stbprp_b` 快速确认覆盖区域。
 - **db 模块路径:** `sys.path.insert(0, str(Path(__file__).parent / 'lib'))`。不要用其他路径。
+- **水体分类需前置标注（高频错误）。** `rvnm`（河名）字段将洪泽湖（湖泊）、长江（天然河流）、里运河（人工运河）同级归类，**不区分水体类型**。输出结果时需根据 `references/water_classification.md` 前置标注水体类型，避免语义混淆。参见 Validation Gate"水体分类一致性检查"。
+- **高程基准不一致（高频错误）。** 本库存在多种高程基准：
+  - 洪泽湖蒋坝站：`dtmnm='废黄河口'`，`dtmel=NULL`
+  - 长江大通站：`dtmnm='冻结(吴淞)'`，`dtmel=-1.860`
+  - **1985 国家高程基准在本库实测中未发现**
+  - 跨站对比前必须确认基准相同，否则不能直接比绝对值。参见 Validation Gate"高程基准标注检查"。
+- **阈值数据严重缺失（高频错误）。** `st_rvfcch_b` 表中：**GRZ（保证水位）全表 0% 有值**，**WRZ（警戒水位）水位站/水文站基本为空**（如蒋坝站 WRZ=NULL）。**绝对不要硬编码任何阈值**（如"洪泽湖警戒水位14.35m"无法在本库证实）。查询阈值前必须验证数据存在性，缺失时明确告知用户。参见 `references/threshold_query_validation.md` 和 Validation Gate"阈值数据存在性检查"。
+- **单站代表性风险。** 本库洪泽湖、长江各仅 1 个测站（蒋坝、大通(二)），不存在"测站数量差异导致加权偏倚"的问题（等权均值=站均均值），但单站空间局限性需在报告中说明。参见 `references/single_station_representativeness.md` 和 Validation Gate"单站代表性检查"。
 
 ## References
 
@@ -54,6 +62,10 @@ metadata:
 - 参考 `references/few_shots.md` — SQL 示例（来源: domains/sqls.txt）
 - 参考 `references/mad_anomaly_detection.md` — MAD 异常检测算法（水位突变/横向对比/变化速率）
 - 参考 `references/water_balance_check.md` — 水量平衡检查方法（所需表、编码映射、替代方案）
+- 参考 `references/water_classification.md` — 水体分类知识库（湖泊/天然河流/人工运河的区分与报告规范）
+- 参考 `references/elevation_datum.md` — 高程基准说明（废黄河口/吴淞分布、跨基准对比注意事项）
+- 参考 `references/threshold_query_validation.md` — 阈值查询验证方法（查询前验证、缺失处理规范）
+- 参考 `references/single_station_representativeness.md` — 单站代表性检查（单站结论评估框架）
 - 参考 `shared/sql_safety_rules.md` — SQL 安全规则（所有 skill 通用）
 - 参考 `shared/sql_quality_check.md` — SQL 质量审查流程（所有 skill 通用）
 - 参考 `shared/statistical_methods.md` — 统计分析方法（水位百分位、趋势分析、异常检测）
@@ -93,12 +105,21 @@ metadata:
    > ```
    > 生成 SQL 后自检:**SQL 里不许出现 `{` `}` 占位符**;若有,立即改用 JOIN 按名查。
 
-5. **生成 SQL。** JOIN st_stbprp_b 获取名称，LEFT JOIN st_rvfcch_b 获取警戒/保证水位。
-6. **超警戒判断。** z > WRZ→超警戒; z > GRZ→超保证。
-7. **水位保留两位小数。**
-8. **质量自检。** 执行 SQL 前确认符合安全规则（只读、有 WHERE、有 LIMIT）。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。返回数值做合理性检查（水位 -1~20m）。
-9. **统计增强（可选）。** 如需百分位分布、移动平均趋势、水位变率异常检测，参考 shared/statistical_methods.md。需窗口函数时参考 shared/sql_patterns.md。
-10. **输出验证。** 交付前按 shared/analysis_validation.md 做置信度评定——特别是同比时注意不完整周期和均值之均值陷阱。
+5. **前置检查：水体分类与基准一致性。**
+   - **水体分类**：若用户问题涉及"河流"、"河湖"、"水域"，查询前确认 `rvnm` 中是否包含湖泊/运河（如洪泽湖=湖泊，里运河=人工运河），参考 `references/water_classification.md`。输出结果时**前置标注水体类型**。
+   - **高程基准**：若需跨站对比水位，联表 `st_stbprp_b` 查询两站 `dtmnm`（基准名称），若基准不同（如废黄河口 vs 冻结(吴淞)），需在报告中用 ⚠️ 标注"两站基准不同，绝对水位不可直比"。参考 `references/elevation_datum.md`。
+   - **单站代表性**：若水域仅 1 个测站，需评估该站是否为控制站/代表站，并在报告末尾添加"数据局限性说明"。参考 `references/single_station_representativeness.md`。
+6. **生成 SQL。** JOIN st_stbprp_b 获取名称，LEFT JOIN st_rvfcch_b 获取警戒/保证水位。
+7. **阈值数据存在性验证（强制）。** 在查询 WRZ/GRZ 前，**必须**验证该测站阈值数据是否存在：
+   ```sql
+   SELECT COUNT(*) as cnt FROM st_rvfcch_b WHERE STCD='目标站码' AND (WRZ IS NOT NULL OR GRZ IS NOT NULL)
+   ```
+   若 cnt=0，**跳过阈值查询**，直接告知用户"⚠️ 该站阈值数据缺失"。详见 `references/threshold_query_validation.md`。
+8. **超警戒判断（仅阈值存在时）。** z > WRZ→超警戒; z > GRZ→超保证。若 WRZ/GRZ 为 NULL，不判断超警状态。
+9. **水位保留两位小数。**
+10. **质量自检。** 执行 SQL 前确认符合安全规则（只读、有 WHERE、有 LIMIT）。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。返回数值做合理性检查（水位 -1~20m）。
+11. **统计增强（可选）。** 如需百分位分布、移动平均趋势、水位变率异常检测，参考 shared/statistical_methods.md。需窗口函数时参考 shared/sql_patterns.md。
+12. **输出验证。** 交付前按 Validation Gate 检查清单逐项验证，然后按 shared/analysis_validation.md 做置信度评定——特别是同比时注意不完整周期和均值之均值陷阱。
 
 ## Key Tables
 
@@ -123,3 +144,123 @@ metadata:
 - `water-warning` — 防洪预警判断
 - `rainfall` — 降雨量查询（水位变化的关联因素）
 - `water-visualization` — 水位趋势图、对比图
+
+## Validation Gate
+
+**每个水位分析交付前必须通过以下验证。** 未通过项标注在报告末尾。
+
+### 水体分类一致性检查
+
+- [ ] **分类前置标注**：若用户问题涉及"河流"、"河湖"、"水域"，输出结果中**必须标注水体类型**（湖泊/天然河流/人工运河/水库）
+- [ ] **分类准确性**：使用 `references/water_classification.md` 中的映射表，确保分类正确
+- [ ] **严格分类场景**：若用户要求"仅天然河流"，需过滤掉湖泊/人工运河
+
+**示例**：
+```markdown
+❌ 错误：2024年平均水位最高的前3条河流依次为洪泽湖、长江、里运河
+✅ 正确：2024年水域年均水位TOP3：洪泽湖（湖泊）13.148m、长江（天然河流）9.528m、里运河（人工运河）6.779m
+```
+
+### 高程基准标注检查
+
+- [ ] **基准已标注**：报告中每个水位数值**必须标注基准来源**（`dtmnm` 字段值）
+- [ ] **基准缺失说明**：若 `dtmnm` 为空或 `dtmel` 为 NULL，需说明"基准未记录"
+- [ ] **跨站对比预警**：若对比的两个测站基准不同（如废黄河口 vs 吴淞），必须加注⚠️ 警告
+
+**常见基准名称**（来自 `st_stbprp_b.dtmnm`）：
+- `废黄河口`：里运河沿线（宝应、高邮等）
+- `冻结(吴淞)`：长江大通站
+- `1985 国家高程基准`：**本库实测中未发现任何测站使用此基准**
+
+**示例**：
+```markdown
+洪泽湖年均水位 13.148m（基准：废黄河口）
+长江年均水位 9.528m（基准：冻结(吴淞)）
+⚠️ 两站基准不同，绝对水位横向比较仅供参考
+```
+
+### 阈值数据存在性检查
+
+**⚠️ 重要警告**：`sl323.st_rvfcch_b` 表数据质量极差（GRZ 保证水位全表 0%，WRZ 警戒水位水位站基本为空）。
+
+在查询任何阈值（WRZ/GRZ）之前，**必须**执行以下检查：
+
+- [ ] **表中有数据**：`SELECT COUNT(*) FROM st_rvfcch_b WHERE STCD='xxx' AND (WRZ IS NOT NULL OR GRZ IS NOT NULL)`
+- [ ] **字段值非空**：具体字段（WRZ/GRZ）不能为 NULL
+- [ ] **数值合理性**：若阈值在 0~20m 范围之外，标记为异常
+
+**阈值缺失时的处理**：
+- ❌ **不要硬编码阈值**（如"洪泽湖警戒水位14.35m"无法在本库证实）
+- ❌ **不要猜测或估算**
+- ✅ **必须告知用户**："⚠️ 该站阈值数据缺失，无法判断超警戒状态"
+- ✅ **提供替代方案**：可提供历史极值作为参考（明确标注"非官方阈值"）
+
+**查询验证示例**（详见 `references/threshold_query_validation.md`）：
+```python
+def validate_threshold(stcd: str) -> dict:
+    # Step 1: 验证表中有数据
+    cnt = query(f"SELECT COUNT(*) as cnt FROM st_rvfcch_b WHERE STCD='{stcd}' AND (WRZ IS NOT NULL OR GRZ IS NOT NULL)")
+    if cnt[0]['cnt'] == 0:
+        return {'valid': False, 'message': f'⚠️ {stcd} 阈值数据全部缺失'}
+
+    # Step 2: 验证字段值
+    row = query(f"SELECT WRZ, GRZ FROM st_rvfcch_b WHERE STCD='{stcd}'")[0]
+    if row['WRZ'] is None:
+        warn('⚠️ 警戒水位数据缺失（WRZ=NULL）')
+    # ...
+```
+
+### 单站代表性检查
+
+针对涉及**水位均值统计**的场景，评估单站代表性：
+
+- [ ] **测站数量统计**：查询该水域测站数量 `COUNT(DISTINCT stcd)`
+- [ ] **代表性评估**：
+  - ≥5 站：✅ 多站均值，代表性较高
+  - 2~4 站：⚡ 代表性中等
+  - 1 站：⚠️ 单站，需进一步评估
+- [ ] **单站情况额外检查**：
+  - 是否为控制站/代表站（查询 `business_rules.md` 重点测站映射）
+  - 是否位于流域关键位置（入湖/出湖口、干支流交汇处）
+  - 数据质量（缺测率、异常值比例）
+- [ ] **报告末尾添加"数据局限性说明"**
+
+**示例**：
+```markdown
+洪泽湖 2024 年年均水位 13.148m（蒋坝站，位于入湖口，为控制站，单站代表性较高）
+
+⚠️ **局限性**：本库洪泽湖仅蒋坝 1 站，若需全湖均值建议补充湖心、出湖口等测站。
+```
+
+### 统计口径说明
+
+- [ ] **均值计算口径已说明**：等权算术平均 / 加权平均 / 站均的均值
+- [ ] **权重差异说明**：若水域存在多测站，需说明是否按数据量加权或等权
+- [ ] **实测验证**：对于关键结果，建议实测"等权均值 vs 站均均值"差值（本库实测差值 = 0.000）
+
+**示例**：
+```markdown
+统计口径：里运河 4 站水位数据直接算术平均（等权）
+验证：全量等权平均 = 站均均值 = 6.779m（差值 0.000），无加权偏倚
+```
+
+### 数值合理性检查（继承 shared/analysis_validation.md）
+
+- [ ] **水位范围**：-1 ~ 20m（超出需标记异常）
+- [ ] **数据完整性**：缺测率 < 阈值（如 5%）
+- [ ] **时间序列连续性**：无意外断点
+- [ ] **边界情况**：空集合/零值/缺失段时查询是否正常运行？
+
+### 置信度评定
+
+通过以上所有检查 → **高置信度**（可直接交付）
+
+存在以下情况 → **有保留**（报告中标注具体问题）：
+- 1~2 项水体分类/基准/阈值检查未通过
+- 单站代表性受限但结论仍可用
+
+存在以下情况 → **需修订**（返回 Workflow 修正）：
+- 3+ 项检查未通过
+- 基准未标注且跨站对比
+- 阈值硬编码且无法证实
+- 单站代表性极差（如偏僻小站代表大流域）
