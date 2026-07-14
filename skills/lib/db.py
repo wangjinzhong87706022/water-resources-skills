@@ -1,30 +1,10 @@
 """Shared DB helper for water-resources skills.
 
-Platform-specific import paths:
-
-=== "DeerFlow"
-    ```python
+Usage (DeerFlow):
     import sys
     sys.path.insert(0, '/opt/git/deer-flow/skills/public/water-situation/lib')
     from db import query, query_multi
-    ```
 
-=== "hermes-agent"
-    ```python
-    import sys
-    sys.path.insert(0, '/opt/git/hermes-agent/skills/water-resources/lib')
-    from db import query, query_multi
-    ```
-
-=== "Git repository"
-    ```python
-    import sys
-    from pathlib import Path
-    sys.path.insert(0, str(Path(__file__).parent / 'lib'))
-    from db import query, query_multi
-    ```
-
-Usage example:
     rows = query("SELECT stcd, stnm FROM sl323.st_stbprp_b LIMIT 10")
     for row in rows:
         print(row['stnm'], row['stcd'])
