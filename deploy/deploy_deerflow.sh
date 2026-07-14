@@ -76,7 +76,11 @@ echo "[4/5] 启动 DeerFlow"
 echo "----------------------------------------"
 cd "$DEERFLOW_DIR"
 
-# 导出环境变量（确保 uvicorn 进程能读到）
+# 启动 DeerFlow（后台）
+echo "启动 DeerFlow Gateway..."
+cd "$DEERFLOW_DIR"
+
+# 导出环境变量到 DeerFlow 启动脚本
 export WATER_RESOURCES_ROOT=/mnt/skills
 export SL323_DB_HOST=192.168.100.103
 export SL323_DB_PORT=3306
@@ -90,9 +94,9 @@ echo "  SL323_DB_PORT=$SL323_DB_PORT"
 echo "  SL323_DB_USER=$SL323_DB_USER"
 echo
 
-# 启动 DeerFlow（后台）
-echo "启动 DeerFlow Gateway..."
-nohup make gateway > /tmp/deerflow-start.log 2>&1 &
+# 使用 make dev 启动（开发模式，带 hot-reload）
+echo "启动 DeerFlow (make dev)..."
+nohup make dev > /tmp/deerflow-start.log 2>&1 &
 DEERFLOW_PID=$!
 echo "PID: $DEERFLOW_PID"
 echo
