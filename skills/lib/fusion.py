@@ -7,9 +7,8 @@ Implements the patent's fusion pipeline:
   4. Conflict detection and resolution
 
 Usage:
-    import sys
-    sys.path.insert(0, '/opt/git/hermes-agent/skills/water-resources/lib')
     from fusion import correlate, fuse, detect_conflicts, resolve_conflicts
+    from db import query  # lib/ 同目录，无需 sys.path 操作
 
     correlations = correlate({"rainfall": rows1, "water-situation": rows2})
     fused = fuse({"rainfall": rows1, "water-situation": rows2}, correlations)

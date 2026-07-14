@@ -46,12 +46,26 @@ EOF
 
 所有查询**必须**使用 `lib/db.py` 助手模块，不要手写 pymysql 连接代码：
 
+### LLM 运行时（推荐）
+
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query, query_multi
+```
+
+### 离线脚本（scripts/ 目录）
+
 ```python
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent / 'lib'))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'lib'))
+from bootstrap import locate_lib, locate_shared
 from db import query, query_multi
+```
 
+**示例查询**：
+```python
 # 单个查询（默认 sl323 库，30s 超时）
 rows = query("SELECT stcd, stnm FROM sl323.st_stbprp_b WHERE sttp='ZZ' LIMIT 10")
 for row in rows:
@@ -93,18 +107,34 @@ DB_CONFIG = {
 
 ## 路径说明
 
-✅ **标准写法**（符合 skill 规范）：
+### LLM 运行时（推荐）
+
+**标准写法**（使用 `WATER_RESOURCES_ROOT` 环境变量，双平台通用）：
+
 ```python
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent / 'lib'))
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query, query_multi
 ```
 
-**适用场景**：
-- 脚本文件位于 skill 目录内（`Path(__file__)` 指向 skill 目录中的文件）
-- hermes-agent 直接执行 skill 目录中的脚本
-- 本地开发测试
+- `WATER_RESOURCES_ROOT` 由部署层设置，指向 `skills/` 目录
+- DeerFlow: `/mnt/skills`，Hermes: `~/.hermes/skills/water-resources`，开发: 仓库 `…/skills`
+- `__file__` 在 LLM 暂存脚本中不可靠，**不要用** `Path(__file__).parent / 'lib'`
 
-**要求**：确保脚本文件保存在 skill 目录中，`Path(__file__)` 才能正确解析到 skill 目录的父目录。
+### 离线脚本（scripts/ 目录）
+
+离线脚本从真实路径运行，可使用 `bootstrap.py` 解析器（环境变量优先 + 候选兜底）：
+
+```python
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'lib'))
+from bootstrap import locate_lib, locate_shared
+from db import query
+```
+
+**优先级**：`WATER_RESOURCES_ROOT` 环境变量 → `WATER_RESOURCES_LIB`/`_SHARED` 显式覆盖 → 候选根兜底（`/mnt/skills`、仓库路径、`~/.hermes/...`）。
+
 
 ## 备选：原始 pymysql（不推荐）
 

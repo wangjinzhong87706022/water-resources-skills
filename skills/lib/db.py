@@ -1,10 +1,20 @@
 """Shared DB helper for water-resources skills.
 
-Usage:
+Usage (LLM-generated runtime script — __file__ unreliable, use the
+ROOT env-var snippet documented in SKILL.md "标准导入片段"):
+
+    import os, sys
+    sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+    from db import query, query_multi
+
+Usage (offline scripts under scripts/, run from real path — uses bootstrap
+resolver which adds env-var override + candidate fallback):
+
     import sys
     from pathlib import Path
-    sys.path.insert(0, str(Path(__file__).parent / 'lib'))
-    from db import query, query_multi
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'lib'))
+    from bootstrap import locate_lib, locate_shared
+    from db import query
 
     rows = query("SELECT stcd, stnm FROM sl323.st_stbprp_b LIMIT 10")
     for row in rows:

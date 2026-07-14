@@ -36,6 +36,26 @@ metadata:
 - **pymysql:** execute_code 环境可能未安装，首次使用需先运行 `pip install pymysql`
 - **DB 助手模块:** 使用 `from db import query, query_multi`（见 shared/db_connection.md），自动处理连接管理、30s 超时、空结果提示。**不要手写 pymysql 连接代码。**
 
+### 文件引用约定（双平台通用）
+
+本 skill 通过「逻辑相对路径」引用共享资源，真实路径由**部署环境变量 `WATER_RESOURCES_ROOT`**（指向 skills/）派生：
+
+| 引用 | 逻辑路径 | 运行时真实路径（两平台统一） |
+|------|---------|---------------------------|
+| 共享库 | `lib/db.py` | `$WATER_RESOURCES_ROOT/lib/db.py` |
+| 共享文档 | `shared/db_connection.md` | `$WATER_RESOURCES_ROOT/shared/db_connection.md` |
+| 本 skill 参考 | `references/schema.md` | （skill_dir 内，由平台注入的 skill 目录决定） |
+
+> `WATER_RESOURCES_ROOT` 由部署层设置：DeerFlow 指向 `/mnt/skills`，Hermes 指向 `~/.hermes/skills/water-resources`，开发指向仓库 `…/skills`。
+
+**标准导入片段**（生成查询代码时照抄，`__file__` 不可靠，勿用）：
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query, query_multi
+```
+
+
 ## Pitfalls
 
 - **`query()` 返回 `list[dict]`，不是 DataFrame。** 不能调用 `.iterrows()`, `.groupby()`, `.describe()` 等 pandas 方法。必须用 `for row in df: row['列名']` 或手动转 DataFrame: `import pandas as pd; df = pd.DataFrame(query(sql))`。
@@ -45,7 +65,7 @@ metadata:
 - **本库只含扬州地区站点。** sl323 库的行政区划码以 3210 开头（扬州）。如果用户查询的水库/站点在此库中找不到（如"三岔水库"），应提示用户该站点可能在调度数据库中，推荐切换到 `plan-generation` skill（连接本地 `powerelf_srm_yml` 库，包含调度预案和更多水库数据），而非反复在 sl323 中搜索。
 - **无汛限水位字段。** st_rvfcch_b 仅有 WRZ（警戒水位）和 GRZ（保证水位），无"汛限水位"字段。水库防洪参数表 st_rsvrfcch_b 为空，因此系统中无法查询水库汛限水位。用户询问"距汛限水位多少米"时需说明该数据缺失。
 - **数据库仅覆盖扬州地区。** st_stbprp_b 行政区划码以 3210xx 为主（扬州），不包含其他省市站点。用户询问非扬州地区的水库（如三岔水库、千岛湖等）时，应第一时间说明覆盖范围限制，避免无意义的多次模糊搜索。可用 `SELECT DISTINCT addvcd FROM st_stbprp_b` 快速确认覆盖区域。
-- **db 模块路径:** 使用 `lib/db.py` 助手模块，标准导入方式为 `sys.path.insert(0, str(Path(__file__).parent / 'lib'))`（相对路径，符合 skill 规范）。
+- **db 模块路径:** 见上方「标准导入片段」。⚠️ 不要用 `Path(__file__).parent / 'lib'`——LLM 生成的暂存脚本 `__file__` 在 workspace，lib/ 是 skill 的兄弟目录而非子目录，该写法会定位到不存在的路径。
 - **水体分类需前置标注（高频错误）。** `rvnm`（河名）字段将洪泽湖（湖泊）、长江（天然河流）、里运河（人工运河）同级归类，**不区分水体类型**。输出结果时需根据 `references/water_classification.md` 前置标注水体类型，避免语义混淆。参见 Validation Gate"水体分类一致性检查"。
 - **高程基准不一致（高频错误）。** 本库存在多种高程基准：
   - 洪泽湖蒋坝站：`dtmnm='废黄河口'`，`dtmel=NULL`

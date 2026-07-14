@@ -70,7 +70,8 @@ Cross-cutting docs every skill references: `sql_safety_rules.md`, `sql_patterns.
 
 ## Critical conventions & pitfalls
 
-- **DB helper path:** load it with `sys.path.insert(0, str(Path(__file__).parent / 'lib')); from db import query`. The `/opt/git/hermes-agent/skills/water-resources/lib` absolute paths in some docstrings are **stale** — the repo root here is `/opt/git/water-resources-skills`. Always use the `__file__`-relative form.
+- **DB helper path (environment variable method):** Load it with `sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib')); from db import query`. The `WATER_RESOURCES_ROOT` environment variable (set by deployment) points to the `skills/` directory; `lib/` and `shared/` are derived from it. See `skills/docs/skill-file-reference-design.md` for the full design.
+- **DB helper path (offline scripts):** `sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'lib')); from bootstrap import locate_lib, locate_shared; from db import query`. The `.parent.parent` navigates from `scripts/` → `skills/` → `lib/`.
 - **`query()` returns `list[dict]`, not a DataFrame.** Don't call `.iterrows()`/`.groupby()`. Convert explicitly if needed: `pd.DataFrame(query(sql))`.
 - **SELECT-only:** `db.py` rejects anything but `SELECT/SHOW/DESCRIBE`. SQL must have a `WHERE` (time range or station), every `JOIN` an `ON`, and a `LIMIT` (default 1000). No cartesian products, subqueries ≤3 levels.
 - **Partitioned tables** (`st_river_r`, `st_was_r`, `st_pump_r`, `st_pump_pa`) are RANGE-partitioned on `tm` — **WHERE must include a `tm` range** or the query scans all partitions and times out (30s). `st_rvfcch_b` has no index; avoid joining it repeatedly.

@@ -38,8 +38,8 @@ metadata:
 1. **识别涉及 Skill。** 根据用户问题判断涉及哪些业务域。参考下方关键词映射。
 2. **规划执行策略。** 调用 `plan_execution(skills)` 获取串行/并行执行计划。
    ```python
-   import sys
-   sys.path.insert(0, str(Path(__file__).parent / 'lib'))
+   import os, sys
+   sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
    from planner import plan_execution
    plan = plan_execution(["rainfall", "water-situation", "water-warning"])
    # plan["steps"] = [["rainfall", "water-situation"], ["water-warning"]]

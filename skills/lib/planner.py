@@ -4,9 +4,8 @@ Builds a dependency graph from predefined rules, performs topological sort,
 and groups skills into parallel execution batches.
 
 Usage:
-    import sys
-    sys.path.insert(0, '/opt/git/hermes-agent/skills/water-resources/lib')
     from planner import plan_execution
+    from db import query  # lib/ 同目录，无需 sys.path 操作
 
     plan = plan_execution(["rainfall", "water-situation", "water-warning"])
     # {"steps": [["rainfall", "water-situation"], ["water-warning"]]}
