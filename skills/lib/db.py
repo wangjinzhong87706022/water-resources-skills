@@ -1,18 +1,33 @@
 """Shared DB helper for water-resources skills.
 
-Usage (DeerFlow):
+Platform-specific import paths:
+
+=== "DeerFlow"
+    ```python
     import sys
     sys.path.insert(0, '/opt/git/deer-flow/skills/public/water-situation/lib')
     from db import query, query_multi
+    ```
 
-    rows = query("SELECT stcd, stnm FROM sl323.st_stbprp_b LIMIT 10")
-    for row in rows:
-        print(row['stnm'], row['stcd'])
-
-Usage (hermes-agent):
+=== "hermes-agent"
+    ```python
     import sys
     sys.path.insert(0, '/opt/git/hermes-agent/skills/water-resources/lib')
     from db import query, query_multi
+    ```
+
+=== "Git repository"
+    ```python
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).parent / 'lib'))
+    from db import query, query_multi
+    ```
+
+Usage example:
+    rows = query("SELECT stcd, stnm FROM sl323.st_stbprp_b LIMIT 10")
+    for row in rows:
+        print(row['stnm'], row['stcd'])
 """
 
 import os
@@ -53,41 +68,33 @@ def query(sql, db=DEFAULT_DB, timeout=DEFAULT_TIMEOUT):
     Raises:
         ValueError: Non-SELECT SQL.
         TimeoutError: Query exceeded timeout.
-        RuntimeError: MySQL execution error.
     """
     _check_sql(sql)
-    conn = pymysql.connect(database=db, read_timeout=timeout, **DB_CONFIG)
+    conn = _connect(db)
     try:
-        cursor = conn.cursor()
-        cursor.execute(f"SET SESSION max_execution_time = {timeout * 1000}")
-        cursor.execute(sql)
-        columns = [d[0] for d in cursor.description] if cursor.description else []
-        rows = cursor.fetchall()
-        result = [dict(zip(columns, row)) for row in rows]
-        if not result:
-            print("[db] 查询返回 0 行。建议: 扩大时间范围、模糊匹配名称、或检查分区表是否缺少 tm 条件。")
-        return result
+        with conn.cursor(pymysql.cursors.DictCursor) as cur:
+            cur.execute(sql, timeout=timeout)
+            return cur.fetchall()
     except pymysql.err.OperationalError as e:
         if e.args[0] == 3024:  # ER_QUERY_TIMEOUT
-            raise TimeoutError(
-                f"查询超时({timeout}s)。建议: 添加 WHERE tm >= ... 时间条件以利用分区裁剪。SQL: {sql[:100]}"
-            ) from e
-        raise RuntimeError(f"MySQL 执行错误: {e}") from e
-    except pymysql.Error as e:
-        raise RuntimeError(f"MySQL 错误: {e}") from e
+            raise TimeoutError(f"Query timeout after {timeout}s") from None
+        raise
     finally:
         conn.close()
 
 
 def query_multi(sqls, db=DEFAULT_DB, timeout=DEFAULT_TIMEOUT):
-    """Execute multiple SQL statements sequentially.
-
-    Args:
-        sqls: List of SQL strings.
-        db: Database name (default: sl323).
-        timeout: Per-query timeout in seconds (default: 30).
-
-    Returns:
-        list[list[dict]]: One element per SQL.
-    """
+    """Execute multiple SELECT queries sequentially, return list of results."""
     return [query(sql, db=db, timeout=timeout) for sql in sqls]
+
+
+def _connect(db=DEFAULT_DB):
+    return pymysql.connect(
+        host=DB_CONFIG['host'],
+        port=DB_CONFIG['port'],
+        user=DB_CONFIG['user'],
+        password=DB_CONFIG['password'],
+        database=db,
+        charset=DB_CONFIG['charset'],
+        connect_timeout=10,
+    )

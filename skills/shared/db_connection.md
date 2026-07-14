@@ -25,28 +25,79 @@
 
 所有查询**必须**使用 `lib/db.py` 助手模块，不要手写 pymysql 连接代码：
 
-```python
-import sys
-sys.path.insert(0, '/opt/git/hermes-agent/skills/water-resources/lib')
-from db import query, query_multi
+=== "DeerFlow 平台"
+    ```python
+    import sys
+    sys.path.insert(0, '/opt/git/deer-flow/skills/public/water-situation/lib')
+    from db import query, query_multi
 
-# 单个查询（默认 sl323 库，30s 超时）
-rows = query("SELECT stcd, stnm FROM sl323.st_stbprp_b WHERE sttp='ZZ' LIMIT 10")
-for row in rows:
-    print(row['stnm'], row['stcd'])
+    # 单个查询（默认 sl323 库，30s 超时）
+    rows = query("SELECT stcd, stnm FROM sl323.st_stbprp_b WHERE sttp='ZZ' LIMIT 10")
+    for row in rows:
+        print(row['stnm'], row['stcd'])
 
-# 指定不同数据库
-rows = query("SELECT * FROM wq_pcp_d LIMIT 10", db='sl325')
+    # 指定不同数据库
+    rows = query("SELECT * FROM wq_pcp_d LIMIT 10", db='sl325')
 
-# 自定义超时（复杂查询最多 60s）
-rows = query("SELECT ...", timeout=60)
+    # 自定义超时（复杂查询最多 60s）
+    rows = query("SELECT ...", timeout=60)
 
-# 多个查询顺序执行
-results = query_multi([
-    "SELECT COUNT(*) AS cnt FROM sl323.st_stbprp_b",
-    "SELECT MAX(tm) FROM sl323.st_river_r WHERE tm >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
-])
-```
+    # 多个查询顺序执行
+    results = query_multi([
+        "SELECT COUNT(*) AS cnt FROM sl323.st_stbprp_b",
+        "SELECT MAX(tm) FROM sl323.st_river_r WHERE tm >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
+    ])
+    ```
+
+=== "hermes-agent 平台"
+    ```python
+    import sys
+    sys.path.insert(0, '/opt/git/hermes-agent/skills/water-resources/lib')
+    from db import query, query_multi
+
+    # 单个查询（默认 sl323 库，30s 超时）
+    rows = query("SELECT stcd, stnm FROM sl323.st_stbprp_b WHERE sttp='ZZ' LIMIT 10")
+    for row in rows:
+        print(row['stnm'], row['stcd'])
+
+    # 指定不同数据库
+    rows = query("SELECT * FROM wq_pcp_d LIMIT 10", db='sl325')
+
+    # 自定义超时（复杂查询最多 60s）
+    rows = query("SELECT ...", timeout=60)
+
+    # 多个查询顺序执行
+    results = query_multi([
+        "SELECT COUNT(*) AS cnt FROM sl323.st_stbprp_b",
+        "SELECT MAX(tm) FROM sl323.st_river_r WHERE tm >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
+    ])
+    ```
+
+=== "Git 仓库直接使用"
+    ```python
+    import sys
+    from pathlib import Path
+    # 假设当前脚本在 skill 目录中
+    sys.path.insert(0, str(Path(__file__).parent / 'lib'))
+    from db import query, query_multi
+
+    # 单个查询（默认 sl323 库，30s 超时）
+    rows = query("SELECT stcd, stnm FROM sl323.st_stbprp_b WHERE sttp='ZZ' LIMIT 10")
+    for row in rows:
+        print(row['stnm'], row['stcd'])
+
+    # 指定不同数据库
+    rows = query("SELECT * FROM wq_pcp_d LIMIT 10", db='sl325')
+
+    # 自定义超时（复杂查询最多 60s）
+    rows = query("SELECT ...", timeout=60)
+
+    # 多个查询顺序执行
+    results = query_multi([
+        "SELECT COUNT(*) AS cnt FROM sl323.st_stbprp_b",
+        "SELECT MAX(tm) FROM sl323.st_river_r WHERE tm >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
+    ])
+    ```
 
 ### 关键特性
 
@@ -56,6 +107,25 @@ results = query_multi([
 - **超时错误含建议** — 提示添加 `WHERE tm >= ...` 以利用分区裁剪
 - **SQL 安全校验** — 只允许 SELECT/SHOW/DESCRIBE
 - **复杂查询拆分** — 多步查询用 `query_multi()` 或多次 `query()` 调用
+
+## 平台适配说明
+
+⚠️ **不同平台的技能目录路径不同**，请根据实际部署环境选择：
+
+| 平台 | lib 路径 | 说明 |
+|------|---------|------|
+| **DeerFlow** | `/opt/git/deer-flow/skills/public/<skill-name>/lib` | DeerFlow 技能容器路径 |
+| **hermes-agent** | `/opt/git/hermes-agent/skills/water-resources/lib` | hermes-agent 技能路径 |
+| **Git 仓库** | `Path(__file__).parent / 'lib'` | 本地开发，skill 目录内部 |
+
+**查找方法**（路径不确定时）：
+```bash
+# 查找系统中所有 db.py 位置
+find /opt/git -name "db.py" -path "*/lib/*" 2>/dev/null
+
+# 查看当前 skill 的 lib 目录
+ls -la /opt/git/deer-flow/skills/public/water-situation/lib/
+```
 
 ## 备选：原始 pymysql（不推荐）
 
