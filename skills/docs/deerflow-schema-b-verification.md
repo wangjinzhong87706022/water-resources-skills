@@ -67,17 +67,66 @@
 
 | # | 步骤 | 结果 | 备注 |
 |---|---|---|---|
-| V1 | 生成 `public/` 软链层 | ✅ PASS | 14 条软链(11 skill + shared + lib + scripts) |
+| V1 | 生成 `public/` 软链层 | ✅ PASS | 14 条软链（11 skill + shared + lib + scripts） |
 | V2 | `validate_skill_file_path` 不拒绝 | ✅ PASS | SKILL.md 和 shared 引用路径解析后均在根内 |
-| V3 | deer-flow 服务端发现 skill | ✅ PASS | `uv run --directory backend python` 确认识别 14 个条目 |
-| V4 | 斜杠激活测试 | ✅ PASS | `hermes chat -s water-situation -q "古运河有哪些水位测站"` 正确返回 SQL + 分析 |
+| V3 | deer-flow 服务端发现 skill | ✅ PASS | `uv run` 确认识别 14 个条目；config.yaml `skills.path` 读取正确 |
+| V4 | 斜杠激活测试（首次） | ✅ PASS | `hermes chat -s water-situation -q "古运河有哪些水位测站"` 正确返回 SQL + 分析 |
 | V5 | `shared/` 引用测试 | ✅ PASS | 模型引用 `shared/sql_patterns.md` L82-105 给出 GROUP BY + 窗口函数两种写法 |
-| V6 | 内置 deer-flow skill 可用性 | ⚠️ 部分替换 | deer-flow 自带 31 个 skill 在新根下不可见;hermes 列表仍显示内置 skill(hermes 有独立发现路径);取舍已记录 |
+| V6 | 内置 deer-flow skill 可用性 | ⚠️ 取舍 | deer-flow 自带 31 个 skill 在新根下不可见；已接受取舍 |
+| V7 | **deer-flow 重启后验证** | ✅ PASS | `make stop && make dev --daemon` 重启后 V4 斜杠激活再次成功 |
 
-**总结**: 方案 B 所有关键验证项全部通过。唯一取舍是 deer-flow 自带 skill(31 个)与新根的互斥,建议接受或补充软链。
+## 七、最终配置
 
-- [ ] 创建 `skills/scripts/setup-deerflow-symlinks.sh`（生成 `public/` 软链层）
-- [ ] `public/` 加 `.gitignore`（`public/*` + `!public/.gitkeep` 或整目录忽略）
-- [ ] 设 `DEER_FLOW_SKILLS_PATH=/opt/git/water-resources-skills/skills`
-- [ ] 按 V1-V6 顺序验证
-- [ ] 出验证报告，存入 `skills/docs/deerflow-schema-b-verification.md`
+### deer-flow/config.yaml
+```yaml
+skills:
+  path: /opt/git/water-resources-skills/skills  # ← 新增，指向外部仓库
+  container_path: /mnt/skills
+```
+
+### 环境变量（可选，优先级高于 config.yaml）
+```bash
+export DEER_FLOW_SKILLS_PATH=/opt/git/water-resources-skills/skills
+```
+
+### public/ 软链接层（生成物，已 .gitignore）
+```
+skills/public/
+├── water-situation -> ../water-situation
+├── rainfall -> ../rainfall
+├── water-quality -> ../water-quality
+├── water-forecast -> ../water-forecast
+├── gate-pump-operation -> ../gate-pump-operation
+├── water-warning -> ../water-warning
+├── water-fusion -> ../water-fusion
+├── water-visualization -> ../water-visualization
+├── build-dashboard -> ../build-dashboard
+├── create-viz -> ../create-viz
+├── data-context-extractor -> ../data-context-extractor
+├── shared -> ../shared
+├── lib -> ../lib
+└── scripts -> ../scripts
+```
+
+## 八、已知取舍
+
+| 取舍 | 说明 |
+|------|------|
+| 内置 31 个 skill 不可见 | deer-flow 自带 skill（find-skills / deep-research 等）在 `DEER_FLOW_SKILLS_PATH` 指向的外部根下不存在。若需保留，可将其软链进 `public/`，但绝对路径导致斜杠激活拒绝，仅渐进加载可用。 |
+| 单一数据源 | water-resources skill 修改后实时生效，无需同步。deer-flow 内置 skill 若单独维护则版本独立。 |
+| shared/lib/scripts 访问 | 运行时模型通过 `read_file` 可访问 `/mnt/skills/public/<skill>/shared/*` 和 `/mnt/skills/shared/*`，无路径限制。写入 API（网页/斜杠创作）限制为 references/templates/scripts/assets，不影响只读。 |
+
+## 九、故障处理
+
+| 场景 | 排查方向 | 处理 |
+|---|---|---|
+| V1 软链已存在 | `public/` 目录内有残留 | `rm -rf skills/public && bash skills/scripts/setup-deerflow-symlinks.sh` |
+| V2 validate 拒绝 | SKILL.md 用了绝对软链 | 改用 `../<name>` 相对路径 |
+| V3 发现数量为 0 | `DEER_FLOW_SKILLS_PATH` 未生效 | 检查环境变量是否传递给 deer-flow 进程；确认 config.yaml `skills.path` 写入正确 |
+| V4 斜杠激活返回 403/400 | SKILL.md 含危险指令被 `security_scanner` 拦截 | 检查 skill 内容，调整 `allowed-tools` 或 `metadata` |
+| V5 shared 找不到 | SKILL.md 引用路径写错 | 应写 `shared/sql_safety_rules.md` 而非 `../shared/`；检查 `public/<skill>/shared` 软链是否存在 |
+| deer-flow 重启后 skill 消失 | config.yaml 未生效或 `public/` 被删除 | 确认 `public/` 存在、`skills.path` 正确；重跑 setup-deerflow-symlinks.sh |
+
+---
+
+**总结**: 方案 B 全部验证通过（V1-V5 + V7）。deer-flow 重启后 `water-situation` 斜杠激活和 `shared/` 引用均正常工作。配置已持久化至 `deer-flow/config.yaml`，单一数据源、实时同步已实现。

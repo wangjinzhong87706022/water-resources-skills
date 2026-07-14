@@ -1,13 +1,18 @@
 """Shared DB helper for water-resources skills.
 
-Usage:
+Usage (DeerFlow):
     import sys
-    sys.path.insert(0, '/opt/git/hermes-agent/skills/water-resources/lib')
+    sys.path.insert(0, '/opt/git/deer-flow/skills/public/water-situation/lib')
     from db import query, query_multi
 
     rows = query("SELECT stcd, stnm FROM sl323.st_stbprp_b LIMIT 10")
     for row in rows:
         print(row['stnm'], row['stcd'])
+
+Usage (hermes-agent):
+    import sys
+    sys.path.insert(0, '/opt/git/hermes-agent/skills/water-resources/lib')
+    from db import query, query_multi
 """
 
 import os
