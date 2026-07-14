@@ -1,8 +1,9 @@
 """Shared DB helper for water-resources skills.
 
-Usage (DeerFlow):
+Usage:
     import sys
-    sys.path.insert(0, '/opt/git/deer-flow/skills/public/water-situation/lib')
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).parent / 'lib'))
     from db import query, query_multi
 
     rows = query("SELECT stcd, stnm FROM sl323.st_stbprp_b LIMIT 10")
