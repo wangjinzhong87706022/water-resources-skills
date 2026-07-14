@@ -4,13 +4,34 @@
 
 ## 连接参数
 
-| 参数 | 值 |
-|------|-----|
-| Host | 192.168.100.103 |
-| Port | 3306 |
-| User | root |
-| Password | <SL323_DB_PASSWORD> |
-| 权限 | 只读 |
+**默认值**（可通过环境变量覆盖）：
+
+| 参数 | 环境变量 | 默认值 | 说明 |
+|------|---------|--------|------|
+| Host | `SL323_DB_HOST` | 192.168.100.103 | 数据库主机 |
+| Port | `SL323_DB_PORT` | 3306 | 数据库端口 |
+| User | `SL323_DB_USER` | root | 用户名 |
+| Password | `SL323_DB_PASSWORD` | （必填） | 密码 |
+| 权限 | - | 只读 | 只允许查询 |
+
+**环境变量配置**：
+```bash
+# 方式1: 在 shell 中导出
+export SL323_DB_HOST=192.168.100.103
+export SL323_DB_PORT=3306
+export SL323_DB_USER=root
+export SL323_DB_PASSWORD='your-password'
+
+# 方式2: 在 .env 文件中（推荐用于开发）
+cat > .env <<EOF
+SL323_DB_HOST=192.168.100.103
+SL323_DB_PORT=3306
+SL323_DB_USER=root
+SL323_DB_PASSWORD=your-password
+EOF
+```
+
+⚠️ **注意**：`.env` 文件已加入 `.gitignore`，不要提交到 Git。
 
 ## 数据库清单
 
@@ -49,8 +70,20 @@ results = query_multi([
 ])
 ```
 
+**db.py 自动从环境变量读取配置**（`lib/db.py:17-23`）：
+```python
+DB_CONFIG = {
+    'host': os.environ.get('SL323_DB_HOST', '192.168.100.103'),
+    'port': int(os.environ.get('SL323_DB_PORT', '3306')),
+    'user': os.environ.get('SL323_DB_USER', 'root'),
+    'password': os.environ.get('SL323_DB_PASSWORD', ''),
+    'charset': 'utf8mb4',
+}
+```
+
 ### 关键特性
 
+- **自动环境变量读取** — 连接信息来自环境变量，无需硬编码
 - **每查询 30 秒超时** — MySQL 端 `max_execution_time` 强制终止慢查询，避免 300s 整体超时
 - **返回 list[dict]** — 直接用 `row['列名']` 访问结果
 - **空结果自动提示** — 建议扩大时间范围或检查分区表 tm 条件
@@ -58,7 +91,7 @@ results = query_multi([
 - **SQL 安全校验** — 只允许 SELECT/SHOW/DESCRIBE
 - **复杂查询拆分** — 多步查询用 `query_multi()` 或多次 `query()` 调用
 
-## 路径规范
+## 路径说明
 
 ✅ **标准写法**（符合 skill 规范）：
 ```python
@@ -71,7 +104,7 @@ sys.path.insert(0, str(Path(__file__).parent / 'lib'))
 - hermes-agent 直接执行 skill 目录中的脚本
 - 本地开发测试
 
-**注意**：`Path(__file__)` 依赖于脚本文件的实际位置，确保脚本文件保存在 skill 目录中。
+**要求**：确保脚本文件保存在 skill 目录中，`Path(__file__)` 才能正确解析到 skill 目录的父目录。
 
 ## 备选：原始 pymysql（不推荐）
 
@@ -80,9 +113,11 @@ sys.path.insert(0, str(Path(__file__).parent / 'lib'))
 ```python
 import pymysql
 conn = pymysql.connect(
-    host='192.168.100.103', port=3306,
-    user='root', password='<SL323_DB_PASSWORD>',
-    database='sl323'  # 根据查询场景切换为 sl325 或 slztk
+    host=os.environ.get('SL323_DB_HOST', '192.168.100.103'),
+    port=int(os.environ.get('SL323_DB_PORT', '3306')),
+    user=os.environ.get('SL323_DB_USER', 'root'),
+    password=os.environ.get('SL323_DB_PASSWORD', ''),
+    database='sl323'
 )
 ```
 
@@ -91,3 +126,4 @@ conn = pymysql.connect(
 - 跨库查询时使用 `库名.表名` 格式（如 `sl325.wq_pcp_d`）
 - 首次使用需确认 pymysql 已安装：`pip install pymysql`
 - 所有连接必须使用 `conn.cursor()` 执行查询后关闭：`cursor.close(); conn.close()`
+- **部署时无需修改代码**：通过环境变量配置连接信息

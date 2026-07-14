@@ -45,6 +45,8 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+from config import get_default_db_config
+
 
 
 # ============================================================
@@ -368,10 +370,9 @@ def validate_expected_sql(cases: list[TestCase]) -> list[dict]:
         error_msg = ""
         conn = None
         try:
+            db_config = get_default_db_config()
             conn = pymysql.connect(
-                host="192.168.100.103", port=3306,
-                user="root", password=os.environ.get("SL323_DB_PASSWORD", ""),
-                database="sl323", connect_timeout=10,
+                **db_config,
                 read_timeout=60,
             )
             cursor = conn.cursor()

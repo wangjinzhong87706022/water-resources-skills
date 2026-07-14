@@ -11,8 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import verifiers
 from harness_adapter import _final_text_from_messages
 
-DB = {"host": "192.168.100.103", "port": 3306, "user": "root",
-      "password": os.environ.get("SL323_DB_PASSWORD", ""), "database": "sl323"}
+DB = get_default_db_config()
 
 
 def _bucket(s):

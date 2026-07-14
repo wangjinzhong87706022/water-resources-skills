@@ -37,6 +37,9 @@
 import argparse
 import json
 import os
+
+# Database configuration (environment variables)
+from config import get_db_config, get_default_db_config
 import re
 import subprocess
 import sys
@@ -52,10 +55,7 @@ from typing import Optional
 # ============================================================
 
 # Phase B: verifier 只读验证用的 DB 配置(同 validate_expected_sql)
-DEFAULT_DB_CONFIG = {
-    "host": "192.168.100.103", "port": 3306,
-    "user": "root", "password": os.environ.get("SL323_DB_PASSWORD", ""), "database": "sl323",
-}
+DEFAULT_DB_CONFIG = get_default_db_config()
 
 
 @dataclass
@@ -458,12 +458,8 @@ def validate_expected_sql(cases: list[TestCase]) -> list[dict]:
         error_msg = ""
         conn = None
         try:
-            conn = pymysql.connect(
-                host="192.168.100.103", port=3306,
-                user="root", password=os.environ.get("SL323_DB_PASSWORD", ""),
-                database="sl323", connect_timeout=10,
-                read_timeout=60,
-            )
+            db_config = get_default_db_config()
+            conn = pymysql.connect(**db_config)
             cursor = conn.cursor()
             cursor.execute(case.expected_sql)
             row_count = cursor.rowcount if cursor.rowcount >= 0 else len(cursor.fetchall())

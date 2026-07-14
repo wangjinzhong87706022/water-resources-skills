@@ -31,8 +31,8 @@ metadata:
 
 ## Prerequisites
 
-- **数据库:** MySQL 192.168.100.103:3306，数据库 sl323（只读）
-- **连接:** pymysql, host='192.168.100.103', port=3306, user='root', password='<SL323_DB_PASSWORD>', database='sl323'
+- **数据库:** MySQL 数据库 sl323（只读）
+- **连接配置:** 通过环境变量配置（`SL323_DB_HOST`, `SL323_DB_PORT`, `SL323_DB_USER`, `SL323_DB_PASSWORD`），详见 `shared/db_connection.md`。
 - **pymysql:** execute_code 环境可能未安装，首次使用需先运行 `pip install pymysql`
 - **DB 助手模块:** 使用 `from db import query, query_multi`（见 shared/db_connection.md），自动处理连接管理、30s 超时、空结果提示。**不要手写 pymysql 连接代码。**
 
@@ -45,13 +45,7 @@ metadata:
 - **本库只含扬州地区站点。** sl323 库的行政区划码以 3210 开头（扬州）。如果用户查询的水库/站点在此库中找不到（如"三岔水库"），应提示用户该站点可能在调度数据库中，推荐切换到 `plan-generation` skill（连接本地 `powerelf_srm_yml` 库，包含调度预案和更多水库数据），而非反复在 sl323 中搜索。
 - **无汛限水位字段。** st_rvfcch_b 仅有 WRZ（警戒水位）和 GRZ（保证水位），无"汛限水位"字段。水库防洪参数表 st_rsvrfcch_b 为空，因此系统中无法查询水库汛限水位。用户询问"距汛限水位多少米"时需说明该数据缺失。
 - **数据库仅覆盖扬州地区。** st_stbprp_b 行政区划码以 3210xx 为主（扬州），不包含其他省市站点。用户询问非扬州地区的水库（如三岔水库、千岛湖等）时，应第一时间说明覆盖范围限制，避免无意义的多次模糊搜索。可用 `SELECT DISTINCT addvcd FROM st_stbprp_b` 快速确认覆盖区域。
-- **db 模块路径:** 使用 `lib/db.py` 助手模块，导入前需将 lib 目录加入 `sys.path`。
-  在 DeerFlow 环境中，使用以下路径：
-  ```python
-  sys.path.insert(0, '/opt/git/deer-flow/skills/public/water-situation/lib')
-  from db import query, query_multi
-  ```
-  ⚠️ **注意**：DeerFlow 执行环境的工作目录是 `/mnt/user-data/workspace/`，不要使用相对路径或 `Path(__file__)`（不可靠）。
+- **db 模块路径:** 使用 `lib/db.py` 助手模块，标准导入方式为 `sys.path.insert(0, str(Path(__file__).parent / 'lib'))`（相对路径，符合 skill 规范）。
 - **水体分类需前置标注（高频错误）。** `rvnm`（河名）字段将洪泽湖（湖泊）、长江（天然河流）、里运河（人工运河）同级归类，**不区分水体类型**。输出结果时需根据 `references/water_classification.md` 前置标注水体类型，避免语义混淆。参见 Validation Gate"水体分类一致性检查"。
 - **高程基准不一致（高频错误）。** 本库存在多种高程基准：
   - 洪泽湖蒋坝站：`dtmnm='废黄河口'`，`dtmel=NULL`
