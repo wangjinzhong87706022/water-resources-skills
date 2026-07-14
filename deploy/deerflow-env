@@ -1,0 +1,21 @@
+# DeerFlow 环境变量配置
+# 文件: /etc/default/deerflow-env
+# 部署: sudo cp deploy/deerflow-env /etc/default/deerflow-env
+#       sudo chmod 600 /etc/default/deerflow-env  # 保护密码
+
+# Skill 根目录（指向 water-resources-skills 仓库）
+# DeerFlow 通过此变量定位 lib/、shared/、references/
+WATER_RESOURCES_ROOT=/mnt/skills
+
+# ========================================
+# 数据库配置（SL323 水利核心数据库）
+# ========================================
+SL323_DB_HOST=192.168.100.103
+SL323_DB_PORT=3306
+SL323_DB_USER=root
+SL323_DB_PASSWORD=your-password-here  # ← 替换为实际密码
+
+# ========================================
+# Hermes 配置（可选，用于文档参考）
+# ========================================
+# HERMES_SKILL_DIR=/root/.hermes/skills/water-resources
