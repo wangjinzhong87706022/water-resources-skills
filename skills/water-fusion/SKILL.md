@@ -33,6 +33,29 @@ metadata:
 - 参考 `shared/analysis_validation.md` — 分析验证（融合输出的置信度评定和陷阱检查）
 - 参考 `shared/sql_patterns.md` — SQL 通用查询模式（跨表 JOIN、窗口函数对齐）
 
+### 文件引用约定
+
+本 skill 通过**环境变量 `WATER_RESOURCES_ROOT`**（指向 skills/）定位共享资源：
+
+| 引用 | 逻辑路径 | 运行时真实路径（两平台统一） |
+|------|---------|---------------------------|
+| 共享库 | `lib/db.py` | `$WATER_RESOURCES_ROOT/lib/db.py` |
+| 编排模块 | `lib/planner.py` | `$WATER_RESOURCES_ROOT/lib/planner.py` |
+| 融合模块 | `lib/fusion.py` | `$WATER_RESOURCES_ROOT/lib/fusion.py` |
+| 共享文档 | `shared/db_connection.md` | `$WATER_RESOURCES_ROOT/shared/db_connection.md` |
+| 共享规则 | `shared/sql_safety_rules.md` | `$WATER_RESOURCES_ROOT/shared/sql_safety_rules.md` |
+
+> `WATER_RESOURCES_ROOT` 由部署层设置：DeerFlow 指向 `/mnt/skills`，Hermes 指向 `~/.hermes/skills/water-resources`，开发指向仓库 `…/skills`。
+
+**标准导入片段**（`__file__` 在 sandbox 暂存脚本中不可靠，勿用）：
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query
+from planner import plan_execution
+from fusion import correlate, fuse, detect_conflicts, resolve_conflicts
+```
+
 ## Workflow
 
 1. **识别涉及 Skill。** 根据用户问题判断涉及哪些业务域。参考下方关键词映射。

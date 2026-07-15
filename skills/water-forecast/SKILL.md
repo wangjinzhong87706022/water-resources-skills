@@ -35,6 +35,25 @@ metadata:
 - 参考 `shared/sql_patterns.md` — SQL 通用查询模式（预测 vs 实测跨表对齐）
 - 参考 `shared/analysis_validation.md` — 分析验证（预测结果的可信度评定）
 
+### 文件引用约定
+
+本 skill 通过**环境变量 `WATER_RESOURCES_ROOT`**（指向 skills/）定位共享资源：
+
+| 引用 | 逻辑路径 | 运行时真实路径（两平台统一） |
+|------|---------|---------------------------|
+| 共享库 | `lib/db.py` | `$WATER_RESOURCES_ROOT/lib/db.py` |
+| 共享文档 | `shared/db_connection.md` | `$WATER_RESOURCES_ROOT/shared/db_connection.md` |
+| 共享规则 | `shared/sql_safety_rules.md` | `$WATER_RESOURCES_ROOT/shared/sql_safety_rules.md` |
+
+> `WATER_RESOURCES_ROOT` 由部署层设置：DeerFlow 指向 `/mnt/skills`，Hermes 指向 `~/.hermes/skills/water-resources`，开发指向仓库 `…/skills`。
+
+**标准导入片段**（`__file__` 在 sandbox 暂存脚本中不可靠，勿用）：
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query, query_multi
+```
+
 ## Pitfalls
 
 - **最新任务可能很旧。** 预测系统不一定每天运行。先查 `SELECT taskid, tm, stuts FROM slztk.st_mx_taskid_r ORDER BY tm DESC LIMIT 1` 确认最新任务时间，若距今超过1天，需告知用户数据非实时。可降级查最近已完成任务(stuts=1)。
@@ -47,6 +66,19 @@ metadata:
 3. **JOIN 测站信息。** 跨库: slztk 表 JOIN sl323.st_stbprp_b。
 4. **模型结果。** 可查询 st_mx_rv_dm_r 获取河道断面数据。
 5. **质量自检。** 执行 SQL 前确认符合安全规则。预测数据需检查最新任务时间，若距当前超过1天需告知用户。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。
+
+## Validation Gate
+
+**水位预测查询交付前必须通过以下检查。**
+
+### 预测时效性检查
+
+- [ ] **最新任务时间验证**：在查询预测数据前，**必须**先检查最新任务时间
+  ```sql
+  SELECT taskid, tm, stuts FROM slztk.st_mx_taskid_r ORDER BY tm DESC LIMIT 1
+  ```
+- [ ] **时效性判断**：若最新任务距今超过 24 小时，**必须告知用户**"⚠️ 预测数据非实时（最新任务时间：YYYY-MM-DD HH:mm）"
+- [ ] **降级策略**：若最新任务未完成(stuts=0)，可降级查询最近已完成任务(stuts=1)
 
 ## Key Tables
 

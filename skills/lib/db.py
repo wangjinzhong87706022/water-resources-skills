@@ -22,14 +22,64 @@ resolver which adds env-var override + candidate fallback):
 """
 
 import os
+from pathlib import Path
 
 import pymysql
 
+# DeerFlow runs skill scripts in a sandbox subprocess whose environment is
+# scrubbed by env_policy.build_sandbox_env() — any var matching *PASSWORD* /
+# *KEY* / *SECRET* / *TOKEN* / *PASSWD* / *CREDENTIAL* / *DSN* is stripped
+# (issue #3861). Consequently SL323_DB_PASSWORD is NOT visible to db.py when
+# it runs inside the sandbox, and a plain os.environ.get() returns ''. We fall
+# back to reading the gitignored repo-root .env, located relative to this file
+# so resolution works regardless of cwd or env vars.
+_ENV_FILE_CANDIDATES = (
+    Path(__file__).resolve().parent.parent.parent / ".env",  # <repo-root>/.env
+    Path(__file__).resolve().parent.parent / ".env",         # <skills>/.env
+)
+
+
+def _parse_env_file(path):
+    """Minimal KEY=VALUE parser (no python-dotenv dependency)."""
+    values = {}
+    try:
+        with open(path, encoding="utf-8") as fh:
+            for raw in fh:
+                line = raw.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, _, val = line.partition("=")
+                val = val.split("#", 1)[0].strip()  # strip inline comments
+                if len(val) >= 2 and val[0] == val[-1] and val[0] in "\"'":
+                    val = val[1:-1]
+                values[key.strip()] = val
+    except OSError:
+        pass
+    return values
+
+
+def _load_file_env():
+    merged = {}
+    for candidate in _ENV_FILE_CANDIDATES:
+        if candidate.is_file():
+            merged.update(_parse_env_file(candidate))
+    return merged
+
+
+_FILE_ENV = _load_file_env()
+
+
+def _cfg(key, default=""):
+    """Resolve a DB config value: os.environ wins; .env file fills the gap
+    (e.g. the scrubbed PASSWORD); built-in default is the last resort."""
+    return os.environ.get(key) or _FILE_ENV.get(key) or default
+
+
 DB_CONFIG = {
-    'host': os.environ.get('SL323_DB_HOST', '192.168.100.103'),
-    'port': int(os.environ.get('SL323_DB_PORT', '3306')),
-    'user': os.environ.get('SL323_DB_USER', 'root'),
-    'password': os.environ.get('SL323_DB_PASSWORD', ''),
+    'host': _cfg('SL323_DB_HOST', '192.168.100.103'),
+    'port': int(_cfg('SL323_DB_PORT', '3306')),
+    'user': _cfg('SL323_DB_USER', 'root'),
+    'password': _cfg('SL323_DB_PASSWORD', ''),
     'charset': 'utf8mb4',
 }
 
@@ -61,10 +111,10 @@ def query(sql, db=DEFAULT_DB, timeout=DEFAULT_TIMEOUT):
         TimeoutError: Query exceeded timeout.
     """
     _check_sql(sql)
-    conn = _connect(db)
+    conn = _connect(db, timeout=timeout)
     try:
         with conn.cursor(pymysql.cursors.DictCursor) as cur:
-            cur.execute(sql, timeout=timeout)
+            cur.execute(sql)
             return cur.fetchall()
     except pymysql.err.OperationalError as e:
         if e.args[0] == 3024:  # ER_QUERY_TIMEOUT
@@ -79,7 +129,7 @@ def query_multi(sqls, db=DEFAULT_DB, timeout=DEFAULT_TIMEOUT):
     return [query(sql, db=db, timeout=timeout) for sql in sqls]
 
 
-def _connect(db=DEFAULT_DB):
+def _connect(db=DEFAULT_DB, timeout=DEFAULT_TIMEOUT):
     return pymysql.connect(
         host=DB_CONFIG['host'],
         port=DB_CONFIG['port'],
@@ -88,4 +138,5 @@ def _connect(db=DEFAULT_DB):
         database=db,
         charset=DB_CONFIG['charset'],
         connect_timeout=10,
+        read_timeout=timeout,
     )

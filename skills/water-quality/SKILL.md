@@ -38,6 +38,25 @@ metadata:
 - 参考 `shared/sql_patterns.md` — SQL 通用查询模式（窗口函数、CTE 分步构建）
 - 参考 `shared/analysis_validation.md` — 分析验证（质量检查清单、常见陷阱、置信度评定）
 
+### 文件引用约定
+
+本 skill 通过**环境变量 `WATER_RESOURCES_ROOT`**（指向 skills/）定位共享资源：
+
+| 引用 | 逻辑路径 | 运行时真实路径（两平台统一） |
+|------|---------|---------------------------|
+| 共享库 | `lib/db.py` | `$WATER_RESOURCES_ROOT/lib/db.py` |
+| 共享文档 | `shared/db_connection.md` | `$WATER_RESOURCES_ROOT/shared/db_connection.md` |
+| 共享规则 | `shared/sql_safety_rules.md` | `$WATER_RESOURCES_ROOT/shared/sql_safety_rules.md` |
+
+> `WATER_RESOURCES_ROOT` 由部署层设置：DeerFlow 指向 `/mnt/skills`，Hermes 指向 `~/.hermes/skills/water-resources`，开发指向仓库 `…/skills`。
+
+**标准导入片段**（`__file__` 在 sandbox 暂存脚本中不可靠，勿用）：
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query, query_multi
+```
+
 ## Workflow
 
 1. **识别查询场景。** 历史监测→sl325.wq_pcp_d; 等级评定→CASE WHEN 6级标准; 水质预测→slztk.st_mx_preset_r_shj_auto。
@@ -48,6 +67,26 @@ metadata:
 6. **质量自检。** 执行 SQL 前确认符合安全规则。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。返回数值做合理性检查（CODMn 0~50mg/L, DO 0~20mg/L）。
 7. **统计增强（可选）。** 如需趋势分析或异常检测，参考 shared/statistical_methods.md（移动平均、IQR 异常检测、水质指标分布描述）。
 8. **输出验证。** 交付前按 shared/analysis_validation.md 做置信度评定——特别是同比/环比结论的陷阱检查（不完整周期、分母漂移、均值之均值）。
+
+## Validation Gate
+
+**水质查询交付前必须通过以下检查。**
+
+### 水质评级检查
+
+- [ ] **取最差等级**：单因子评价法必须取**最差等级**，不能取平均或多数等级
+- [ ] **6 级标准正确性**：Ⅰ~劣Ⅴ 的划分阈值符合国标（GB 3838-2002）
+
+**常见错误示例**：
+```sql
+❌ 错误：取出现次数最多的等级（多数原则）
+✅ 正确：取最差等级（任一指标最差决定整体等级）
+```
+
+### 测站类型检查
+
+- [ ] **水质站过滤正确**：sttp='WQ'，不能与水位站（ZZ）/水文站（ZQ）/水库站（RR）混淆
+- [ ] **跨库 JOIN 测站类型验证**：JOIN sl323.st_stbprp_b 后确认 sttp='WQ'
 
 ## Key Tables
 

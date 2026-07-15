@@ -42,6 +42,15 @@ tail -f /tmp/ablation-run.log
 
 There is no build step, lint, or test runner — "tests" = the eval harness above. Reports are written to `skills/reports/` (e.g. `l1_eval/`, `l3_eval/`, `gate/`, `ablation/`, `autoresearch/`).
 
+## Configuration（DeerFlow 运行时）
+
+- **env 来源**：DeerFlow 以 `make dev` 启动（非 systemd），backend 进程 cwd=backend，通过 `app_config.py` 的 `load_dotenv()` 读 `deer-flow/backend/.env`。`/etc/default/deerflow-env` 不被任何 service 引用，是死文件。
+- **`WATER_RESOURCES_ROOT`**（写在 `deer-flow/backend/.env`）必须指向含 `lib/` 的真实目录：`/opt/git/water-resources-skills/skills`。LLM 运行时代码用 `sys.path.insert(0, $WATER_RESOURCES_ROOT/lib)`；sandbox 的 `execute_command` 是 host bash，宿主机绝对路径透传、不走 `/mnt/skills` 路径翻译与逃逸检查。**不要用 `/mnt/skills`** —— 那是遗留 symlink → `deer-flow/skills`，其下无 `lib/`。
+- **db.py 超时**：`query()` 的超时经 `_connect(read_timeout=timeout)` 实现（连接级）。`pymysql` 的 `cursor.execute()` **不接受** `timeout=` 参数，切勿加回。
+- **db.py 密码回退（sandbox env 清洗，重要）**：DeerFlow sandbox 子进程的环境经 `env_policy.build_sandbox_env()` 清洗，凡匹配 `*PASSWORD*/*KEY*/*SECRET*/*TOKEN*/*PASSWD*/*CREDENTIAL*/*DSN*` 的变量一律剥离（issue #3861，防止 skill 脚本窃取平台密钥）。故 `SL323_DB_PASSWORD` 在 sandbox 里**不可见**，db.py 不能只靠 `os.environ`。db.py 已加文件回退：环境变量为空时从仓库根 `.env`（gitignored，相对 `__file__` 定位）读。**密码在 sandbox 里的权威来源是 `water-resources-skills/.env`，不是 `deer-flow/backend/.env`**（后者虽由 `load_dotenv()` 载入 backend 进程，但传给 sandbox 前已被清洗）。db.py 在 backend 目录之外，由 `execute_command` 每次 spawn 的新 python 重新 import，改完下次查询即生效，无需重启。
+- **生效方式**：改 `backend/.env` 会触发 uvicorn `--reload`（`--reload-include='.env'`）自动重载；`db.py` 在 backend 目录之外，由 `execute_command` 每次 spawn 的新 python 重新 import，改完下次查询即生效，无需手动重启。
+- **加载额外 skill**：DeerFlow 扫描根是 `water-resources-skills/skills/public`（config.yaml `skills.path`），用 `os.walk(followlinks=True)` 递归发现。要把 skill 加进来，拷**实目录**进 `public/`（软链接在 sandbox `read_file` 路径翻译时会因逃逸检查失败）。
+
 ## Architecture: the big picture
 
 ### Skill layer (`skills/<name>/`)

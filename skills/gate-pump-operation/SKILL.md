@@ -34,6 +34,25 @@ metadata:
 - 参考 `shared/sql_patterns.md` — SQL 通用查询模式（窗口函数处理时序数据）
 - 参考 `shared/analysis_validation.md` — 分析验证（综合汇总结果的检查清单）
 
+### 文件引用约定
+
+本 skill 通过**环境变量 `WATER_RESOURCES_ROOT`**（指向 skills/）定位共享资源：
+
+| 引用 | 逻辑路径 | 运行时真实路径（两平台统一） |
+|------|---------|---------------------------|
+| 共享库 | `lib/db.py` | `$WATER_RESOURCES_ROOT/lib/db.py` |
+| 共享文档 | `shared/db_connection.md` | `$WATER_RESOURCES_ROOT/shared/db_connection.md` |
+| 共享规则 | `shared/sql_safety_rules.md` | `$WATER_RESOURCES_ROOT/shared/sql_safety_rules.md` |
+
+> `WATER_RESOURCES_ROOT` 由部署层设置：DeerFlow 指向 `/mnt/skills`，Hermes 指向 `~/.hermes/skills/water-resources`，开发指向仓库 `…/skills`。
+
+**标准导入片段**（`__file__` 在 sandbox 暂存脚本中不可靠，勿用）：
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query, query_multi
+```
+
 ## Pitfalls
 
 - **综合汇总查询必须分步执行。** 当用户要求"泵站综合运行状态汇总"或"闸泵综合状态"时，不要尝试用一个复杂 SQL JOIN 所有表（st_gate_r + st_was_r + st_pump_r + st_pump_pa），这会因分区表扫描导致超时。
@@ -50,6 +69,27 @@ metadata:
 5. **综合汇总查询。** 拆分为独立查询：闸站状态(st_gate_r) + 堰闸水情(st_was_r) + 泵站状态(st_pump_r)，分别执行后合并结果。每个查询必须带时间范围 WHERE 条件。
 6. **质量自检。** 执行 SQL 前确认符合安全规则。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。检查 sttp 过滤是否正确（DD=闸站, DP=泵站）。
 7. **输出格式。** 结果应包含：测站名称、关键数值（水位/开度/流量）、运行状态判断、时间。用表格或分条列出，附带简要总结。
+
+## Validation Gate
+
+**闸泵工况查询交付前必须通过以下检查。**
+
+### 分区表时间条件检查
+
+- [ ] **st_was_r/st_pump_r/st_pump_pa 必须带 WHERE tm 条件**：这三个表按 tm 做 RANGE 分区，不带时间条件会全分区扫描导致超时
+- [ ] **时间范围合理**：推荐 `tm >= DATE_SUB(NOW(), INTERVAL 7 DAY)` 或子查询取最新时间
+
+**常见错误示例**：
+```sql
+❌ 错误：SELECT * FROM st_pump_r WHERE stcd='xxx'（无 tm 条件，超时）
+✅ 正确：SELECT * FROM st_pump_r WHERE stcd='xxx' AND tm >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+```
+
+### 运行状态逻辑检查
+
+- [ ] **闸门开启判断**：`gtophgt > 0` → 已开启，`gtophgt = 0` → 关闭
+- [ ] **泵站运行判断**：`omcn > 0` → 有泵运行，`omcn = 0` → 停机
+- [ ] **泵站工情开关判断**：`switch = 1` → 开，`switch = 0` → 关
 
 ## Key Tables
 

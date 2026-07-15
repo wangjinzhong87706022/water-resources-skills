@@ -40,6 +40,25 @@ metadata:
 - 参考 `shared/sql_patterns.md` — SQL 通用查询模式（滚动累加、分组 Top-N）
 - 参考 `shared/analysis_validation.md` — 分析验证（降雨统计的合理性检查）
 
+### 文件引用约定
+
+本 skill 通过**环境变量 `WATER_RESOURCES_ROOT`**（指向 skills/）定位共享资源：
+
+| 引用 | 逻辑路径 | 运行时真实路径（两平台统一） |
+|------|---------|---------------------------|
+| 共享库 | `lib/db.py` | `$WATER_RESOURCES_ROOT/lib/db.py` |
+| 共享文档 | `shared/db_connection.md` | `$WATER_RESOURCES_ROOT/shared/db_connection.md` |
+| 共享规则 | `shared/sql_safety_rules.md` | `$WATER_RESOURCES_ROOT/shared/sql_safety_rules.md` |
+
+> `WATER_RESOURCES_ROOT` 由部署层设置：DeerFlow 指向 `/mnt/skills`，Hermes 指向 `~/.hermes/skills/water-resources`，开发指向仓库 `…/skills`。
+
+**标准导入片段**（`__file__` 在 sandbox 暂存脚本中不可靠，勿用）：
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query, query_multi
+```
+
 ## Workflow
 
 1. **识别查询场景。** 实时降雨→st_pptn_r; 降雨预报→f_rnfl_h; 区域统计→st_pptn_r + GROUP BY addvcd。
@@ -65,6 +84,21 @@ metadata:
 5. **预报场景。** f_rnfl_h JOIN f_rnfl_info_r，过滤 UNITNAME='2' AND TYPE='2'，取最新 FYMDH。降雨量字段是 **RN** 不是 f_rnfl。
 6. **质量自检。** 执行 SQL 前确认符合安全规则。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。返回数值做合理性检查（日降雨量 0~500mm）。
 7. **输出格式。** 根据判断的回复深度选择合适的输出格式：精简模式→只给出数值和日期；标准模式→给出查询范围+数值+简要说明；详细模式→完整上下文+分析。
+
+## Validation Gate
+
+**降雨量查询交付前必须通过以下检查。**
+
+### 降雨量字段选择检查
+
+- [ ] **优先用 drp 聚合**：`dyp` 是日降水量但数据可能不全，优先用 `SUM(drp) GROUP BY DATE(tm)` 按天聚合
+- [ ] **预报场景字段正确**：f_rnfl_h 中是 **RN** 不是 f_rnfl
+
+**常见错误示例**：
+```sql
+❌ 错误：SELECT dyp FROM st_pptn_r（dyp 可能为空）
+✅ 正确：SELECT DATE(tm), SUM(drp) FROM st_pptn_r GROUP BY DATE(tm)
+```
 
 ## Key Tables
 

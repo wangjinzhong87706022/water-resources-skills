@@ -58,6 +58,8 @@ from db import query, query_multi
 
 ## Pitfalls
 
+- **🚫 严禁手写 pymysql 连接、严禁硬编码数据库密码（高频错误 + 严重后果）。** 必须照抄 Prerequisites 的「标准导入片段」用 `from db import query, query_multi`。生成代码中**禁止**出现 `pymysql.connect(...)`、`password='...'`、`types.ModuleType('db')` 等任何自造连接逻辑——它们既白白消耗大量输出 token（显著拖慢响应，实测一次查询因此多花 30+ 秒），又把数据库密码明文写进脚本（密码泄漏）。若 `from db import query` 导入失败，说明 `WATER_RESOURCES_ROOT/lib` 路径不对，应改为检查/修正环境变量（正确值见 `CLAUDE.md`），**绝不可**转而手写连接绕过。
+
 - **`query()` 返回 `list[dict]`，不是 DataFrame。** 不能调用 `.iterrows()`, `.groupby()`, `.describe()` 等 pandas 方法。必须用 `for row in df: row['列名']` 或手动转 DataFrame: `import pandas as pd; df = pd.DataFrame(query(sql))`。
 - **水库数据可能非常稀疏。** st_rsvr_r 表可能仅有最近1天的数据（如仅2025-05-19），远少于河道水情。查询前应先用 `SELECT MIN(tm), MAX(tm), COUNT(*) FROM st_rsvr_r WHERE rz IS NOT NULL` 确认实际数据范围，避免按"最近3个月"查出空结果。
 - **站点编码格式不匹配。** 水库站（510B6180）、河道站（00000001）、闸门/泵站（HPBZCZ*）使用不同编码体系，无法直接 JOIN。跨域关联需先建立编码映射。
