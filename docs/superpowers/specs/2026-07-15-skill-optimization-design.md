@@ -1,186 +1,99 @@
-# Skill 优化设计方案
+# Skill 优化设计方案（修订版）
 
 **日期**: 2026-07-15
 **状态**: Draft → Pending Review
-**目标**: 基于 water-situation 范本,优化其他 6 个数据/orchestration skills 的环境变量支持、多平台适配和 Validation Gate
+**核心问题**: 其他 skills 是否真的需要增加行数？还是只是"对齐范本"的焦虑？
 
 ---
 
-## 一、现状诊断
+## 一、我的反思
 
-### 1.1 行数对比
+我最初的设计犯了**形式主义错误**:
+- ❌ 过早设定"目标行数"(100-150 行) → 为增加而增加
+- ❌ 假设 Validation Gate 必须照搬 → 没验证 LLM 是否真的会执行
+- ❌ 关注"完整性"而非"解决问题"
 
-| Skill | 当前行数 | water-situation | 差距 |
-|-------|---------|----------------|------|
-| water-situation | 287 | 287 (范本) | - |
-| water-fusion | 150 | - | -48% |
-| water-visualization | 132 | - | -54% |
-| rainfall | 89 | - | -69% |
-| water-quality | 75 | - | -74% |
-| gate-pump-operation | 78 | - | -73% |
-| water-warning | 74 | - | -74% |
-| water-forecast | 71 | - | -75% |
-
-### 1.2 缺失功能矩阵
-
-| Skill | 文件引用约定 | WATER_RESOURCES_ROOT | 标准导入片段 | Validation Gate |
-|-------|------------|---------------------|-------------|-----------------|
-| water-situation | ✅ | ✅ | ✅ | ✅ (6维) |
-| rainfall | ❌ | ❌ | ❌ | ❌ |
-| water-quality | ❌ | ❌ | ❌ | ❌ |
-| water-forecast | ❌ | ❌ | ❌ | ❌ |
-| gate-pump-operation | ❌ | ❌ | ❌ | ❌ |
-| water-warning | ❌ | ❌ | ❌ | ❌ |
-| water-fusion | ❌ | ❌ | ⚠️ 部分 | ⚠️ 简化版 |
+**正确的问题应该是**:
+- ✅ 现有 skills 在实际使用中遇到了哪些**真实错误**？
+- ✅ 哪些改动能**直接预防这些错误**？
+- ✅ 最少需要增加多少内容？
 
 ---
 
-## 二、优化策略
+## 二、真正的优化目标（按优先级）
 
-### 2.1 原则
+### 🎯 目标 1: 环境变量支持（必须做）
 
-**问题2 确认**: 根据每个 skill 的复杂度适当调整,不完全对齐 water-situation 的 287 行。
+**实际问题**: water-situation 的 Pitfalls 里反复强调的**高频错误**:
+```
+❌ "不要硬编码密码"
+❌ "不要用 __file__ 定位 lib/"
+❌ "密码在 sandbox 里不可见"
+```
 
-**目标行数范围**:
-- 数据 skills (rainfall/water-quality/water-forecast/gate-pump-operation/water-warning): **100-150 行** (+40-80%)
-- water-fusion: **180-220 行** (+20-47%)
-- 可视化 skills (water-visualization/build-dashboard/create-viz): 保持现状,不需要 DB 导入
+这些问题在 water-situation 真实发生过(commit history + eval failures)。
 
-**不做过度设计**:
-- 只有 water-situation 有 8 个 references/ (水体分类/高程基准/阈值验证等高频问题)
-- 其他 skills 的 references/ 保持现有规模(1-2 个即可)
-- Validation Gate 不盲目照搬 6 维,按业务定制
+**其他 skills 现状**:
+- 只写了"使用 `from db import query`"
+- 没说路径怎么来
+- 没说 __file__ 为什么不可靠
+- 没说 DeerFlow sandbox 会清洗环境变量
 
-### 2.2 统一环境变量支持（所有 6 个 data/orchestration skills）
+**后果**:
+- LLM 生成代码时手写 pymysql.connect() → 泄露密码 + 浪费 30+ 秒 token
+- LLM 用 Path(__file__).parent → sandbox 里路径错误
 
-每个 skill 的 **Prerequisites** 章节添加:
-
-#### 结构模板
-
+**优化方案**（极简版，+10~12 行）:
 ```markdown
-### 文件引用约定（双平台通用）
+### 文件引用约定
 
-本 skill 通过「逻辑相对路径」引用共享资源,真实路径由**部署环境变量 `WATER_RESOURCES_ROOT`**（指向 skills/）派生：
+本 skill 通过**环境变量 `WATER_RESOURCES_ROOT`**（指向 skills/）定位共享资源：
 
-| 引用 | 逻辑路径 | 运行时真实路径（两平台统一） |
-|------|---------|---------------------------|
-| 共享库 | `lib/db.py` | `$WATER_RESOURCES_ROOT/lib/db.py` |
-| 共享文档 | `shared/db_connection.md` | `$WATER_RESOURCES_ROOT/shared/db_connection.md` |
-| 共享规则 | `shared/sql_safety_rules.md` | `$WATER_RESOURCES_ROOT/shared/sql_safety_rules.md` |
+- `lib/db.py` → `$WATER_RESOURCES_ROOT/lib/db.py`
+- `shared/db_connection.md` → `$WATER_RESOURCES_ROOT/shared/db_connection.md`
 
-> `WATER_RESOURCES_ROOT` 由部署层设置：DeerFlow 指向 `/mnt/skills`，Hermes 指向 `~/.hermes/skills/water-resources`，开发指向仓库 `…/skills`。
+> `WATER_RESOURCES_ROOT` 由部署层设置：DeerFlow `/mnt/skills`，Hermes `~/.hermes/skills/water-resources`，开发指向仓库 `…/skills`。
 
-**标准导入片段**（生成查询代码时照抄，`__file__` 不可靠，勿用）：
-```python
+**标准导入片段**（`__file__` 在 sandbox 暂存脚本中不可靠，勿用）：
+\```python
 import os, sys
 sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
 from db import query, query_multi
+\```
 ```
-```
 
-**为什么重要**:
-- DeerFlow sandbox 环境会清洗 `*PASSWORD*` 变量,db.py 有文件回退逻辑,但路径必须正确
-- Hermes 和本地开发路径不同,统一约定避免 `__file__` 硬编码
+**预计总增量**: +60~72 行（6 个 skills × +10~12 行）
 
-### 2.3 Validation Gate 定制方案
+---
 
-#### 2.3.1 rainfall (降雨量查询)
+### ⚠️ 目标 2: Validation Gate（先试点再决定）
 
-**检查维度** (3项):
-- ✅ **数值范围**: 日降雨量 0~500mm,时段降雨 0~200mm
-- ✅ **时间分布**: 月度总量不超过 800mm (扬州历史极值约 600mm/月)
-- ✅ **测站数据完整性**: 缺测率 < 5%
+**我的担忧**: water-situation 的 Validation Gate 有 6 个检查维度，但：
+1. LLM 会在实际查询时执行这些检查吗？(缺乏证据)
+2. 还是只是"文档完整性"的装饰？
 
-**不检查**:
-- ❌ 水体分类(降雨站无水体类型)
-- ❌ 高程基准(降雨量无基准)
+**需要验证的问题**:
+- 查看 eval harness 的 `failed_trajectories.jsonl`
+- 检查实际输出中是否有"水体分类错误""高程基准缺失""阈值硬编码"等问题
 
-**目标行数**: 130 行 (+46%)
+**如果确实有高频错误** → 针对性增加最小检查清单
+**如果没有** → 保持现状,不增加
 
-#### 2.3.2 water-quality (水质查询)
+---
 
-**检查维度** (4项):
-- ✅ **指标范围**:
-  - CODMn: 0~50 mg/L
-  - DO: 0~20 mg/L
-  - NH3N: 0~10 mg/L
-  - TP: 0~5 mg/L
-  - pH: 6~9
-- ✅ **等级评定准确性**: 单因子评价法取最差等级
-- ✅ **采样时间连续性**: 缺测率 < 10%
-- ✅ **预测数据时效**: 水质预测任务距当前 < 24h
+### ❌ 不做的优化
 
-**不检查**:
-- ❌ 水体分类(水质站已明确)
-- ❌ 高程基准(水质无基准)
-
-**目标行数**: 140 行 (+87%)
-
-#### 2.3.3 water-forecast (水位预测)
-
-**检查维度** (3项):
-- ✅ **预测时效性**: 最新任务距当前 < 24h,否则提示"数据非实时"
-- ✅ **预测值合理性**: 预测水位与实测水位偏差 < 2m (除非洪水涨水期)
-- ✅ **任务状态**: 仅使用 stuts=1 的已完成任务
-
-**不检查**:
-- ❌ 水体分类(预测基于测站)
-- ❌ 阈值对比(预测表无阈值)
-
-**目标行数**: 120 行 (+69%)
-
-#### 2.3.4 gate-pump-operation (闸泵工况)
-
-**检查维度** (4项):
-- ✅ **运行状态逻辑**:
-  - 闸门: gtophgt > 0 → 已开启
-  - 泵站: omcn > 0 → 有泵运行
-  - switch=1 → 开, switch=0 → 关
-- ✅ **分区表时间条件**: st_was_r/st_pump_r/st_pump_pa 必须带 WHERE tm 条件
-- ✅ **测站类型正确性**: sttp='DD' (闸站), sttp='DP' (泵站)
-- ✅ **数值范围**: 开度 0~100%, 流量 0~1000 m³/s
-
-**不检查**:
-- ❌ 水体分类(闸泵站无水体)
-- ❌ 高程基准(闸泵高程单独管理)
-
-**目标行数**: 130 行 (+67%)
-
-#### 2.3.5 water-warning (水利预警)
-
-**检查维度** (4项):
-- ✅ **阈值对比准确性**:
-  - 防洪: z > WRZ → 黄色, z > GRZ → 红色
-  - 水质: 任一指标低于Ⅳ类触发预警
-- ✅ **预警级别正确性**: 红/黄级别不能混淆
-- ✅ **阈值数据存在性**: 查询 WRZ/GRZ 前必须验证(参考 water-situation 的 threshold_query_validation.md)
-- ✅ **跨库 JOIN 大小写**: st_rvfcch_b.STCD 必须大写
-
-**不检查**:
-- ❌ 水体分类(预警基于测站)
-- ❌ 高程基准(预警基于相对阈值)
-
-**目标行数**: 130 行 (+76%)
-
-#### 2.3.6 water-fusion (跨域融合)
-
-**保持现有结构**,仅优化:
-- ✅ 补充「文件引用约定」章节
-- ✅ 补充 `WATER_RESOURCES_ROOT` 说明
-- ✅ Validation Gate 保持现有 6 项检查,补充说明
-- ✅ 增加「融合策略选择」的详细示例
-
-**目标行数**: 200 行 (+33%)
+1. **盲目增加行数**: 不为"对齐范本"而增加
+2. **照搬 6 维检查**: 不盲目复制 water-situation 的 Validation Gate
+3. **为了完整性而完整性**: 每个 skill 的 Validation Gate 必须解决**实际问题**
 
 ---
 
 ## 三、实施计划
 
-### Phase 1: 环境变量支持 (所有 6 个 skills)
+### Phase 1: 环境变量支持（立即执行）
 
-**目标**: 统一添加「文件引用约定」+ 标准导入片段
-
-**skills 清单**:
+**6 个 skills 各增加 +10~12 行**:
 1. rainfall
 2. water-quality
 3. water-forecast
@@ -190,87 +103,72 @@ from db import query, query_multi
 
 **每 skill 改动**:
 - Prerequisites 章节末尾添加「文件引用约定」子章节
-- 统一表格格式(参照 water-situation 第 39-56 行)
-- **改动行数**: +10~15 行/skill
+- **改动**: +10~12 行/skill
+- **总增量**: +60~72 行
 
-### Phase 2: Validation Gate 定制
+### Phase 2: Validation Gate 试点（先调研）
 
-**按业务优先级**:
-1. **water-warning** (预警系统,影响最大) - 4 维检查
-2. **water-quality** (水质民生) - 4 维检查
-3. **gate-pump-operation** (调度核心) - 4 维检查
-4. **rainfall** (降雨基础) - 3 维检查
-5. **water-forecast** (预测辅助) - 3 维检查
-6. **water-fusion** (融合编排) - 保持+优化
+**行动**:
+1. 查看 `skills/reports/eval_run/failed_trajectories.jsonl` (如果存在)
+2. 统计最常见的错误类型
+3. 对**真实发生频率最高的 1-2 个错误**设计最小检查清单
+4. 只在 water-warning 和 water-quality 试点(预警/水质民生相关,错误影响大)
 
-**每 Skill 改动**:
-- Workflow 章节末尾添加「## Validation Gate」
-- 每个检查维度包含:检查项 + 示例 + 常见错误
-- **改动行数**: +20~40 行/skill
-
-### Phase 3: 文档完善
-
-- rainfall: 补充 `references/rainfall_range_validation.md`
-- water-quality: 补充 `references/water_quality_rating.md` (6级标准详细说明)
-- water-forecast: 补充 `references/forecast_freshness.md` (预测时效性判断)
-- gate-pump-operation: 补充 `references/operation_status_logic.md` (运行状态判断规则)
-- water-warning: 补充 `references/warning_level_mapping.md` (预警级别映射)
+**如果 eval 数据不可用**: 询问用户"你在实际使用中有没有遇到过以下错误?"
 
 ---
 
-## 四、改动预估
+## 四、改动预估（修订版）
 
 | Skill | 当前行数 | 预估最终 | 增幅 | 关键改动 |
 |-------|---------|---------|------|---------|
 | water-situation | 287 | 287 | - | 范本,不变 |
-| water-fusion | 150 | 200 | +33% | 环境变量 + Validation Gate 优化 |
+| water-fusion | 150 | 165 | +10% | 环境变量支持 |
 | water-visualization | 132 | 132 | - | 可视化 skill,不需要 |
-| rainfall | 89 | 130 | +46% | 环境变量 + Validation Gate |
-| water-quality | 75 | 140 | +87% | 环境变量 + Validation Gate |
-| gate-pump-operation | 78 | 130 | +67% | 环境变量 + Validation Gate |
-| water-warning | 74 | 130 | +76% | 环境变量 + Validation Gate |
-| water-forecast | 71 | 120 | +69% | 环境变量 + Validation Gate |
+| rainfall | 89 | 100 | +12% | 环境变量支持 |
+| water-quality | 75 | 85 | +13% | 环境变量支持 |
+| gate-pump-operation | 78 | 90 | +15% | 环境变量支持 |
+| water-warning | 74 | 85 | +15% | 环境变量支持 |
+| water-forecast | 71 | 80 | +13% | 环境变量支持 |
 | build-dashboard | 60 | 60 | - | 可视化 skill,不需要 |
 | create-viz | 89 | 89 | - | 可视化 skill,不需要 |
 | data-context-extractor | 102 | 102 | - | 工具 skill,不需要 |
 
-**总增量**: +295 行 (water-situation 287 行 → 其他 6 个 582 行)
+**总增量（仅 Phase 1）**: +80~94 行
+
+**Phase 2（条件性）**: +20~60 行（仅在 Validation Gate 试点确认有必要后）
 
 ---
 
-## 五、不做的优化（保持现状）
+## 五、成功标准（修订）
 
-1. **可视化 3 件套** (water-visualization/build-dashboard/create-viz): 无 DB 依赖,不需要环境变量
-2. **data-context-extractor**: 工具型 skill,结构已合理
-3. **public/ 下的 2 个通用 skills** (chart-visualization/data-analysis): 非水利业务,不混改
-4. **water-situation 的 references/**: 8 个参考文档保持,不精简(高频问题确实需要)
-
----
-
-## 六、成功标准
-
-✅ **环境变量支持**:
-- 所有 6 个 skills 的 Prerequisites 包含「文件引用约定」表格
-- 明确说明 `WATER_RESOURCES_ROOT` 的 3 种路径(DeerFlow/Hermes/开发)
+✅ **Phase 1: 环境变量支持（必须）**:
+- 6 个 skills 的 Prerequisites 包含极简版「文件引用约定」
+- 说明 `WATER_RESOURCES_ROOT` 的 3 种路径
 - 提供标准导入片段
+- **总增量控制在 80~95 行以内**
 
-✅ **Validation Gate**:
-- 每个 data/orchestration skill 有至少 3 个检查维度
-- 检查项与该 skill 的业务强相关(不盲目照搬)
-- 包含常见错误示例
+✅ **Phase 2: Validation Gate（条件性）**:
+- 只在 eval 数据显示有必要,或用户确认遇到过某类错误时才增加
+- 每个检查维度必须解决**已发生的实际问题**
+- 保持极简(1~2 个检查维度的最小清单)
+- **如果增加,每 skill 不超过 15 行**
 
-✅ **长度合理**:
-- 数据 skills: 100~150 行
-- water-fusion: < 220 行
-- 不超过 water-situation 的 80% (除非业务复杂度确实更高)
+✅ **不做的优化**:
+- 不为"对齐范本"而增加行数
+- 不盲目照搬 Validation Gate
+- 保持技能简洁可读
 
 ---
 
-## 七、下一步
+## 六、下一步
 
 **请确认**:
-1. ✅ 优化策略是否符合预期?
-2. ✅ Validation Gate 的检查维度设计是否合理?
-3. ✅ Phase 1/2/3 的实施顺序是否可以?
+1. ✅ 这个修订版的方向是否符合你的想法？（"解决问题 > 增加行数"）
+2. ✅ Phase 1（环境变量支持）是否可以立即执行？
+3. ✅ 关于 Validation Gate,你希望：
+   - A) 先查看 eval harness 的错误数据再决定
+   - B) 基于你的实际使用经验直接告诉我"哪些错误经常发生"
+   - C) 保持现状,不做 Validation Gate
 
-确认后我开始实施,预计 15~20 分钟完成所有改动。
+确认后我开始实施 Phase 1（预计 10 分钟完成所有 6 个 skills）。
