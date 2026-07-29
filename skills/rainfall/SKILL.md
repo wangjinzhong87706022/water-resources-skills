@@ -61,7 +61,7 @@ from db import query, query_multi
 
 ## Pitfalls
 
-- **⚠️ 禁止幻觉列 `addvnm`（不存在，必报错）。** st_stbprp_b 只有 `addvcd`（行政区划码），**没有区域名称列**。按区域聚合时 `GROUP BY addvcd` 并输出行政区划码即可，**切勿** `SELECT addvnm`（报 `Unknown column`）。覆盖 Q30。
+- **⚠️ 区域/站名列只在 `st_stbprp_b`，雨量表 `st_pptn_r` 只有 stcd+drp+tm。** 按区域聚合**必须 `JOIN st_stbprp_b b ON p.stcd=b.stcd`** 再 `GROUP BY b.addvcd`；禁止从 st_pptn_r 直接 SELECT addvcd（报 `Unknown column`）。也**禁止幻觉列 `addvnm`**（区域名称列不存在，只有 `addvcd` 码）。覆盖 Q30。
 - **⚠️ 含单位/特殊字符的列别名必须加引号**（如 `AS '降雨量(mm)'`），**禁 CTE/`WITH`**（改子查询）。
 
 ## Workflow

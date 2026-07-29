@@ -64,6 +64,9 @@ from db import query, query_multi
   ```
   覆盖所有"古运河/里运河/X 河"类查询（Q1/Q5/Q8/Q11/Q12/Q14/Q25）。
 
+- **⚠️ 求"最新值"必须先限定近期 tm 窗口（否则分区表全扫超时）。** `st_river_r` 是 RANGE(tm) 分区表，`WHERE tm=(SELECT MAX(tm) ... WHERE stcd=...)` 这类相关子查询**没有 tm 范围**会扫所有分区→超时(实测 2013)。必须先裁剪：`WHERE r.tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY) AND r.tm=(SELECT MAX(tm) FROM st_river_r r2 WHERE r2.stcd=r.stcd AND r2.tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY))`。**窗口要宽（≥90天）**——本库数据可能滞后（实测停在 2026-06），7 天窗口会落空返 0 行。覆盖 Q10。
+- **⚠️ 建站时间字段是 `esstym`（char(6)，如 '201501'），不是 `bldt`/`build_date`。** st_stbprp_b 的建站年月列叫 `esstym`，始报年月叫 `bgfrym`。查"建站最早/最晚"用 `MIN(esstym)`/`MAX(esstym)`，**禁止**幻觉列 bldt。覆盖 Q6。
+
 - **⚠️ 分区裁剪（跨年/跨月对比必读）。** `st_river_r`/`st_was_r`/`st_pump_r`/`st_pump_pa` 是 `RANGE(tm)` 分区表。WHERE 若用 `YEAR(tm) IN (...)`、`MONTH(tm)=` 这类**把 tm 包进函数**的谓词，优化器拿不到连续区间→扫所有分区→慢甚至超时。必须写成 `tm` 连续区间：`tm >= '2023-01-01' AND tm < '2025-01-01'`。（实测 434s 的"2023 vs 2024 古运河"查询就踩了这个坑，SQL 写成 `YEAR(tm) IN (2023,2024)` 无 tm 范围。）
 
 - **🚫 严禁手写 pymysql 连接、严禁硬编码数据库密码（高频错误 + 严重后果）。** 必须照抄 Prerequisites 的「标准导入片段」用 `from db import query, query_multi`。生成代码中**禁止**出现 `pymysql.connect(...)`、`password='...'`、`types.ModuleType('db')` 等任何自造连接逻辑——它们既白白消耗大量输出 token（显著拖慢响应，实测一次查询因此多花 30+ 秒），又把数据库密码明文写进脚本（密码泄漏）。若 `from db import query` 导入失败，说明 `WATER_RESOURCES_ROOT/lib` 路径不对，应改为检查/修正环境变量（正确值见 `CLAUDE.md`），**绝不可**转而手写连接绕过。

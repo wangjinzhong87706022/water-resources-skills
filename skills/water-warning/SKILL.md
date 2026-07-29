@@ -62,6 +62,10 @@ from db import query, query_multi
 - **⚠️ 禁止 CTE / `WITH … AS`（运行时报错，必返空）。** db.py 只放行以 `SELECT` 开头的语句，CTE 会被拒绝。需"每个站最新水位"等中间结果时**改用子查询**：`JOIN (SELECT stcd, MAX(tm) mt FROM st_river_r GROUP BY stcd) latest ON r.stcd=latest.stcd AND r.tm=latest.mt`。覆盖 Q85/Q89/Q93。
 - **⚠️ 含单位/特殊字符的列别名必须加引号。** `AS 超警戒(m)` 的括号会被 MySQL 当函数→语法错→空结果。必须 `AS '当前水位(m)'`、`AS '超警戒(m)'`、`AS '警戒水位(m)'`。
 - **按河道名查测站必须双匹配。** 运河站 `rvnm` 常为 NULL，只用 `rvnm LIKE` 必返 0 行，须 `WHERE (stnm LIKE '%X%' OR rvnm LIKE '%X%')`。
+- **⚠️ 站点属性列（stnm/rvnm/hnnm/bsnm）只在 `st_stbprp_b`，数据表 `st_river_r` 只有 stcd+测量值(z/q/tm)。** 取站名/河名/水系**必须 `JOIN st_stbprp_b`**，禁止从 `st_river_r` 直接 SELECT stnm/rvnm（报 `Unknown column 'r.rvnm'`）。覆盖 Q85/Q89。
+- **⚠️ 严禁残留 `{...}` 占位符（高频语法错）。** 生成 SQL 后自检：**不许出现 `{` `}`**。条件必须直接写成具体值（如 `WHERE b.stnm LIKE '%扬州%'`），**禁止**留 `{where_condition}`/`{stcd}` 等未填模板变量——MySQL 会语法错。覆盖 Q89。
+
+
 
 ## Workflow
 
