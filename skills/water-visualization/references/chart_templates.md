@@ -5,15 +5,79 @@
 ## 公共头部（所有模板必须包含）
 
 ```python
+import os
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 
-# CJK 字体设置（必须）
-matplotlib.rcParams['font.sans-serif'] = ['Noto Sans CJK SC', 'SimHei', 'DejaVu Sans']
+# CJK 字体（按宿主机实测安装情况排序：Noto 已装、WenQuanYi 备选；切勿改成未安装的字体）
+matplotlib.rcParams['font.sans-serif'] = ['Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']
 matplotlib.rcParams['axes.unicode_minus'] = False
+
+# 输出目录（DeerFlow sandbox 可写路径；绘图前必须保证存在）
+OUT_DIR = '/mnt/user-data/outputs'
+os.makedirs(OUT_DIR, exist_ok=True)
+```
+
+> **字体说明（重要）**：宿主机实测只装了 `Noto Sans CJK SC`，**未装** `WenQuanYi Micro Hei` / `SimHei`。上面的列表把已装的 Noto 放第一位，不要改、不要花时间找字体。乱码只因用错字体名。
+
+---
+
+## 0. 一次成功铁律（先读这条，再选下面的具体模板）
+
+实测一次"画图"失败会触发 LLM 重写整段代码 2~3 次，每次重写都是 ~2000 token 的 decode（本地 27B 约 60~80s/次），是耗时大头。下列铁律把"画图"从「从零写脚本」变成「照抄模板填参数」，争取一次成功：
+
+1. **查画解耦（最关键）。** 数据步骤查一次 SQL，**落盘成 CSV**；绘图步骤**只读 CSV**，绘图脚本里**严禁出现 `query()` / 连数据库**。
+   ```python
+   # 数据步骤末尾（在查询脚本里）：
+   df.to_csv('/mnt/user-data/workspace/plot_data.csv', index=False)
+   # 绘图步骤开头（在画图脚本里）：
+   df = pd.read_csv('/mnt/user-data/workspace/plot_data.csv')
+   ```
+2. **照抄「黄金模板」，只改 4 处**：`CSV_PATH`、x 列、y 列、标题。不要重写结构、不要自造子图布局、不要堆装饰性 `print`/注释。
+3. **先洗后画。** 绘图前 `df = df.dropna(subset=[<绘图列>])`，避免 None 喂进 matplotlib 报错。
+4. **单图单脚本。** 需要多张图就多跑几次模板，别在一个脚本里 `delaxes`/`reshape` 玩多子图布局（最容易出错）。
+5. **路径用 `OUT_DIR`**（已在公共头部定义），不要写裸文件名 `savefig('x.png')`。
+
+### 黄金模板（完整可运行，照抄即用）
+
+```python
+import os, matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import pandas as pd
+
+matplotlib.rcParams['font.sans-serif'] = ['Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']
+matplotlib.rcParams['axes.unicode_minus'] = False
+OUT_DIR = '/mnt/user-data/outputs'
+os.makedirs(OUT_DIR, exist_ok=True)
+
+# ---- 只改这 4 处 ----
+CSV_PATH = '/mnt/user-data/workspace/plot_data.csv'
+X_COL, Y_COL, GROUP_COL = 'mo', 'avg_z', 'yr'
+TITLE = '古运河月度平均水位对比'
+OUT_NAME = 'water_compare.png'
+# --------------------
+
+df = pd.read_csv(CSV_PATH)
+df = df.dropna(subset=[Y_COL])                 # 先洗：丢掉空值，防 None 报错
+
+fig, ax = plt.subplots(figsize=(14, 6))
+for key, g in df.groupby(GROUP_COL):
+    g = g.sort_values(X_COL)
+    ax.plot(g[X_COL], g[Y_COL], marker='o', label=f'{key}')
+
+ax.set_title(TITLE, fontsize=16)
+ax.set_xlabel(X_COL); ax.set_ylabel('平均水位 (m)')
+ax.legend(); ax.grid(True, alpha=0.3)
+plt.tight_layout()
+
+out = os.path.join(OUT_DIR, OUT_NAME)
+plt.savefig(out, dpi=150, bbox_inches='tight')
+plt.close()
+print(f'图表已保存: {out}')
 ```
 
 ---

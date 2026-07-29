@@ -88,6 +88,10 @@ from db import query, query_multi
 - **阈值数据严重缺失（高频错误）。** `st_rvfcch_b` 表中：**GRZ（保证水位）全表 0% 有值**，**WRZ（警戒水位）水位站/水文站基本为空**（如蒋坝站 WRZ=NULL）。**绝对不要硬编码任何阈值**（如"洪泽湖警戒水位14.35m"无法在本库证实）。查询阈值前必须验证数据存在性，缺失时明确告知用户。参见 `references/threshold_query_validation.md` 和 Validation Gate"阈值数据存在性检查"。
 - **单站代表性风险。** 本库洪泽湖、长江各仅 1 个测站（蒋坝、大通(二)），不存在"测站数量差异导致加权偏倚"的问题（等权均值=站均均值），但单站空间局限性需在报告中说明。参见 `references/single_station_representativeness.md` 和 Validation Gate"单站代表性检查"。
 
+- **🚫 matplotlib/pandas 已预装，禁止 pip install（高频浪费轮次）。** 沙箱 Python 环境已装好 matplotlib、pandas、numpy。**绝不要**执行 `pip install`/`python -m pip install`/`python -m venv`——系统 Python 会拒绝（externally-managed / No module named pip），反复重试会白白烧掉 3-5 个执行轮次并触发 recursion limit。需要绘图直接 `import matplotlib` 即可。（实测 Q14/Q23 因此触顶失败。）
+- **🚫 Python 脚本用 write_file 落盘后再 bash 执行，禁止 heredoc 内联（高频误报）。** 不要写 `python << 'EOF' ... EOF` 这类内联代码块——沙箱路径守卫会把代码里的字符串片段（如 `width/2.,`、`ax/2`）误判成绝对路径 `/2.,` 而拒绝执行（`Unsafe absolute paths`）。**正确做法**：`write_file` 把脚本写到 `/mnt/user-data/workspace/xxx.py`，再 `bash: python3 /mnt/user-data/workspace/xxx.py`。（实测 Q13 因 heredoc 误报连烧 2 轮，仅差 1 步触顶。）
+- **📊 仅在用户明确要求时生成图表（省轮次）。** "对比/趋势/分布情况"等措辞**默认输出文字结论 + 数据表**即可，不要自发画图。绘图涉及脚本编写、字体、路径等多轮环境交互，非必要不做。用户明确说"画图/图表/可视化"时才生成，且遵循上面两条规则。
+
 ## References
 
 - 参考 `references/schema.md` §S3/S5/S6 — **表业务场景/口径/SQL 模板（卡片化知识，解决低分用例）**

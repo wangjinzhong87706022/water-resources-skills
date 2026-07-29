@@ -28,7 +28,7 @@ metadata:
 
 ## Prerequisites
 
-- **Python 包:** matplotlib, pandas, plotly（如未安装需先 `pip install matplotlib pandas plotly kaleido`）
+- **Python 包:** matplotlib、pandas、numpy 沙箱已预装，直接 import。**🚫 禁止 `pip install` / `python -m venv`**——沙箱系统 Python 会拒绝（externally-managed / No module named pip），反复重试会烧掉多个轮次直至 recursion limit（实测 Q14/Q23 因此失败）。plotly/seaborn 未必可用，缺则改用 matplotlib，不要尝试安装。
 - **CJK 字体:** 中文字符必须设置 CJK 字体，否则显示为方块
 - **数据来源:** 上下文中已有的查询结果，或先调用对应数据 skill 获取数据
 - 参考 `references/chart_templates.md` — 各类水利图表的代码模板
@@ -39,7 +39,8 @@ matplotlib 默认不支持中文。**所有图表都必须设置 CJK 字体**：
 
 ```python
 import matplotlib
-matplotlib.rcParams['font.sans-serif'] = ['Noto Sans CJK SC', 'SimHei', 'DejaVu Sans']
+# 宿主机实测只装了 Noto Sans CJK SC（未装 WenQuanYi/SimHei）；勿改、勿找字体
+matplotlib.rcParams['font.sans-serif'] = ['Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']
 matplotlib.rcParams['axes.unicode_minus'] = False
 ```
 
@@ -52,18 +53,36 @@ plt.title('标题', fontproperties=font_prop)
 
 ## Workflow
 
+### 🔴 先读这三条铁律，再走下面的步骤
+
+1. **每步必须产出实质性交付物。** 一个完整的 LLM 调用必须完成一项可交付的工作——查数据并落 CSV / 生成一张图表 / 写出最终报告的正文与嵌图。**禁止**输出短于 100 token 的中间回复（如"正在思考""还需查询""让我确认一下"），那会让 agent 循环空转、白白浪费多次往返。如果当前步骤产出 <100 token，说明不该单独成一步，应合并到上一步里。
+
+2. **完整报告 + 所有图直接写在「对话回复正文」里，不另存 .md 报告文件。** 对话回复就是交付物（标题/结论/图/表/发现全部写在这里）。**严禁** `open(...).write(...)` 把报告另存成 `.md` 文件再让用户去翻——实测：落盘 → 前端只剩摘要、图显示成文字。落盘文件只保留两类：数据 CSV（查画解耦）和图表 PNG。报告文字不落盘。
+
+3. **脚本必须 write_file 落盘再 bash 执行，禁止 heredoc 内联。** 不要写 `python << 'EOF' ... EOF`——沙箱路径守卫会把代码里的 `width/2.,`、`x/2` 等片段误判成绝对路径而拒绝执行（`Unsafe absolute paths in command: /2.,`）。正确做法：`write_file` 写到 `/mnt/user-data/workspace/plot.py`，再 `bash: python3 /mnt/user-data/workspace/plot.py`。（实测 Q13 因此连烧 2 轮触顶失败。）
+
+### 具体步骤
+
 1. **理解数据与分析目标。** 先确认数据结构（维度、数值、时间列）和用户意图——趋势、对比、分布还是异常检测？问题决定图表类型。
-2. **准备数据。** 聚合、透视、重采样为合适的粒度。对时序数据按时间排序，NaN 处理后再绘图。
+2. **准备数据（查画解耦，强制）。** 在**数据脚本**里聚合/透视/重采样，得到干净的 DataFrame 后**落盘成 CSV**：`df.to_csv('/mnt/user-data/workspace/plot_data.csv', index=False)`。绘图脚本只读这个 CSV。**严禁在绘图脚本里 `query()` 或连数据库**——查画耦合是画图反复失败、反复重写的头号原因（每次重写 ~2000 token decode，本地 27B 约 60~80s/次）。
 3. **选择图表类型。** 根据数据特征和用户意图选择（见下方 Chart Type Selection Guide）。
    - 水位/流量随时间变化 → 折线图（多站可叠加）
    - 降雨量对比 → 柱状图
    - 水质等级分布 → 堆叠柱状图或阶梯图
    - 闸泵运行状态 → 仪表盘/状态面板
    - 多站水位对比 → 多子图或分组折线
-4. **生成代码。** 参照 `references/chart_templates.md` 中的模板，替换数据和参数。优先使用 plotly 做交互式图表（悬停、缩放、对比），matplotlib 做静态报告图表。
+4. **生成代码（照抄黄金模板）。** 先读 `references/chart_templates.md` 的「**0. 一次成功铁律**」和「黄金模板」，**照抄、只改 4 处**（CSV 路径 / x 列 / y 列 / 标题）。不要从零写脚本、不要自造多子图布局。绘图前 `df.dropna(subset=[绘图列])` 先洗后画。优先 plotly 做交互图，matplotlib 做静态报告图。
 5. **执行代码。** 使用 execute_code 工具执行 Python 代码生成图表文件。
 6. **添加上下文注解。** 在图表上用标注、参考线、阴影区突出关键数据点（如警戒水位线、超阈值区域）。
-7. **返回结果。** 展示图表文件路径 + 关键发现简述。
+7. **返回结果：完整报告 + 图都写在「对话回复正文」里，不要另存 .md 报告文件。**
+   - **对话回复就是交付物**：标题、结论、**图片**、数据表、关键发现，**全部直接写在回复正文**。**严禁**把报告 `open(...).write(...)` 成单独的 `.md` 文件再让用户去翻——那样前端对话区会变得单薄，且文件里的图渲染不出来（实测过：报告落盘 → 前端只剩摘要 + 图显示成 alt 文本）。
+   - **图必须内嵌在回复正文**，且路径**必须用绝对路径** `/mnt/user-data/outputs/<文件名>.png`。DeerFlow 只解析这种绝对路径形式；**相对路径**（如 `古运河水位对比.png`）或只写进文件里的路径**都渲染不出**，会显示成文字。格式照抄：
+     ```markdown
+     ![古运河水位对比](/mnt/user-data/outputs/古运河水位对比.png)
+     ```
+   - **生成多张图时，每张都必须在回复正文内嵌一个 `![标题](/mnt/user-data/outputs/xxx.png)`（生成 N 张 → 嵌 N 张）**。漏嵌的图用户在前端看不到（实测：生成 2 张只嵌 1 张 → 前端只渲染 1 张，另一张白生成）。
+   - 回复结构：`## 标题` → 一句话结论 → **`![图](/mnt/user-data/outputs/xxx.png)`**（放结论后最显眼处）→ 数据表 → 关键发现 → 局限性说明。
+   - **落盘文件只保留两类**：数据 CSV（查画解耦用）和图表 PNG。**报告文字不落盘**，直接写在回复里。
 
 ## Chart Type Selection Guide
 
@@ -84,7 +103,7 @@ plt.title('标题', fontproperties=font_prop)
 - **matplotlib** — 基础绑图库，适合静态报告图表
 - **pandas** — 数据处理（DataFrame 直接 plot）
 - **plotly / plotly.express** — 交互式图表（悬停显示数值、缩放、平移、双轴对比），保存为 HTML 可嵌入报告
-- **seaborn** — 统计可视化（可选，需 `pip install seaborn`），适合密度图、箱线图、热力图
+- **seaborn** — 统计可视化（可选），适合密度图、箱线图、热力图；未预装则改用 matplotlib 实现，**不要 pip install**
 
 ## Best Practices
 
