@@ -57,6 +57,12 @@ sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
 from db import query, query_multi
 ```
 
+## Pitfalls
+
+- **⚠️ 含单位/特殊字符的列别名必须加引号。** `AS CODMn(mg/L)` 的括号/斜杠会触发 MySQL 语法错→空结果。必须 `AS 'CODMn(mg/L)'`、`AS '氨氮(mg/L)'`、`AS '溶解氧(mg/L)'`。
+- **⚠️ 禁止 CTE / `WITH … AS`。** db.py 只放行 SELECT 开头，改用子查询。
+- **按河道名查测站必须双匹配。** `rvnm` 常为 NULL，须 `WHERE (stnm LIKE '%X%' OR rvnm LIKE '%X%')`。
+
 ## Workflow
 
 1. **识别查询场景。** 历史监测→sl325.wq_pcp_d; 等级评定→CASE WHEN 6级标准; 水质预测→slztk.st_mx_preset_r_shj_auto。

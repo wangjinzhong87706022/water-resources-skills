@@ -55,6 +55,9 @@ from db import query, query_multi
 
 ## Pitfalls
 
+- **⚠️ 禁止 CTE / `WITH … AS`（运行时报错，必返空）。** db.py 运行时只放行以 `SELECT` 开头的语句，CTE 会被拒绝。需中间结果（如"最新一条启闭/开度"）时**改用子查询**：`JOIN (SELECT stcd, MAX(tm) mt FROM st_gate_r GROUP BY stcd) latest ON g.stcd=latest.stcd AND g.tm=latest.mt`。覆盖 Q70/Q74/Q76。
+- **⚠️ 含单位/特殊字符的列别名必须加引号。** `AS 闸门开度(m)` 的括号会被 MySQL 当函数→语法错→空结果。必须 `AS '闸门开度(m)'`、`AS '过闸流量(m³/s)'`。
+
 - **综合汇总查询必须分步执行。** 当用户要求"泵站综合运行状态汇总"或"闸泵综合状态"时，不要尝试用一个复杂 SQL JOIN 所有表（st_gate_r + st_was_r + st_pump_r + st_pump_pa），这会因分区表扫描导致超时。
 - **正确做法：拆分为 2-3 个简单查询。** 先查泵站列表(st_pump_r)，再查闸站列表(st_gate_r)，最后合并结果。每个查询只 JOIN st_stbprp_b 获取名称。
 - **分区表查询必须带时间条件。** st_was_r、st_pump_r、st_pump_pa 按 tm 做 RANGE 分区，不带 WHERE tm 条件会全分区扫描导致超时。"最新"数据用 `WHERE tm >= DATE_SUB(NOW(), INTERVAL 7 DAY)` 或子查询 `WHERE tm = (SELECT MAX(tm) FROM ...)` 限定范围。

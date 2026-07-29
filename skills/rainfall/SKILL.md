@@ -59,6 +59,11 @@ sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
 from db import query, query_multi
 ```
 
+## Pitfalls
+
+- **⚠️ 禁止幻觉列 `addvnm`（不存在，必报错）。** st_stbprp_b 只有 `addvcd`（行政区划码），**没有区域名称列**。按区域聚合时 `GROUP BY addvcd` 并输出行政区划码即可，**切勿** `SELECT addvnm`（报 `Unknown column`）。覆盖 Q30。
+- **⚠️ 含单位/特殊字符的列别名必须加引号**（如 `AS '降雨量(mm)'`），**禁 CTE/`WITH`**（改子查询）。
+
 ## Workflow
 
 1. **识别查询场景。** 实时降雨→st_pptn_r; 降雨预报→f_rnfl_h; 区域统计→st_pptn_r + GROUP BY addvcd。

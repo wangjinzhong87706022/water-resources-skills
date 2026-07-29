@@ -57,6 +57,12 @@ sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
 from db import query, query_multi
 ```
 
+## Pitfalls
+
+- **⚠️ 禁止 CTE / `WITH … AS`（运行时报错，必返空）。** db.py 只放行以 `SELECT` 开头的语句，CTE 会被拒绝。需"每个站最新水位"等中间结果时**改用子查询**：`JOIN (SELECT stcd, MAX(tm) mt FROM st_river_r GROUP BY stcd) latest ON r.stcd=latest.stcd AND r.tm=latest.mt`。覆盖 Q85/Q89/Q93。
+- **⚠️ 含单位/特殊字符的列别名必须加引号。** `AS 超警戒(m)` 的括号会被 MySQL 当函数→语法错→空结果。必须 `AS '当前水位(m)'`、`AS '超警戒(m)'`、`AS '警戒水位(m)'`。
+- **按河道名查测站必须双匹配。** 运河站 `rvnm` 常为 NULL，只用 `rvnm LIKE` 必返 0 行，须 `WHERE (stnm LIKE '%X%' OR rvnm LIKE '%X%')`。
+
 ## Workflow
 
 1. **防洪预警。** 比较 st_river_r.z 与 st_rvfcch_b.WRZ/GRZ。
