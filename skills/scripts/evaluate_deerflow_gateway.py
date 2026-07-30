@@ -17,6 +17,7 @@ import re
 import sys
 import time
 import urllib.request
+import uuid
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
@@ -73,12 +74,17 @@ class GatewayEvalResult:
 # ============================================================
 
 def call_gateway(question: str, model_name: str | None = None, timeout: int = 900) -> dict:
-    """POST /api/runs/wait，返回最终 channel values（含 messages）"""
+    """POST /api/runs/wait，返回最终 channel values（含 messages）
+
+    注意：/runs/wait 返回的是最终图状态，长 run 的早期消息可能被上下文压缩裁掉。
+    因此显式指定 thread_id，完成后再从事件库 /threads/{id}/messages 拉全量历史。
+    """
+    thread_id = str(uuid.uuid4())
     body = {
         "input": {"messages": [{"role": "user", "content": question}]},
         # 默认 100 step ≈ 11 轮 LLM（每轮 ~9 step），带图表的 L3 题会触顶。
         # 服务端 max_recursion_limit=1000 内可自定义。
-        "config": {"recursion_limit": 250},
+        "config": {"recursion_limit": 250, "configurable": {"thread_id": thread_id}},
     }
     context = {"thinking_enabled": False}
     if model_name:
@@ -97,7 +103,39 @@ def call_gateway(question: str, model_name: str | None = None, timeout: int = 90
         method="POST",
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+        payload = json.loads(resp.read().decode("utf-8"))
+    payload["thread_messages"] = fetch_thread_messages(thread_id)
+    payload["thread_id"] = thread_id
+    return payload
+
+
+def fetch_thread_messages(thread_id: str) -> list:
+    """GET /threads/{id}/messages（事件库全量，无压缩裁剪），解包 content JSON"""
+    req = urllib.request.Request(
+        f"{GATEWAY_URL}/api/threads/{thread_id}/messages?limit=200",
+        headers={
+            "X-DeerFlow-Internal-Token": INTERNAL_TOKEN,
+            "X-CSRF-Token": CSRF_TOKEN,
+            "Cookie": f"csrf_token={CSRF_TOKEN}",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            events = json.loads(resp.read().decode("utf-8"))
+    except Exception as e:
+        print(f"  ⚠️ 拉取事件库消息失败（回退图状态 messages）: {e}", file=sys.stderr)
+        return []
+    messages = []
+    for ev in events:
+        content = ev.get("content")
+        if isinstance(content, str):
+            try:
+                content = json.loads(content)
+            except (json.JSONDecodeError, TypeError):
+                continue
+        if isinstance(content, dict):
+            messages.append(content)
+    return messages
 
 # ============================================================
 # 响应解析
@@ -117,8 +155,12 @@ def _content_text(content) -> str:
     return str(content or "")
 
 def parse_run_messages(payload: dict) -> dict:
-    """从 /api/runs/wait 返回值提取评分所需信息"""
-    messages = payload.get("messages", [])
+    """从 /api/runs/wait 返回值提取评分所需信息
+
+    优先用事件库全量历史（thread_messages）；图状态 messages 在长 run 中
+    会被上下文压缩裁掉早期轮次（实测 Q014 丢失数据查询轮的 SQL）。
+    """
+    messages = payload.get("thread_messages") or payload.get("messages", [])
     final_answer = ""
     last_ai_text = ""
     actual_sqls = []
@@ -131,7 +173,7 @@ def parse_run_messages(payload: dict) -> dict:
         if mtype == "ai":
             llm_round_trips += 1
             for tc in (m.get("tool_calls") or []):
-                name = tc.get("name", "")
+                name = tc.get("name") or ""
                 args = tc.get("args") or {}
                 tool_trace.append(name)
                 sql = args.get("sql") or args.get("query")
@@ -147,7 +189,7 @@ def parse_run_messages(payload: dict) -> dict:
                 if not m.get("tool_calls"):
                     final_answer = text  # 最后一条无工具调用的 ai 消息
         elif mtype == "tool":
-            name = m.get("name", "")
+            name = m.get("name") or ""
             if name in QUERY_TOOL_NAMES or name.startswith("water-db") or name == "bash":
                 tool_results.append(_content_text(m.get("content"))[:5000])
 
