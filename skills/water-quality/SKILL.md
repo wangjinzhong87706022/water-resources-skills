@@ -62,7 +62,13 @@ from db import query, query_multi
 
 ## Pitfalls
 
-- **⚡ 一轮完成（性能第一杠杆，每次 LLM 往返 30-80s）。** 站点识别 + `MAX(spt)` 锚点 + 主查询必须写进**同一个 Python 脚本**一轮执行：先查站点/锚点，再用 f-string 把实值代入主查询（同脚本内安全；**禁止跨回合留 `{stcd}`/`{max_spt}` 等占位符**）。
+- **⚡ 单轮数据获取（性能第一杠杆，每轮 LLM 往返 30–80s，往返预算 ≤4）。不要为读中间结果而结束本轮**——站点识别、时间锚点、主查询全部写进**同一个 Python 脚本**一轮跑完（脚本内可多次 `query()`/`query_multi()`，同一轮零额外往返）。硬性禁令：
+  1. **禁 schema 探查**：列名照抄下方/`references/schema.md`，不得 `SHOW COLUMNS`/`INFORMATION_SCHEMA`/`SELECT DATABASE()`。
+  2. **禁独立锚点轮**：`MAX(spt)`/最新 `taskid` 一律内联为**子查询**，不得单独查一轮再代入下一轮。
+  3. **禁站点/taskid 独立发现轮**：用 `stnm LIKE` 派生表 JOIN 内联（`rvnm` 常 NULL → `(stnm LIKE '%X%' OR rvnm LIKE '%X%')`）。
+  4. **禁重复执行**：一次成功即停，不得换时间窗重跑同一分析。
+  5. **一脚本一轮**：末尾一次性 `print` 结果（含绘图所需数据）。
+- **📋 wq_pcp_d 已知列（免探查）**：`stcd, spt(采样时间,PK), dox, codmn, nh3n, tp, ph, wtmp, turb, cond`；时间字段是 **spt** 不是 tm。
 - **⚡ 聚合优先。** 水质"趋势/变化"类问题默认按日/周聚合指标均值（`GROUP BY DATE(spt)` + `AVG(...)`），**禁止拉原始行**再自行汇总。
 - **⚠️ 时间范围缺省时用默认值直接查，禁止反问（高频 0 分）。** "一段时间内/近期/最近"等模糊时间**不要**向用户追问时间范围——单轮场景下反问即任务失败。默认口径：**近 30 天**（锚定该表 `MAX(spt)` 而非 CURDATE，库数据可能滞后），"趋势"类可按周/月聚合。答复中注明所采用的时间窗即可。
 - **⚠️ 含单位/特殊字符的列别名必须加引号。** `AS CODMn(mg/L)` 的括号/斜杠会触发 MySQL 语法错→空结果。必须 `AS 'CODMn(mg/L)'`、`AS '氨氮(mg/L)'`、`AS '溶解氧(mg/L)'`。
@@ -85,6 +91,55 @@ from db import query, query_multi
 6. **质量自检。** 执行 SQL 前确认符合安全规则。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。返回数值做合理性检查（CODMn 0~50mg/L, DO 0~20mg/L）。
 7. **统计增强（可选）。** 如需趋势分析或异常检测，参考 shared/statistical_methods.md（移动平均、IQR 异常检测、水质指标分布描述）。
 8. **输出验证。** 交付前按 shared/analysis_validation.md 做置信度评定——特别是同比/环比结论的陷阱检查（不完整周期、分母漂移、均值之均值）。
+
+## 单轮模板（照抄，勿拆轮）
+
+> 站点/锚点全部内联，一个脚本一轮出结果。绘图所需数据在同脚本内一并 print。
+
+**① 趋势/监测单轮模板**（近 30 天按日聚合；`spt` 锚定表内 `MAX(spt)`，勿用 NOW/CURDATE）：
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query
+
+STN = '瘦西湖'   # 改成目标站名
+rows = query(f"""
+  SELECT DATE(d.spt) AS '日期',
+         ROUND(AVG(d.dox),2)   AS '溶解氧(mg/L)',
+         ROUND(AVG(d.codmn),2) AS 'CODMn(mg/L)',
+         ROUND(AVG(d.nh3n),3)  AS '氨氮(mg/L)',
+         ROUND(AVG(d.tp),3)    AS '总磷(mg/L)',
+         ROUND(AVG(d.ph),2)    AS 'pH',
+         ROUND(AVG(d.wtmp),1)  AS '水温(℃)'
+  FROM sl325.wq_pcp_d d
+  JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
+  WHERE b.sttp='WQ' AND (b.stnm LIKE '%{STN}%' OR b.rvnm LIKE '%{STN}%')
+    AND d.spt > DATE_SUB((SELECT MAX(spt) FROM sl325.wq_pcp_d), INTERVAL 30 DAY)
+  GROUP BY DATE(d.spt) ORDER BY DATE(d.spt)
+""")
+print(rows)   # 同轮内即可据此做统计/绘图，勿再发新查询
+```
+
+**② 水质预测单轮模板**（最新有效 `taskid` 内联为子查询，勿单独查一轮）：
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query
+
+STN = '瘦西湖'
+rows = query(f"""
+  SELECT b.stnm AS '测站', r.tm AS '预报时间', r.type, r.vals
+  FROM slztk.st_mx_preset_r_shj_auto r
+  JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+  WHERE b.sttp='WQ' AND (b.stnm LIKE '%{STN}%' OR b.rvnm LIKE '%{STN}%')
+    AND r.type IN (103,104,105,128)
+    AND r.tm BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)
+    AND r.taskid = (SELECT taskid FROM slztk.st_mx_taskid_shj_auto
+                    WHERE state='1' ORDER BY tm DESC LIMIT 1)
+  ORDER BY r.tm
+""")
+print(rows)   # type 映射 103=DO 104=CODMn 105=TP 128=NH3N；同轮内评级
+```
 
 ## Validation Gate
 

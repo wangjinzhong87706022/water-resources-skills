@@ -59,7 +59,12 @@ from db import query, query_multi
 
 ## Pitfalls
 
-- **⚡ 一轮完成（性能第一杠杆，每次 LLM 往返 30-80s）。** 站点识别 + `MAX(tm)` 锚点 + 主查询必须写进**同一个 Python 脚本**一轮执行：先查站点/锚点，再用 f-string 把实值代入主查询（同脚本内安全；**禁止跨回合留 `{stcd}`/`{max_tm}` 等占位符**）。
+- **⚡ 单轮数据获取（性能第一杠杆，每轮 LLM 往返 30–80s，往返预算 ≤4）。不要为读中间结果而结束本轮**——站点识别、`MAX(tm)` 锚点、阈值存在性检查、主查询全部写进**同一个 Python 脚本**一轮跑完（脚本内多次 `query()`/一次 `query_multi([...])` 均零额外往返）。硬性禁令：
+  1. **禁 schema 探查**（`SHOW COLUMNS`/`INFORMATION_SCHEMA`/`SELECT DATABASE()`）——列名见下方 Key Tables。
+  2. **禁独立锚点轮**：`MAX(tm)` 内联为派生表子查询，不得单独查一轮再代入。
+  3. **禁多源分轮**：河道/泵站/闸门三源用**一个** `query_multi([river_sql, pump_sql, gate_sql])` 批量取，禁分 3 轮。
+  4. **禁重复执行**：一次成功即停，禁把整段预警/汇总分析换窗口重跑（Q92/Q93 高发）。
+  5. **一脚本一轮**：末尾一次性 `print` 全部结果（清单题打印全行）。
 - **⚡ 相对时间窗必须锚定 `MAX(tm)`，禁锚 NOW()/CURDATE()。** 库数据滞后于挂钟（实测停在 2026-06），`DATE_SUB(NOW(), ...)` 窗口常落空返 0 行。先取该表 `MAX(tm)` 再推时间窗。
 - **⚡ 聚合优先，禁 `LIMIT 500` 拉原始行。** 统计/趋势/汇总类问题在 SQL 里用 COUNT/SUM/AVG/GROUP BY 完成，不要拉原始行回 Python 再汇总。
 - **⚠️ 模糊时间禁止反问。** "近期/一段时间"等模糊时间默认取**近 30 天**（锚 `MAX(tm)`）直接查，**禁止向用户反问**（单轮评测反问=0 分），答复中注明所采用的时间窗即可。
@@ -80,6 +85,51 @@ from db import query, query_multi
 2. **水质预警。** 查询 sl325.wq_pcp_d 各指标，按 6 级标准评级（单因子评价法），任一指标低于Ⅳ类触发预警。
 3. **跨库查询需带库名前缀:** sl325.wq_pcp_d, sl323.st_river_r 等。
 4. **质量自检。** 执行 SQL 前确认符合安全规则。特别注意 st_rvfcch_b.STCD 是大写。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。
+
+## 多源单轮模板（照抄，勿拆轮）
+
+综合防洪形势（河道超警/泵站排水/闸门开启）**一个脚本一轮跑完**：三源用 `query_multi([...])` 批量取，每源各自内联派生表 `MAX(tm)` 锚点（禁相关子查询、禁拆 3 轮、禁换窗重跑）。
+
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query_multi
+
+river_sql = """
+SELECT b.stnm AS '测站', r.z AS '当前水位(m)', rv.WRZ AS '警戒水位(m)', rv.GRZ AS '保证水位(m)',
+       CASE WHEN r.z > rv.GRZ THEN '红色预警' WHEN r.z > rv.WRZ THEN '黄色预警' ELSE '正常' END AS '状态'
+FROM sl323.st_river_r r
+JOIN (SELECT stcd, MAX(tm) mt FROM sl323.st_river_r GROUP BY stcd) lt ON r.stcd=lt.stcd AND r.tm=lt.mt
+JOIN sl323.st_stbprp_b b ON r.stcd=b.stcd
+JOIN sl323.st_rvfcch_b rv ON r.stcd=rv.STCD
+WHERE rv.WRZ IS NOT NULL AND r.z > rv.WRZ
+ORDER BY r.z-rv.WRZ DESC
+"""
+
+pump_sql = """
+SELECT COUNT(*) AS '正在排水泵站数', ROUND(SUM(p.pmpq),2) AS '总排水流量(m³/s)'
+FROM sl323.st_pump_r p
+JOIN (SELECT stcd, MAX(tm) mt FROM sl323.st_pump_r GROUP BY stcd) lt ON p.stcd=lt.stcd AND p.tm=lt.mt
+WHERE p.pdchcd='2' AND p.omcn > 0
+"""
+
+gate_sql = """
+SELECT COUNT(*) AS '开启闸门数'
+FROM sl323.st_gate_r g
+JOIN (SELECT stcd, MAX(tm) mt FROM sl323.st_gate_r GROUP BY stcd) lt ON g.stcd=lt.stcd AND g.tm=lt.mt
+WHERE g.gtophgt > 0
+"""
+
+rivers, pumps, gates = query_multi([river_sql, pump_sql, gate_sql])
+print('超警戒站点：', len(rivers))
+for row in rivers:                      # 清单题打印全行，勿截断
+    print(row)
+print('泵站：', pumps)
+print('闸门：', gates)
+```
+
+- 派生表别名用 `lt`/`mt`/`mx`，**禁用 `inner`/`latest` 等保留字**（语法错）。
+- 一次成功即停：**禁**把同一分析换 30/60/90 天窗口重跑（Q92 ×3、Q93 ×4 均属此坑）。
 
 ## Validation Gate
 

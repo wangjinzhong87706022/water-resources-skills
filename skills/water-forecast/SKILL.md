@@ -59,7 +59,12 @@ from db import query, query_multi
 
 ## Pitfalls
 
-- **⚡ 一轮完成（性能第一杠杆，每次 LLM 往返 30-80s）。** taskid 探测 + 时效检查 + EXISTS 回退 + 主查询必须写进**同一个 Python 脚本**一轮执行：先取 taskid，再用 f-string 把实值代入主查询（同脚本内安全；**禁止跨回合留 `{taskid}` 占位符**）。首查就直接用带 EXISTS 的取-taskid SQL（见下），不要等 0 行后再回退多烧一轮。
+- **⚡ 单轮数据获取（性能第一杠杆，每轮 LLM 往返 30–80s，往返预算 ≤4）。不要为读中间结果而结束本轮**——taskid 探测、时效检查、EXISTS 回退、主查询全部写进**同一个 Python 脚本**一轮跑完（脚本内多次 `query()` 零额外往返）。硬性禁令：
+  1. **禁 schema 探查**（`SHOW COLUMNS`/`INFORMATION_SCHEMA`/`SELECT DATABASE()`）——列名见下方 Key Tables。
+  2. **禁独立 taskid 轮**：最新有效 taskid **内联为子查询**（见下方模板），不得单独查一轮再代入。首查就直接用带 EXISTS 的内联 taskid，不要等 0 行后再回退多烧一轮。
+  3. **禁重复执行**：一次成功即停，禁把整段预测分析换任务/窗口重跑。
+  4. **一脚本一轮**：末尾一次性 `print` 全部结果（含可视化数据）。
+  - 同脚本内需分步时用 f-string 把实值代入主查询（安全；**禁跨回合留 `{taskid}` 占位符**）。
 - **⚡ 预报时间窗必须锚定任务自身时间。** 用该 taskid 下的 `MIN(tm)`~`MAX(tm)`（或任务 tm）圈定窗口，**禁止** `BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)`——最新任务可能很旧，NOW() 窗口与预报 tm 无交集必返 0 行。
 - **⚠️ 模糊时间禁止反问。** "未来/近期"等模糊时间默认取最新有效任务直接查，**禁止向用户反问**（单轮评测反问=0 分），答复中注明实际使用的任务时间即可。
 - **最新任务可能很旧。** 预测系统不一定每天运行。先查 `SELECT taskid, tm, stuts FROM slztk.st_mx_taskid_r ORDER BY tm DESC LIMIT 1` 确认最新任务时间，若距今超过1天，需告知用户数据非实时。可降级查最近已完成任务(stuts = '1')。
@@ -80,6 +85,37 @@ from db import query, query_multi
 3. **JOIN 测站信息。** 跨库: slztk 表 JOIN sl323.st_stbprp_b。
 4. **模型结果。** 可查询 st_mx_rv_dm_r 获取河道断面数据。
 5. **质量自检。** 执行 SQL 前确认符合安全规则。预测数据需检查最新任务时间，若距当前超过1天需告知用户。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。
+
+## 单轮模板（照抄，勿拆轮）
+
+未来水位预报**一个脚本一轮跑完**：把"有数据的最新已完成 taskid"**内联为 EXISTS 子查询**，不单独查一轮 taskid。
+
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query
+
+sql = """
+SELECT b.stnm AS '测站', p.tm AS '预报时间', p.vals AS '预测水位(m)'
+FROM slztk.st_mx_preset_cal_r p
+JOIN sl323.st_stbprp_b b ON p.stcd = b.stcd
+WHERE p.type = '1'
+  AND p.taskid = (
+    SELECT t.taskid FROM slztk.st_mx_taskid_r t
+    WHERE t.stuts = '1'
+      AND EXISTS (SELECT 1 FROM slztk.st_mx_preset_cal_r d WHERE d.taskid = t.taskid)
+    ORDER BY t.tm DESC LIMIT 1
+  )
+  AND (b.stnm LIKE '%古运河%' OR b.stnm LIKE '%瘦西湖%')
+ORDER BY b.stnm, p.tm
+"""
+rows = query(sql)
+for row in rows:                        # 打印全行，勿截断
+    print(row)
+```
+
+- 断面数据把 `st_mx_preset_cal_r` 换成 `st_mx_rv_dm_r`（EXISTS 里同步替换）。
+- 站点用 `stnm LIKE` 内联，**禁**单独查站码轮。
 
 ## Validation Gate
 
