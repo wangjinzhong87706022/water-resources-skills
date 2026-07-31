@@ -548,9 +548,10 @@ SELECT b.stnm AS '测站名称', d.spt AS '采样时间',
        d.nh3n AS '氨氮(mg/L)', d.tp AS '总磷(mg/L)',
        d.ph AS 'pH', d.wtmp AS '水温(℃)'
 FROM sl325.wq_pcp_d d
+JOIN (SELECT stcd, MAX(spt) AS maxSpt FROM sl325.wq_pcp_d GROUP BY stcd) m
+  ON d.stcd = m.stcd AND d.spt = m.maxSpt
 JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
-WHERE b.stnm LIKE '%瘦西湖%' AND b.sttp = 'WQ'
-  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd);
+WHERE b.stnm LIKE '%瘦西湖%' AND b.sttp = 'WQ';
 ```
 
 **Q2:** 查询京杭运河水质站的最新水质指标。
@@ -560,9 +561,10 @@ SELECT b.stnm AS '测站名称', d.spt AS '采样时间',
        d.dox AS 'DO(mg/L)', d.codmn AS 'CODMn(mg/L)',
        d.nh3n AS 'NH3N(mg/L)', d.tp AS 'TP(mg/L)', d.ph AS 'pH'
 FROM sl325.wq_pcp_d d
+JOIN (SELECT stcd, MAX(spt) AS maxSpt FROM sl325.wq_pcp_d GROUP BY stcd) m
+  ON d.stcd = m.stcd AND d.spt = m.maxSpt
 JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
-WHERE b.stnm LIKE '%京杭运河%' AND b.sttp = 'WQ'
-  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd);
+WHERE b.stnm LIKE '%京杭运河%' AND b.sttp = 'WQ';
 ```
 
 ### L2 — 趋势分析、评级
@@ -612,9 +614,10 @@ SELECT b.stnm AS '测站',
          WHEN d.tp <= 0.4 THEN 'Ⅴ类' ELSE '劣Ⅴ类'
        END AS 'TP评级'
 FROM sl325.wq_pcp_d d
+JOIN (SELECT stcd, MAX(spt) AS maxSpt FROM sl325.wq_pcp_d GROUP BY stcd) m
+  ON d.stcd = m.stcd AND d.spt = m.maxSpt
 JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
-WHERE b.stnm LIKE '%京杭运河%' AND b.sttp = 'WQ'
-  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd);
+WHERE b.stnm LIKE '%京杭运河%' AND b.sttp = 'WQ';
 ```
 
 **Q5:** 查询所有水质站最新一条数据中，哪些指标劣于Ⅳ类。
@@ -627,9 +630,10 @@ SELECT b.stnm AS '测站名称', d.spt AS '采样时间',
        CASE WHEN d.nh3n > 1.5 THEN '超标' END AS 'NH3N状态',
        CASE WHEN d.tp > 0.3 THEN '超标' END AS 'TP状态'
 FROM sl325.wq_pcp_d d
+JOIN (SELECT stcd, MAX(spt) AS maxSpt FROM sl325.wq_pcp_d GROUP BY stcd) m
+  ON d.stcd = m.stcd AND d.spt = m.maxSpt
 JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
 WHERE b.sttp = 'WQ'
-  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd)
   AND (d.codmn > 10 OR d.dox < 3 OR d.nh3n > 1.5 OR d.tp > 0.3);
 ```
 
@@ -728,9 +732,10 @@ SELECT b.stnm AS '测站名称', d.spt AS '采样时间',
        d.ph AS 'pH', d.wtmp AS '水温(℃)',
        d.turb AS '浊度', d.cond AS '电导率(uS/cm)'
 FROM sl325.wq_pcp_d d
+JOIN (SELECT stcd, MAX(spt) AS maxSpt FROM sl325.wq_pcp_d GROUP BY stcd) m
+  ON d.stcd = m.stcd AND d.spt = m.maxSpt
 JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
 WHERE b.sttp = 'WQ'
-  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd)
 ORDER BY b.stnm;
 ```
 
@@ -761,9 +766,10 @@ SELECT b.stnm AS '测站', d.spt AS '采样时间',
          ELSE 'Ⅰ类'
        END AS '综合水质等级(单因子)'
 FROM sl325.wq_pcp_d d
+JOIN (SELECT stcd, MAX(spt) AS maxSpt FROM sl325.wq_pcp_d GROUP BY stcd) m
+  ON d.stcd = m.stcd AND d.spt = m.maxSpt
 JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
-WHERE b.stnm LIKE '%宝带河%' AND b.sttp = 'WQ'
-  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd);
+WHERE b.stnm LIKE '%宝带河%' AND b.sttp = 'WQ';
 ```
 
 **Q12:** 帮我分析一下最近一个月仪扬河上游水质变化趋势。
@@ -784,8 +790,8 @@ ORDER BY DATE(d.spt);
 
 ```sql
 SELECT b.stnm AS '水质站名称', b.rvnm AS '河流', b.stcd AS '测站编码'
-FROM sl323.st_stbprp_b
-WHERE sttp = 'WQ'
+FROM sl323.st_stbprp_b b
+WHERE b.sttp = 'WQ'
 ORDER BY b.rvnm, b.stnm;
 ```
 
@@ -1223,7 +1229,7 @@ WHERE rv.WRZ IS NOT NULL;
 **Q3:** 扬州市重点河道水位实时情况（含超警戒判断）。
 
 ```sql
-SELECT b.stnm AS '测站名称', r.z AS '实时水位(m)', r.tm AS '更新时间',
+SELECT sub.stnm AS '测站名称', r.z AS '实时水位(m)', r.tm AS '更新时间',
        rv.WRZ AS '警戒水位(m)',
        CASE WHEN r.z > rv.WRZ THEN '超警戒' ELSE '正常' END AS '状态'
 FROM sl323.st_river_r r
@@ -1248,9 +1254,10 @@ SELECT b.stnm AS '测站名称', d.spt AS '采样时间',
          ELSE '正常'
        END AS '预警状态'
 FROM sl325.wq_pcp_d d
+JOIN (SELECT stcd, MAX(spt) AS maxSpt FROM sl325.wq_pcp_d GROUP BY stcd) m
+  ON d.stcd = m.stcd AND d.spt = m.maxSpt
 JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
 WHERE b.sttp = 'WQ'
-  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd)
   AND (d.codmn > 10 OR d.dox < 3 OR d.nh3n > 1.5 OR d.tp > 0.3);
 ```
 
@@ -1311,17 +1318,17 @@ ORDER BY rv.WRZ;
 SELECT
   (SELECT COUNT(*) FROM sl323.st_river_r r
    JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD
-   JOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r GROUP BY stcd) l ON r.stcd = l.stcd AND r.tm = l.maxTm
+   JOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r WHERE tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY) GROUP BY stcd) l ON r.stcd = l.stcd AND r.tm = l.maxTm
    WHERE r.z > rv.WRZ AND rv.WRZ IS NOT NULL) AS '超警戒站点数',
   (SELECT COUNT(*) FROM sl323.st_pump_r p
-   WHERE p.pdchcd = '2' AND p.omcn > 0
-     AND p.tm = (SELECT MAX(p2.tm) FROM sl323.st_pump_r p2 WHERE p2.stcd = p.stcd)) AS '正在排水泵站数',
+   JOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_pump_r WHERE tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY) GROUP BY stcd) m ON p.stcd = m.stcd AND p.tm = m.maxTm
+   WHERE p.pdchcd = '2' AND p.omcn > 0) AS '正在排水泵站数',
   (SELECT SUM(p.pmpq) FROM sl323.st_pump_r p
-   WHERE p.pdchcd = '2' AND p.omcn > 0
-     AND p.tm = (SELECT MAX(p2.tm) FROM sl323.st_pump_r p2 WHERE p2.stcd = p.stcd)) AS '总排水流量(m³/s)',
+   JOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_pump_r WHERE tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY) GROUP BY stcd) m ON p.stcd = m.stcd AND p.tm = m.maxTm
+   WHERE p.pdchcd = '2' AND p.omcn > 0) AS '总排水流量(m³/s)',
   (SELECT COUNT(*) FROM sl323.st_gate_r g
-   WHERE g.gtophgt > 0
-     AND g.tm = (SELECT MAX(g2.tm) FROM sl323.st_gate_r g2 WHERE g2.stcd = g.stcd)) AS '开启闸门数';
+   JOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_gate_r WHERE tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY) GROUP BY stcd) n ON g.stcd = n.stcd AND g.tm = n.maxTm
+   WHERE g.gtophgt > 0) AS '开启闸门数';
 ```
 
 **Q9:** 查询当前所有站点的预警状态一览（包含正常站）。
@@ -1362,7 +1369,7 @@ ORDER BY r.z - rv.WRZ DESC;
 **Q11:** 扬州市重点河道（古运河、新城河、瘦西湖、沿山河等）实时水位情况。
 
 ```sql
-SELECT b.stnm AS '测站名称', r.z AS '实时水位(m)', r.tm AS '更新时间',
+SELECT sub.stnm AS '测站名称', r.z AS '实时水位(m)', r.tm AS '更新时间',
        rv.WRZ AS '警戒水位(m)',
        CASE WHEN rv.WRZ IS NOT NULL AND r.z > rv.WRZ THEN '超警戒' ELSE '正常' END AS '状态'
 FROM sl323.st_river_r r
@@ -1396,9 +1403,10 @@ SELECT b.stnm AS '测站', d.spt AS '采样时间',
          ELSE '正常'
        END AS '预警'
 FROM sl325.wq_pcp_d d
+JOIN (SELECT stcd, MAX(spt) AS maxSpt FROM sl325.wq_pcp_d GROUP BY stcd) m
+  ON d.stcd = m.stcd AND d.spt = m.maxSpt
 JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
 WHERE b.sttp = 'WQ'
-  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd)
 ORDER BY d.codmn DESC;
 ```
 

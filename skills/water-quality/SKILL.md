@@ -30,7 +30,7 @@ metadata:
   - sl325: wq_pcp_d（水质监测数据）
   - slztk: st_mx_preset_r_shj_auto, st_mx_taskid_shj_auto, wq_cod_pz（水质预测）
   - sl323: st_stbprp_b（测站信息）
-- **pymysql:** execute_code 环境可能未安装，首次使用需先运行 `pip install pymysql`
+- **pymysql 已由 lib/db.py 内部处理，🚫 禁止 pip install**（沙箱 externally-managed，pip 必失败且白烧 3-5 个轮次）。
 - **DB 助手模块:** 使用 `from db import query, query_multi`（见 shared/db_connection.md），自动处理连接管理、30s 超时、空结果提示。**不要手写 pymysql 连接代码。**
 - 参考 `shared/sql_safety_rules.md` — SQL 安全规则（所有 skill 通用）
 - 参考 `shared/sql_quality_check.md` — SQL 质量审查流程（所有 skill 通用）
@@ -59,8 +59,17 @@ from db import query, query_multi
 
 ## Pitfalls
 
+- **⚡ 一轮完成（性能第一杠杆，每次 LLM 往返 30-80s）。** 站点识别 + `MAX(spt)` 锚点 + 主查询必须写进**同一个 Python 脚本**一轮执行：先查站点/锚点，再用 f-string 把实值代入主查询（同脚本内安全；**禁止跨回合留 `{stcd}`/`{max_spt}` 等占位符**）。
+- **⚡ 聚合优先。** 水质"趋势/变化"类问题默认按日/周聚合指标均值（`GROUP BY DATE(spt)` + `AVG(...)`），**禁止拉原始行**再自行汇总。
+- **⚠️ 时间范围缺省时用默认值直接查，禁止反问（高频 0 分）。** "一段时间内/近期/最近"等模糊时间**不要**向用户追问时间范围——单轮场景下反问即任务失败。默认口径：**近 30 天**（锚定该表 `MAX(spt)` 而非 CURDATE，库数据可能滞后），"趋势"类可按周/月聚合。答复中注明所采用的时间窗即可。
 - **⚠️ 含单位/特殊字符的列别名必须加引号。** `AS CODMn(mg/L)` 的括号/斜杠会触发 MySQL 语法错→空结果。必须 `AS 'CODMn(mg/L)'`、`AS '氨氮(mg/L)'`、`AS '溶解氧(mg/L)'`。
-- **⚠️ 禁止 CTE / `WITH … AS`。** db.py 只放行 SELECT 开头，改用子查询。
+- **⚠️ 查"每站最新一条"严禁相关子查询 `d.spt = (SELECT MAX(spt) ... WHERE stcd = d.stcd)`（30s 必超时）。** wq_pcp_d 相关子查询逐行执行必超时（实测）。**必须**用派生表 JOIN（实测 0.1s）：
+  ```sql
+  FROM sl325.wq_pcp_d d
+  JOIN (SELECT stcd, MAX(spt) AS maxSpt FROM sl325.wq_pcp_d GROUP BY stcd) m
+    ON d.stcd = m.stcd AND d.spt = m.maxSpt
+  ```
+- **⚠️ 禁止 CTE / `WITH … AS`。** db.py 只放行 SELECT/SHOW/DESCRIBE/EXPLAIN 开头的语句，`WITH` 开头会被拒绝，改用子查询。
 - **按河道名查测站必须双匹配。** `rvnm` 常为 NULL，须 `WHERE (stnm LIKE '%X%' OR rvnm LIKE '%X%')`。
 
 ## Workflow

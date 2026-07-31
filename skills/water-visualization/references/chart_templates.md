@@ -38,7 +38,7 @@ os.makedirs(OUT_DIR, exist_ok=True)
    ```
 2. **照抄「黄金模板」，只改 4 处**：`CSV_PATH`、x 列、y 列、标题。不要重写结构、不要自造子图布局、不要堆装饰性 `print`/注释。
 3. **先洗后画。** 绘图前 `df = df.dropna(subset=[<绘图列>])`，避免 None 喂进 matplotlib 报错。
-4. **单图单脚本。** 需要多张图就多跑几次模板，别在一个脚本里 `delaxes`/`reshape` 玩多子图布局（最容易出错）。
+4. **单图单脚本。** 需要多张图就多跑几次模板，别在一个脚本里 `delaxes`/`reshape` 玩多子图布局（最容易出错）。多子图仅限照抄模板 5/7，不要自造布局。
 5. **路径用 `OUT_DIR`**（已在公共头部定义），不要写裸文件名 `savefig('x.png')`。
 
 ### 黄金模板（完整可运行，照抄即用）
@@ -82,11 +82,16 @@ print(f'图表已保存: {out}')
 
 ---
 
+> **⚠️ 模板 1-9 使用前必读**：以下每个模板都假定已包含「公共头部」（含 `import os` 与 `OUT_DIR` 定义）。使用前必须：① 读 CSV 后对时间列执行 `pd.to_datetime`（`pd.read_csv` 读入的时间列是字符串，直接喂 mdates 会报错）；② 绘图前 `df = df.dropna(subset=[<关键数值列>])`（与黄金模板做法一致，防 None 喂进 matplotlib）；③ `savefig` 一律用 `OUT_DIR` 绝对路径（前端只渲染 `/mnt/user-data/outputs/` 下的 PNG，裸文件名不渲染）。
+
 ## 1. 水位趋势折线图
 
 适用：water-situation, water-forecast — 单站或多站水位随时间变化。
 
 ```python
+df['tm'] = pd.to_datetime(df['tm'])   # CSV 读入的 tm 是字符串，必须先转
+df = df.dropna(subset=['z'])          # 先洗后画
+
 fig, ax = plt.subplots(figsize=(14, 6))
 
 for stnm, group in df.groupby('stnm'):
@@ -101,8 +106,10 @@ plt.xticks(rotation=45)
 ax.legend(fontsize=10)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
-plt.savefig('water_level_trend.png', dpi=150, bbox_inches='tight')
-print('图表已保存: water_level_trend.png')
+OUT_DIR = '/mnt/user-data/outputs'
+os.makedirs(OUT_DIR, exist_ok=True)
+plt.savefig(os.path.join(OUT_DIR, 'water_level_trend.png'), dpi=150, bbox_inches='tight')
+print('图表已保存: /mnt/user-data/outputs/water_level_trend.png')
 ```
 
 ## 2. 水位 + 警戒线折线图
@@ -110,6 +117,9 @@ print('图表已保存: water_level_trend.png')
 适用：water-situation, water-warning — 显示水位与警戒/保证水位对比。
 
 ```python
+df['tm'] = pd.to_datetime(df['tm'])   # CSV 读入的 tm 是字符串，必须先转
+df = df.dropna(subset=['z'])          # 先洗后画
+
 fig, ax = plt.subplots(figsize=(14, 6))
 
 # 水位线
@@ -139,8 +149,10 @@ plt.xticks(rotation=45)
 ax.legend(fontsize=10)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
-plt.savefig('water_level_warning.png', dpi=150, bbox_inches='tight')
-print('图表已保存: water_level_warning.png')
+OUT_DIR = '/mnt/user-data/outputs'
+os.makedirs(OUT_DIR, exist_ok=True)
+plt.savefig(os.path.join(OUT_DIR, 'water_level_warning.png'), dpi=150, bbox_inches='tight')
+print('图表已保存: /mnt/user-data/outputs/water_level_warning.png')
 ```
 
 ## 3. 降雨量柱状图
@@ -148,6 +160,9 @@ print('图表已保存: water_level_warning.png')
 适用：rainfall — 日降雨量或时段降雨量。
 
 ```python
+df['tm'] = pd.to_datetime(df['tm'])   # CSV 读入的 tm 是字符串，必须先转
+df = df.dropna(subset=['drp'])        # 先洗后画
+
 fig, ax = plt.subplots(figsize=(14, 6))
 
 colors = ['#1976D2' if v < 25 else '#FF9800' if v < 50 else '#F44336'
@@ -167,8 +182,10 @@ for threshold, label, color in [(25, '大雨 25mm', '#FF9800'), (50, '暴雨 50m
 
 ax.grid(True, alpha=0.3, axis='y')
 plt.tight_layout()
-plt.savefig('rainfall_daily.png', dpi=150, bbox_inches='tight')
-print('图表已保存: rainfall_daily.png')
+OUT_DIR = '/mnt/user-data/outputs'
+os.makedirs(OUT_DIR, exist_ok=True)
+plt.savefig(os.path.join(OUT_DIR, 'rainfall_daily.png'), dpi=150, bbox_inches='tight')
+print('图表已保存: /mnt/user-data/outputs/rainfall_daily.png')
 ```
 
 ## 4. 月度降雨量对比柱状图
@@ -176,6 +193,8 @@ print('图表已保存: rainfall_daily.png')
 适用：rainfall — 多年/多月降雨量对比。
 
 ```python
+df = df.dropna(subset=['total_rain'])   # 先洗后画（x 轴为月份数值，无需 to_datetime）
+
 fig, ax = plt.subplots(figsize=(14, 6))
 
 months = df['month'].unique()
@@ -196,8 +215,10 @@ ax.set_xticklabels([f'{m}月' for m in range(1, 13)])
 ax.legend(fontsize=10)
 ax.grid(True, alpha=0.3, axis='y')
 plt.tight_layout()
-plt.savefig('rainfall_monthly_compare.png', dpi=150, bbox_inches='tight')
-print('图表已保存: rainfall_monthly_compare.png')
+OUT_DIR = '/mnt/user-data/outputs'
+os.makedirs(OUT_DIR, exist_ok=True)
+plt.savefig(os.path.join(OUT_DIR, 'rainfall_monthly_compare.png'), dpi=150, bbox_inches='tight')
+print('图表已保存: /mnt/user-data/outputs/rainfall_monthly_compare.png')
 ```
 
 ## 5. 水质指标变化趋势图
@@ -205,6 +226,9 @@ print('图表已保存: rainfall_monthly_compare.png')
 适用：water-quality — 多指标子图展示水质变化。
 
 ```python
+df['spt'] = pd.to_datetime(df['spt'])   # CSV 读入的采样时间是字符串，必须先转
+df = df.dropna(subset=['spt'])          # 先洗后画（各指标列的 NaN 会自然显示为断点）
+
 indicators = {
     'dox': ('溶解氧 DO (mg/L)', '#4CAF50'),
     'codmn': ('高锰酸盐 CODMn (mg/L)', '#FF9800'),
@@ -225,8 +249,10 @@ for idx, (col, (label, color)) in enumerate(indicators.items()):
     ax.grid(True, alpha=0.3)
 
 plt.tight_layout()
-plt.savefig('water_quality_trend.png', dpi=150, bbox_inches='tight')
-print('图表已保存: water_quality_trend.png')
+OUT_DIR = '/mnt/user-data/outputs'
+os.makedirs(OUT_DIR, exist_ok=True)
+plt.savefig(os.path.join(OUT_DIR, 'water_quality_trend.png'), dpi=150, bbox_inches='tight')
+print('图表已保存: /mnt/user-data/outputs/water_quality_trend.png')
 ```
 
 ## 6. 水质等级阶梯图
@@ -234,6 +260,9 @@ print('图表已保存: water_quality_trend.png')
 适用：water-quality, water-warning — 水质等级随时间变化。
 
 ```python
+df['spt'] = pd.to_datetime(df['spt'])          # CSV 读入的采样时间是字符串，必须先转
+df = df.dropna(subset=['grade']).sort_values('spt')   # 先洗后画
+
 grade_colors = {
     'Ⅰ类': '#4CAF50', 'Ⅱ类': '#8BC34A', 'Ⅲ类': '#CDDC39',
     'Ⅳ类': '#FFC107', 'Ⅴ类': '#FF9800', '劣Ⅴ类': '#F44336'
@@ -259,8 +288,10 @@ legend_elements = [Patch(facecolor=c, label=g) for g, c in grade_colors.items()]
 ax.legend(handles=legend_elements, fontsize=9, loc='upper right')
 
 plt.tight_layout()
-plt.savefig('water_quality_grade.png', dpi=150, bbox_inches='tight')
-print('图表已保存: water_quality_grade.png')
+OUT_DIR = '/mnt/user-data/outputs'
+os.makedirs(OUT_DIR, exist_ok=True)
+plt.savefig(os.path.join(OUT_DIR, 'water_quality_grade.png'), dpi=150, bbox_inches='tight')
+print('图表已保存: /mnt/user-data/outputs/water_quality_grade.png')
 ```
 
 ## 7. 闸泵运行状态面板
@@ -268,6 +299,9 @@ print('图表已保存: water_quality_grade.png')
 适用：gate-pump-operation — 闸门开度 + 泵站流量综合面板。
 
 ```python
+df_gate = df_gate.dropna(subset=['gtophgt'])   # 先洗后画
+df_pump = df_pump.dropna(subset=['pmpq'])
+
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 fig.suptitle('闸泵运行状态', fontsize=16)
 
@@ -288,8 +322,10 @@ ax2.set_title('泵站抽水流量 (m³/s)', fontsize=12)
 ax2.set_xlabel('流量 (m³/s)')
 
 plt.tight_layout()
-plt.savefig('gate_pump_status.png', dpi=150, bbox_inches='tight')
-print('图表已保存: gate_pump_status.png')
+OUT_DIR = '/mnt/user-data/outputs'
+os.makedirs(OUT_DIR, exist_ok=True)
+plt.savefig(os.path.join(OUT_DIR, 'gate_pump_status.png'), dpi=150, bbox_inches='tight')
+print('图表已保存: /mnt/user-data/outputs/gate_pump_status.png')
 ```
 
 ## 8. 预测 vs 实际水位对比图
@@ -297,6 +333,11 @@ print('图表已保存: gate_pump_status.png')
 适用：water-forecast — 预测水位与实测水位对比，含误差区间。
 
 ```python
+actual_df['tm'] = pd.to_datetime(actual_df['tm'])       # CSV 读入的 tm 是字符串，必须先转
+forecast_df['tm'] = pd.to_datetime(forecast_df['tm'])
+actual_df = actual_df.dropna(subset=['z'])              # 先洗后画
+forecast_df = forecast_df.dropna(subset=['vals'])
+
 fig, ax = plt.subplots(figsize=(14, 6))
 
 # 实测水位
@@ -320,8 +361,10 @@ plt.xticks(rotation=45)
 ax.legend(fontsize=10)
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
-plt.savefig('forecast_vs_actual.png', dpi=150, bbox_inches='tight')
-print('图表已保存: forecast_vs_actual.png')
+OUT_DIR = '/mnt/user-data/outputs'
+os.makedirs(OUT_DIR, exist_ok=True)
+plt.savefig(os.path.join(OUT_DIR, 'forecast_vs_actual.png'), dpi=150, bbox_inches='tight')
+print('图表已保存: /mnt/user-data/outputs/forecast_vs_actual.png')
 ```
 
 ## 9. 预警状态汇总面板
@@ -329,6 +372,8 @@ print('图表已保存: forecast_vs_actual.png')
 适用：water-warning — 各站预警状态一览。
 
 ```python
+df = df.dropna(subset=['z']).reset_index(drop=True)   # 先洗后画（reset_index 保证 iterrows 的 i 与 barh 行号对齐）
+
 fig, ax = plt.subplots(figsize=(14, max(4, len(df) * 0.5)))
 
 status_colors = {'正常': '#4CAF50', '黄色预警': '#FFC107', '红色预警': '#F44336'}
@@ -353,6 +398,8 @@ legend_elements = [Patch(facecolor=c, label=l) for l, c in status_colors.items()
 ax.legend(handles=legend_elements, fontsize=10, loc='lower right')
 ax.grid(True, alpha=0.3, axis='x')
 plt.tight_layout()
-plt.savefig('warning_summary.png', dpi=150, bbox_inches='tight')
-print('图表已保存: warning_summary.png')
+OUT_DIR = '/mnt/user-data/outputs'
+os.makedirs(OUT_DIR, exist_ok=True)
+plt.savefig(os.path.join(OUT_DIR, 'warning_summary.png'), dpi=150, bbox_inches='tight')
+print('图表已保存: /mnt/user-data/outputs/warning_summary.png')
 ```

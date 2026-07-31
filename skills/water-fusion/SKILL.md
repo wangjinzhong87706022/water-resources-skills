@@ -58,6 +58,8 @@ from fusion import correlate, fuse, detect_conflicts, resolve_conflicts
 
 ## Workflow
 
+> ⚡ **步骤 2-6 必须写进同一个 Python 脚本一轮执行**——每次 LLM 往返 30-80s，按步骤拆成多个回合会把一次融合查询烧到 5-6 轮。各域 SQL 必须带时间范围：**锚各表 `MAX(tm)`（禁 NOW()/CURDATE()，库数据滞后）**、聚合优先（按日/站聚合后再融合），**禁止拉原始行灌上下文**（st_river_r/st_was_r/st_pump_r/st_pump_pa 为 RANGE(tm) 分区表，无 tm 条件会全分区扫描）。
+
 1. **识别涉及 Skill。** 根据用户问题判断涉及哪些业务域。参考下方关键词映射。
 2. **规划执行策略。** 调用 `plan_execution(skills)` 获取串行/并行执行计划。
    ```python
@@ -106,17 +108,11 @@ from fusion import correlate, fuse, detect_conflicts, resolve_conflicts
 
 ### 行数合理性检查
 
-```python
-# 预期范围: 输入 skill 数量 × 时间窗口天数 × 站数 × 0.5~2
-n_input = len([rainfall_rows, water_rows, warning_rows])  # 输入 skill 数
-days = (tm_max - tm_min).days if 'tm_max' in dir() else 30
-stations = len(set(r['stcd'] for r in water_rows))
-expected_min = n_input * min(days, 90)  # 上限 ~90 天
-if len(fused["data"]) > expected_min * 10:
-    mark("WARN: 融合后行数异常膨胀 ({}行 > {}行预期)".format(len(fused["data"]), expected_min * 10))
-if len(fused["data"]) < max(1, n_input):
-    mark("WARN: 融合后行数过少 ({}行)，可能 JOIN 丢失数据".format(len(fused["data"])))
-```
+以文字清单核对（无需照抄代码）：
+
+- 预期行数 ≈ 输入 skill 数 × 时间窗口天数（上限按 90 天计）× 站数的 0.5~2 倍
+- 融合后行数 > 预期上限 10 倍 → 在报告中标注 "WARN: 融合后行数异常膨胀"，回查是否 JOIN 笛卡尔积
+- 融合后行数 < 输入 skill 数 → 标注 "WARN: 融合后行数过少，可能 JOIN 丢失数据"
 
 ### 数值合理性检查
 

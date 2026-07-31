@@ -309,6 +309,10 @@ def main():
     os.environ.setdefault("WATER_RESOURCES_ROOT", str(skills_root))
     results = []
 
+    inc_dir = Path(args.output)
+    inc_dir.mkdir(parents=True, exist_ok=True)
+    inc_path = inc_dir / f"incremental_{args.skill or 'all'}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
+
     for i, case in enumerate(cases, 1):
         print(f"[{i:3d}/{len(cases)}] Q{case.index:03d} [{case.skill}/{case.level}] {case.question[:60]}")
         r = GatewayEvalResult(
@@ -334,6 +338,8 @@ def main():
             score_result(r)
             print(f"  ✗ {r.duration_sec}s | error: {r.error[:100]}")
         results.append(r)
+        with open(inc_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(asdict(r), ensure_ascii=False) + "\n")
 
     # 报告
     output_dir = Path(args.output)

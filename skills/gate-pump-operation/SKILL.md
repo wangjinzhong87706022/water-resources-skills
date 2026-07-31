@@ -28,7 +28,7 @@ metadata:
 ## Prerequisites
 
 - **数据库:** MySQL 192.168.100.103:3306，sl323 库（只读）
-- **pymysql:** execute_code 环境可能未安装，首次使用需先运行 `pip install pymysql`
+- **pymysql 已由 lib/db.py 内部处理，🚫 禁止 pip install**（沙箱 externally-managed，pip 必失败且白烧 3-5 个轮次）。
 - 参考 `shared/sql_safety_rules.md` — SQL 安全规则（所有 skill 通用）
 - 参考 `shared/sql_quality_check.md` — SQL 质量审查流程（所有 skill 通用）
 - 参考 `shared/sql_patterns.md` — SQL 通用查询模式（窗口函数处理时序数据）
@@ -55,12 +55,18 @@ from db import query, query_multi
 
 ## Pitfalls
 
+- **⚡ 一轮完成"站点识别 + MAX(tm) 锚点 + 主查询"：严禁拆成多个 LLM 回合。** 同一 Python 脚本内先 query() 拿真实 stcd/锚点，再 f-string 实值拼进主查询（同脚本代入安全；被禁止的是跨回合留 `{stcd}` 未填占位符）。"分步执行"指拆成多条简单 SQL，但都放在**同一脚本一轮跑完**。
+- **⚡ 相对时间窗锚定 MAX(tm)，禁锚 NOW()/CURDATE()。** 库数据滞后于挂钟（实测停在 2026-06），锚 NOW() 的窗口常落空返 0 行。
+- **⚡ 聚合优先。** 状态/趋势类问题默认按日/站聚合输出，严禁 LIMIT 500 拉原始行灌上下文（st_pump_pa 有 30 列电气参数，逐行拉取会抬高后续每轮耗时）。
+- **⚠️ 模糊时间（"一段时间/近期"）默认近 30 天（锚 MAX(tm)）直接查，禁止向用户反问**——单轮评测反问=0 分。
+- **⚠️ 分区裁剪：st_was_r/st_pump_r/st_pump_pa 是 RANGE(tm) 分区表**，禁止 `YEAR(tm) IN (...)` 这类把 tm 包进函数的谓词，必须写 tm 连续区间。
+
 - **⚠️ 禁止 CTE / `WITH … AS`（运行时报错，必返空）。** db.py 运行时只放行以 `SELECT` 开头的语句，CTE 会被拒绝。需中间结果（如"最新一条启闭/开度"）时**改用子查询**：`JOIN (SELECT stcd, MAX(tm) mt FROM st_gate_r GROUP BY stcd) latest ON g.stcd=latest.stcd AND g.tm=latest.mt`。覆盖 Q70/Q74/Q76。
 - **⚠️ 含单位/特殊字符的列别名必须加引号。** `AS 闸门开度(m)` 的括号会被 MySQL 当函数→语法错→空结果。必须 `AS '闸门开度(m)'`、`AS '过闸流量(m³/s)'`。
 
 - **综合汇总查询必须分步执行。** 当用户要求"泵站综合运行状态汇总"或"闸泵综合状态"时，不要尝试用一个复杂 SQL JOIN 所有表（st_gate_r + st_was_r + st_pump_r + st_pump_pa），这会因分区表扫描导致超时。
 - **正确做法：拆分为 2-3 个简单查询。** 先查泵站列表(st_pump_r)，再查闸站列表(st_gate_r)，最后合并结果。每个查询只 JOIN st_stbprp_b 获取名称。
-- **分区表查询必须带时间条件。** st_was_r、st_pump_r、st_pump_pa 按 tm 做 RANGE 分区，不带 WHERE tm 条件会全分区扫描导致超时。"最新"数据用 `WHERE tm >= DATE_SUB(NOW(), INTERVAL 7 DAY)` 或子查询 `WHERE tm = (SELECT MAX(tm) FROM ...)` 限定范围。
+- **分区表查询必须带时间条件。** st_was_r、st_pump_r、st_pump_pa 按 tm 做 RANGE 分区，不带 WHERE tm 条件会全分区扫描导致超时。"最新"数据的正确做法：先 `SELECT MAX(tm) FROM st_pump_r`（或 st_was_r）取锚点（PK 索引，毫秒级），窗口写 `tm > DATE_SUB('{锚点}', INTERVAL 7 DAY) AND tm <= '{锚点}'`；相关子查询（如 `tm = (SELECT MAX(tm) FROM ... WHERE stcd=...)`）必须带同样的 tm 范围裁剪，禁止无界相关子查询。
 - **避免在分区表上做无限制的 GROUP BY。** 先用时间范围过滤，再聚合。
 
 ## Workflow
@@ -80,12 +86,15 @@ from db import query, query_multi
 ### 分区表时间条件检查
 
 - [ ] **st_was_r/st_pump_r/st_pump_pa 必须带 WHERE tm 条件**：这三个表按 tm 做 RANGE 分区，不带时间条件会全分区扫描导致超时
-- [ ] **时间范围合理**：推荐 `tm >= DATE_SUB(NOW(), INTERVAL 7 DAY)` 或子查询取最新时间
+- [ ] **时间范围合理**：先 `SELECT MAX(tm)` 取锚点，再写 `tm > DATE_SUB('{锚点}', INTERVAL 7 DAY) AND tm <= '{锚点}'`；禁锚 NOW()/CURDATE()（库数据滞后，窗口会落空）
 
 **常见错误示例**：
 ```sql
 ❌ 错误：SELECT * FROM st_pump_r WHERE stcd='xxx'（无 tm 条件，超时）
-✅ 正确：SELECT * FROM st_pump_r WHERE stcd='xxx' AND tm >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+❌ 错误：用 NOW()/CURDATE() 锚相对时间窗（库数据滞后于挂钟，窗口落空返 0 行）
+✅ 正确：先 SELECT MAX(tm) FROM st_pump_r 得锚点（如 '2026-06-15 08:00:00'），再：
+        SELECT * FROM st_pump_r WHERE stcd='xxx'
+        AND tm > DATE_SUB('2026-06-15 08:00:00', INTERVAL 7 DAY) AND tm <= '2026-06-15 08:00:00'
 ```
 
 ### 运行状态逻辑检查

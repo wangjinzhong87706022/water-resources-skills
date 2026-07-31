@@ -2,6 +2,8 @@
 
 > 来源: /home/scada/dataagent/domains/sqls.txt 原始 Question-SQL 对
 
+> **⚠️ 时间锚点警示**：所有示例中的"最新"都必须锚 `MAX(tm)`，禁锚 NOW()/CURDATE()（库数据滞后于挂钟，实测停在 2026-06）。相关子查询必须带 tm 范围裁剪，禁止无界 `tm = (SELECT MAX(tm) ...)` 全分区扫描。
+
 ### Q: 查询当前开启状态的泵站最新工情、最新水情数据
 
 ```sql
@@ -12,8 +14,10 @@ SELECT p.tm AS '时间', p.stcd AS '测站编码', p.pumpname AS '泵名称',
        p.ppdwwptn AS '站下水势', p.pdchcd AS '引排特征码', p.msqmt AS '测流方法'
 FROM sl323.st_pump_r p
 JOIN sl323.st_stbprp_b b ON p.stcd = b.stcd
+JOIN (SELECT stcd, MAX(tm) AS mt FROM sl323.st_pump_r
+      WHERE tm > DATE_SUB((SELECT MAX(tm) FROM sl323.st_pump_r), INTERVAL 30 DAY)
+      GROUP BY stcd) m ON p.stcd = m.stcd AND p.tm = m.mt
 WHERE b.sttp = 'DP'
-  AND p.tm = (SELECT MAX(p2.tm) FROM sl323.st_pump_r p2 WHERE p2.stcd = p.stcd)
   AND p.omcn > 0
 ORDER BY p.tm DESC;
 ```
@@ -39,14 +43,17 @@ ORDER BY g.tm DESC;
 ### Q: 查询泵站综合运行状态汇总
 
 ```sql
+-- 每站最新时刻仅 1 行：omcn 本身就是开机台数、pmpq 就是该站抽水流量，逐站列出即可，无需 SUM/COUNT
 SELECT b.stnm AS '泵站名称',
-       SUM(CASE WHEN p.omcn > 0 THEN 1 ELSE 0 END) AS '运行泵数',
-       MAX(p.omcn) AS '开机台数',
-       SUM(p.pmpq) AS '总抽水流量',
-       CASE WHEN MAX(p.pdchcd) = '1' THEN '引水' WHEN MAX(p.pdchcd) = '2' THEN '排水' ELSE '未知' END AS '引排特征'
+       p.omcn AS '开机台数',
+       p.pmpq AS '抽水流量',
+       CASE WHEN p.pdchcd = '1' THEN '引水' WHEN p.pdchcd = '2' THEN '排水' ELSE '未知' END AS '引排特征',
+       p.tm AS '时间'
 FROM sl323.st_pump_r p
 JOIN sl323.st_stbprp_b b ON p.stcd = b.stcd
+JOIN (SELECT stcd, MAX(tm) AS mt FROM sl323.st_pump_r
+      WHERE tm > DATE_SUB((SELECT MAX(tm) FROM sl323.st_pump_r), INTERVAL 30 DAY)
+      GROUP BY stcd) m ON p.stcd = m.stcd AND p.tm = m.mt
 WHERE b.sttp = 'DP'
-  AND p.tm = (SELECT MAX(p2.tm) FROM sl323.st_pump_r p2 WHERE p2.stcd = p.stcd)
-GROUP BY b.stnm;
+ORDER BY b.stnm;
 ```

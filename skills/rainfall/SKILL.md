@@ -29,7 +29,7 @@ metadata:
 ## Prerequisites
 
 - **数据库:** MySQL 192.168.100.103:3306，数据库 sl323（只读）
-- **pymysql:** execute_code 环境可能未安装，首次使用需先运行 `pip install pymysql`
+- **pymysql 已由 lib/db.py 内部处理，🚫 禁止 pip install**（沙箱 externally-managed，pip 必失败且白烧 3-5 个轮次）。
 - **DB 助手模块:** 使用 `from db import query, query_multi`（见 shared/db_connection.md），自动处理连接管理、30s 超时、空结果提示。**不要手写 pymysql 连接代码。**
 - 参考 `references/schema.md` — 完整表结构（来源: 实际 MySQL DDL）
 - 参考 `references/business_rules.md` — 业务规则（来源: domains/evidens.txt）
@@ -61,6 +61,12 @@ from db import query, query_multi
 
 ## Pitfalls
 
+- **⚡ 一轮完成"站点识别 + MAX(tm) 锚点 + 聚合主查询"：严禁拆成多个 LLM 回合。** 同一 Python 脚本内先 query() 拿真实 stcd/锚点（`SELECT MAX(tm) FROM st_pptn_r`），再 f-string 实值拼进主查询（同脚本代入安全；被禁止的是跨回合留 `{stcd}` 未填占位符）。"分步执行"指拆成多条简单 SQL，但都放在**同一脚本一轮跑完**。
+- **⚡ 相对时间窗锚定 MAX(tm)，禁锚 CURDATE()/NOW()。** 库数据滞后于挂钟（实测停在 2026-06），锚 CURDATE() 的窗口常落空返 0 行。
+- **⚡ 聚合优先。** 降雨"趋势/变化/分布"默认 `GROUP BY DATE(tm)` 日聚合 + SUM(drp)，禁拉原始行灌上下文。
+- **⚠️ 模糊时间（"一段时间/近期"）默认近 30 天（锚 MAX(tm)）直接查，禁止向用户反问**——单轮评测反问=0 分。
+- **⚠️ 分区裁剪：st_pptn_r/f_rnfl_h 是 RANGE 分区表**，禁 `YEAR(tm) IN (...)` 把 tm 包进函数，必须写 tm 连续区间；年度统计写 `tm >= '2024-01-01' AND tm < '2025-01-01'`（**不要** `BETWEEN '2024-01-01' AND '2024-12-31'`——datetime 上界丢掉整个 12-31）。
+
 - **⚠️ 区域/站名列只在 `st_stbprp_b`，雨量表 `st_pptn_r` 只有 stcd+drp+tm。** 按区域聚合**必须 `JOIN st_stbprp_b b ON p.stcd=b.stcd`** 再 `GROUP BY b.addvcd`；禁止从 st_pptn_r 直接 SELECT addvcd（报 `Unknown column`）。也**禁止幻觉列 `addvnm`**（区域名称列不存在，只有 `addvcd` 码）。覆盖 Q30。
 - **⚠️ 含单位/特殊字符的列别名必须加引号**（如 `AS '降雨量(mm)'`），**禁 CTE/`WITH`**（改子查询）。
 
@@ -77,9 +83,10 @@ from db import query, query_multi
    - **标准模式**：用户问法包含"多少""情况""查一下"等中性词
      - 回答目标数据 + 1-2 个相关指标（如总量/均值/极值）
      - 不画图，不做趋势分析
-   - **详细模式**：用户明确要求"分析""趋势""对比""详细""变化""可视化""图"等词
+   - **详细模式**：用户明确要求"分析""趋势""对比""详细""变化"等词
      - 可以做多维度统计分析（按月/季度聚合、同比/环比）
-     - 可以画图（matplotlib），中文字体使用 `plt.rcParams['font.sans-serif'] = ['WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'DejaVu Sans']`
+     - **画图仅当用户明确说"画图/图表/可视化"才触发**（与 water-situation 口径一致）；"分析/趋势/对比"默认文字结论+数据表，不画图
+     - 画图时中文字体使用 `plt.rcParams['font.sans-serif'] = ['Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']`
      - 可以做异常检测、趋势分析
 
    > **`drp` vs `dyp` 决策规则**：`dyp` 是日降水量但数据可能不全。优先用 `SUM(drp) GROUP BY DATE(tm)` 按天聚合。如果 `few_shots.md` 有对应的 SQL，直接使用不要怀疑。

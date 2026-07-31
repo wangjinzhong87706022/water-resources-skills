@@ -154,6 +154,6 @@ conn = pymysql.connect(
 ## 注意事项
 
 - 跨库查询时使用 `库名.表名` 格式（如 `sl325.wq_pcp_d`）
-- 首次使用需确认 pymysql 已安装：`pip install pymysql`
+- pymysql 已预装（由 lib/db.py 内部 import），**🚫 禁止 pip install**（沙箱 externally-managed，pip 必失败）
 - 所有连接必须使用 `conn.cursor()` 执行查询后关闭：`cursor.close(); conn.close()`
 - **部署时无需修改代码**：通过环境变量配置连接信息

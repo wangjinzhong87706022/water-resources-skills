@@ -26,37 +26,31 @@ metadata:
 | 查询水库库水位、入库/出库流量、蓄水量 | Yes |
 | 查询各站防洪指标（警戒水位、保证水位） | Yes |
 | 水位趋势分析（涨/落/平） | Yes |
-| 水位/流量异常检测（MAD/统计方法） | Yes — 参考 references/mad_anomaly_detection.md |
-| 水量平衡检查（验证水位/流量一致性） | Yes — 参考 references/water_balance_check.md |
+| 水位/流量异常检测（MAD/统计方法） | Yes — 参考 shared/statistical_methods.md |
+| 水量平衡检查（验证水位/流量一致性） | Yes — 参考 shared/analysis_validation.md |
 
 ## Prerequisites
 
 - **数据库:** MySQL 数据库 sl323（只读）
 - **连接配置:** 通过环境变量配置（`SL323_DB_HOST`, `SL323_DB_PORT`, `SL323_DB_USER`, `SL323_DB_PASSWORD`），详见 `shared/db_connection.md`。
-- **pymysql:** execute_code 环境可能未安装，首次使用需先运行 `pip install pymysql`
-- **DB 助手模块:** 使用 `from db import query, query_multi`（见 shared/db_connection.md），自动处理连接管理、30s 超时、空结果提示。**不要手写 pymysql 连接代码。**
+- **pymysql 已预装（由 lib/db.py 内部 import），🚫 禁止 pip install**。
+- **导入规范（🚫 严禁手写 pymysql 连接、严禁硬编码密码）:** 必须用下方标准导入片段的 `from db import query, query_multi`（自动处理连接管理、30s 超时、空结果提示）。生成代码中**禁止**出现 `pymysql.connect(...)`、`password='...'`、`types.ModuleType('db')` 等自造连接逻辑——既白白消耗大量输出 token（实测一次查询因此多花 30+ 秒），又把数据库密码明文写进脚本。若导入失败，说明 `WATER_RESOURCES_ROOT/lib` 路径不对，应检查/修正环境变量（正确值见 `CLAUDE.md`），**绝不可**转而手写连接绕过。
 
-### 文件引用约定（双平台通用）
-
-本 skill 通过「逻辑相对路径」引用共享资源，真实路径由**部署环境变量 `WATER_RESOURCES_ROOT`**（指向 skills/）派生：
-
-| 引用 | 逻辑路径 | 运行时真实路径（两平台统一） |
-|------|---------|---------------------------|
-| 共享库 | `lib/db.py` | `$WATER_RESOURCES_ROOT/lib/db.py` |
-| 共享文档 | `shared/db_connection.md` | `$WATER_RESOURCES_ROOT/shared/db_connection.md` |
-| 本 skill 参考 | `references/schema.md` | （skill_dir 内，由平台注入的 skill 目录决定） |
-
-> `WATER_RESOURCES_ROOT` 由部署层设置：DeerFlow 指向 `/mnt/skills`，Hermes 指向 `~/.hermes/skills/water-resources`，开发指向仓库 `…/skills`。
-
-**标准导入片段**（生成查询代码时照抄，`__file__` 不可靠，勿用）：
+**标准导入片段**（生成查询代码时照抄；`__file__` 在暂存脚本中不可靠，**禁止**用 `Path(__file__).parent / 'lib'` 定位）：
 ```python
 import os, sys
 sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
 from db import query, query_multi
 ```
 
+> 共享资源（`lib/db.py`、`shared/*.md`）位于 `$WATER_RESOURCES_ROOT` 下；`references/*.md` 在本 skill 目录内。
+
 
 ## Pitfalls
+
+- **⚡ 一轮完成"站点识别 + 新鲜度探测 + 主查询"（省轮次，性能第一杠杆）。** 每次 LLM 往返耗 30~80s（decode 受限），**严禁**把"查站点→看数据范围→再查数据"拆成 3 个回合。必须在**一个 Python 脚本**里顺序完成：先 `query()` 站点清单拿到真实 stcd，再 `query()` 取 `MAX(tm)` 锚点，最后用 **Python f-string 把实值拼进主查询**。同一脚本内变量代入是安全的（值已落实，不会产生 `{stcd}` 未填占位符）；被禁止的是**跨回合手写 `{...}` 模板**。照抄 `references/few_shots.md`「标准三件套」。（实测 Q4 拆 6 轮烧 768s，可压到 2~3 轮。）
+- **⚡ "最近 N 天/月"必须锚定 MAX(tm)，禁止锚 CURDATE()。** 库数据滞后（实测停在 2026-06），`DATE_SUB(CURDATE(), ...)` 窗口常落空→0 行→整轮重试。正确做法：先按 stcd 取 `SELECT MAX(tm) FROM st_river_r WHERE stcd IN (...)`（PK 索引，毫秒级），再以该值为终点算窗口 `tm >= DATE_SUB('{锚点}', INTERVAL 30 DAY)`。答复中说明数据截止时间。
+- **⚡ 聚合优先，禁止先拉原始行再聚合。** "水位数据/变化/趋势"类问题默认输出**日聚合**（`GROUP BY DATE(tm)` 的 AVG/MAX/MIN）+ 总体统计，**严禁** `LIMIT 500` 拉原始行灌进上下文——大结果表会抬高后续每一轮的 prefill/decode 耗时（实测 Q9 因此 882s）。仅当用户明确要逐条原始记录时才拉明细，且 `LIMIT ≤ 100`。
 
 - **⚠️ 按河道名查必须双匹配 stnm+rvnm（高频 0 行错误）。** 运河/河道的 `rvnm` 字段**经常为 NULL**（实测古运河 3 个水位站 rvnm 全为 NULL，站名"古运河水位站（…）"只存在 `stnm` 里）。**严禁**只写 `WHERE rvnm LIKE '%古运河%'`（必返 0 行），**必须**双匹配：
   ```sql
@@ -64,21 +58,22 @@ from db import query, query_multi
   ```
   覆盖所有"古运河/里运河/X 河"类查询（Q1/Q5/Q8/Q11/Q12/Q14/Q25）。
 
+- **⚠️ 站名精确命中但数据表 0 行→放宽核心词回退到同族站（高频 0 行错误）。** "X水利枢纽/X枢纽"类站在 st_stbprp_b 里多为工程站（sttp='DD'/'DP'），**在 st_river_r 中没有水位数据**（实测"扬州水利枢纽"2 个站 river_r 均 0 行，而同族"扬州闸水文站"(sttp='ZQ')有完整数据）。当 `stnm LIKE '%X水利枢纽%'` 关联数据表返回 0 行时，**禁止反复改时间范围重试**，应立即：
+  1. 剥掉后缀取核心词（"扬州水利枢纽"→"扬州"），查 `SELECT stcd, stnm, sttp FROM st_stbprp_b WHERE stnm LIKE '%扬州%'` 列出同族站；
+  2. 优先选水文/水位站（sttp IN ('ZQ','ZZ','DD')）中**在目标数据表实际有行**的站（用 COUNT 验证）重新查询；
+  3. 答复中说明实际使用的测站名及其与用户所述站点的关系。
+
 - **⚠️ 求"最新值"必须先限定近期 tm 窗口（否则分区表全扫超时）。** `st_river_r` 是 RANGE(tm) 分区表，`WHERE tm=(SELECT MAX(tm) ... WHERE stcd=...)` 这类相关子查询**没有 tm 范围**会扫所有分区→超时(实测 2013)。必须先裁剪：`WHERE r.tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY) AND r.tm=(SELECT MAX(tm) FROM st_river_r r2 WHERE r2.stcd=r.stcd AND r2.tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY))`。**窗口要宽（≥90天）**——本库数据可能滞后（实测停在 2026-06），7 天窗口会落空返 0 行。覆盖 Q10。
 - **⚠️ 建站时间字段是 `esstym`（char(6)，如 '201501'），不是 `bldt`/`build_date`。** st_stbprp_b 的建站年月列叫 `esstym`，始报年月叫 `bgfrym`。查"建站最早/最晚"用 `MIN(esstym)`/`MAX(esstym)`，**禁止**幻觉列 bldt。覆盖 Q6。
 
 - **⚠️ 分区裁剪（跨年/跨月对比必读）。** `st_river_r`/`st_was_r`/`st_pump_r`/`st_pump_pa` 是 `RANGE(tm)` 分区表。WHERE 若用 `YEAR(tm) IN (...)`、`MONTH(tm)=` 这类**把 tm 包进函数**的谓词，优化器拿不到连续区间→扫所有分区→慢甚至超时。必须写成 `tm` 连续区间：`tm >= '2023-01-01' AND tm < '2025-01-01'`。（实测 434s 的"2023 vs 2024 古运河"查询就踩了这个坑，SQL 写成 `YEAR(tm) IN (2023,2024)` 无 tm 范围。）
 
-- **🚫 严禁手写 pymysql 连接、严禁硬编码数据库密码（高频错误 + 严重后果）。** 必须照抄 Prerequisites 的「标准导入片段」用 `from db import query, query_multi`。生成代码中**禁止**出现 `pymysql.connect(...)`、`password='...'`、`types.ModuleType('db')` 等任何自造连接逻辑——它们既白白消耗大量输出 token（显著拖慢响应，实测一次查询因此多花 30+ 秒），又把数据库密码明文写进脚本（密码泄漏）。若 `from db import query` 导入失败，说明 `WATER_RESOURCES_ROOT/lib` 路径不对，应改为检查/修正环境变量（正确值见 `CLAUDE.md`），**绝不可**转而手写连接绕过。
-
 - **`query()` 返回 `list[dict]`，不是 DataFrame。** 不能调用 `.iterrows()`, `.groupby()`, `.describe()` 等 pandas 方法。必须用 `for row in df: row['列名']` 或手动转 DataFrame: `import pandas as pd; df = pd.DataFrame(query(sql))`。
 - **水库数据可能非常稀疏。** st_rsvr_r 表可能仅有最近1天的数据（如仅2025-05-19），远少于河道水情。查询前应先用 `SELECT MIN(tm), MAX(tm), COUNT(*) FROM st_rsvr_r WHERE rz IS NOT NULL` 确认实际数据范围，避免按"最近3个月"查出空结果。
 - **站点编码格式不匹配。** 水库站（510B6180）、河道站（00000001）、闸门/泵站（HPBZCZ*）使用不同编码体系，无法直接 JOIN。跨域关联需先建立编码映射。
 - **水库相关表大多为空。** st_rsvrfcch_b（库容曲线）、st_rsvrfcch_b（防洪参数）、st_rsvrav_r、st_rsvrevs_r（蒸发）在 2025-05 均为空表。水量平衡检查所需的历史流量（inq/otq）也全为空。做分析前应先确认哪些表有数据。
-- **本库只含扬州地区站点。** sl323 库的行政区划码以 3210 开头（扬州）。如果用户查询的水库/站点在此库中找不到（如"三岔水库"），应提示用户该站点可能在调度数据库中，推荐切换到 `plan-generation` skill（连接本地 `powerelf_srm_yml` 库，包含调度预案和更多水库数据），而非反复在 sl323 中搜索。
+- **本库仅覆盖扬州地区站点。** sl323 库行政区划码以 3210 开头（扬州），不含其他省市站点。用户查询非扬州站点（如"三岔水库"、千岛湖）时，应第一时间说明覆盖范围限制（可用 `SELECT DISTINCT addvcd FROM st_stbprp_b` 确认），而非反复模糊搜索。
 - **无汛限水位字段。** st_rvfcch_b 仅有 WRZ（警戒水位）和 GRZ（保证水位），无"汛限水位"字段。水库防洪参数表 st_rsvrfcch_b 为空，因此系统中无法查询水库汛限水位。用户询问"距汛限水位多少米"时需说明该数据缺失。
-- **数据库仅覆盖扬州地区。** st_stbprp_b 行政区划码以 3210xx 为主（扬州），不包含其他省市站点。用户询问非扬州地区的水库（如三岔水库、千岛湖等）时，应第一时间说明覆盖范围限制，避免无意义的多次模糊搜索。可用 `SELECT DISTINCT addvcd FROM st_stbprp_b` 快速确认覆盖区域。
-- **db 模块路径:** 见上方「标准导入片段」。⚠️ 不要用 `Path(__file__).parent / 'lib'`——LLM 生成的暂存脚本 `__file__` 在 workspace，lib/ 是 skill 的兄弟目录而非子目录，该写法会定位到不存在的路径。
 - **水体分类需前置标注（高频错误）。** `rvnm`（河名）字段将洪泽湖（湖泊）、长江（天然河流）、里运河（人工运河）同级归类，**不区分水体类型**。输出结果时需根据 `references/water_classification.md` 前置标注水体类型，避免语义混淆。参见 Validation Gate"水体分类一致性检查"。
 - **高程基准不一致（高频错误）。** 本库存在多种高程基准：
   - 洪泽湖蒋坝站：`dtmnm='废黄河口'`，`dtmel=NULL`
@@ -97,8 +92,6 @@ from db import query, query_multi
 - 参考 `references/schema.md` §S3/S5/S6 — **表业务场景/口径/SQL 模板（卡片化知识，解决低分用例）**
 - 参考 `references/business_rules.md` — 业务规则（来源: domains/evidens.txt）
 - 参考 `references/few_shots.md` — SQL 示例（来源: domains/sqls.txt）
-- 参考 `references/mad_anomaly_detection.md` — MAD 异常检测算法（水位突变/横向对比/变化速率）
-- 参考 `references/water_balance_check.md` — 水量平衡检查方法（所需表、编码映射、替代方案）
 - 参考 `references/water_classification.md` — 水体分类知识库（湖泊/天然河流/人工运河的区分与报告规范）
 - 参考 `references/elevation_datum.md` — 高程基准说明（废黄河口/吴淞分布、跨基准对比注意事项）
 - 参考 `references/threshold_query_validation.md` — 阈值查询验证方法（查询前验证、缺失处理规范）
@@ -112,26 +105,11 @@ from db import query, query_multi
 
 ---
 
-## 📊 基线数据（2026-07-28）
-
-**DeerFlow Eval 全量 98 题基线**：详见 `docs/superpowers/specs/2026-07-28-deerflow-baseline-98.md`
-
-- **平均分**：0.75
-- **通过率**：90.8%
-- **water-situation 低分用例（3 题）**：
-  - Q2 [L1] 宝应站字段查询不完整（0.38 分）→ **S3/S5/S6 已补充场景映射**
-  - Q15 [L3] 白马闸实时水位（0.53 分）→ **S6 模板 6 已覆盖**
-  - Q19 [L3] 2025 年古运河水位站数量（0.58 分）→ **S5 分区规则已明确**
-
-**P0 改造目标**：
-- 平均分从 0.75 → **≥ 0.775**（+3%）
-- 低分用例从 3 题 → **≤ 1 题**（-50%+）
-
 ## Workflow
 
 1. **识别查询场景。** 河道水位→st_river_r; 水库水位→st_rsvr_r; 防洪指标→st_rvfcch_b。
 2. **识别测站/河道实体。** 参照重点河道映射（business_rules.md）。
-3. **确定时间范围。** "实时/最新"→MAX(tm); "某天左右"→前后3天; "最近"→3天; "当前"→10天; "最近30天"→`tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)`; "最近2个月"→`INTERVAL 2 MONTH`。不要把窗口写窄(如把"最近30天"写成单天)。
+3. **确定时间范围。** "实时/最新"→MAX(tm); "某天左右"→前后3天; "最近"→3天; "当前"→10天; "最近30天"→30 天窗口; "最近2个月"→2 个月窗口。不要把窗口写窄(如把"最近30天"写成单天)。**相对窗口一律锚定该站 `MAX(tm)`**（库数据滞后，锚 `CURDATE()` 常落空返 0 行）：同一脚本内先取锚点，再 `tm >= DATE_SUB('{锚点}', INTERVAL 30 DAY)`。
 4. **判断回复深度。** 根据用户问题的措辞和语境选择合适深度：
    - **精简模式**：用户问法简短（如"最高水位""多少""最低"），没有"分析""趋势""详细""对比"等词
      - 只查目标数据，不做额外分析
@@ -146,7 +124,7 @@ from db import query, query_multi
      - 可以画图（matplotlib），中文字体用 `['Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']`（宿主机实测只装了 Noto；勿改、勿找字体）；**查画解耦**——查一次落 CSV（`df.to_csv('/mnt/user-data/workspace/plot_data.csv', index=False)`），绘图脚本只读 CSV、照抄 `water-visualization` 黄金模板（`water-visualization/references/chart_templates.md` §0），避免反复重写画图代码；**完整报告 + 图直接写在对话回复正文**（不另存 .md 报告文件），图用**绝对路径** `/mnt/user-data/outputs/xxx.png` 内嵌（相对路径或写进文件里的路径前端不渲染，会显示成文字）
      - 可以做异常检测、趋势分析等
 
-   > ⚠️ **按站名直查,禁止占位符(高频错误)。** 当题目提到具体测站/河道名(宝应、白马闸、古运河…),**必须** `JOIN st_stbprp_b b ON r.stcd=b.stcd WHERE b.stnm LIKE '%站名%'` 按名直接查。**严禁**"先查 stcd 再用变量代入"的两步法——它会产生 `{stcd}`/`{dt}` 这类**未填值的占位符**,匹配 0 行。
+   > ⚠️ **禁止占位符(高频错误)。** 当题目提到具体测站/河道名(宝应、白马闸、古运河…),要么**单条 SQL 按名 JOIN**(`JOIN st_stbprp_b b ON r.stcd=b.stcd WHERE b.stnm LIKE '%站名%'`),要么**同一 Python 脚本内**先查 stcd 再 f-string 实值代入(「标准三件套」)。**严禁**跨回合留 `{stcd}`/`{dt}` 这类**未填值的占位符**——匹配 0 行。
    >
    > ❌ 错误(占位符污染,返回 0 行):
    > ```sql
@@ -188,8 +166,7 @@ from db import query, query_multi
 
 - **水势编码:** wptn 4=涨, 5=落, 6=平
 - **测站类型:** ZZ=水位站, ZQ=水文站, RR=水库站
-- **st_stbprp_b PK 是 (stcd, sttp)** 不是单独 stcd
-- **st_rvfcch_b 无 PK**，STCD 上只有 INDEX
+- **同一 stcd 在 st_stbprp_b 可能有多行**（主键含 sttp）——按 stcd JOIN 时如出现重复行，加 `sttp` 条件或 DISTINCT
 - **重点河道映射:** 详见 business_rules.md
 
 ## Related Skills
@@ -321,18 +298,13 @@ def validate_threshold(stcd: str) -> dict:
 
 ---
 
-### S3/S5/S6 卡片化知识（P0-1 改造）
+### S3/S5/S6 卡片化知识
 
-**📚 新增强化**：`references/schema.md` 已为 4 张核心表补充 S3/S5/S6 卡片化知识。
+`references/schema.md` 已为 4 张核心表补充 S3/S5/S6 卡片化知识，选表/写 SQL 时**优先查阅**：
 
 | 表名 | S3 场景映射 | S5 口径定义 | S6 SQL 模板 |
 |------|------------|------------|------------|
 | st_river_r | ✅ 6 个适用/不适用场景 | ✅ 分区规则/字段约束/反模式 | ✅ 6 个参数化模板 |
 | st_rsvr_r | ✅ 4 个适用/不适用场景 | ✅ 数据稀疏性说明 | ✅ 3 个模板（含存在性检查） |
-| st_stbprp_b | ✅ 4 个适用/不适用场景 | ✅ 高频字段口径/Q2 专项说明 | ✅ 4 个模板（解决 Q2 低分） |
+| st_stbprp_b | ✅ 4 个适用/不适用场景 | ✅ 高频字段口径 | ✅ 4 个模板 |
 | st_rvfcch_b | ✅ 4 个适用/不适用场景 | ✅ 阈值缺失警告/STCD 大小写 | ✅ 5 个模板（含存在性检查） |
-
-**解决的低分用例**：
-- ✅ Q2 [L1] 宝应站字段查询不完整（0.38 → 预期 ≥ 0.6）：S3/S5/S6 明确 SELECT 所有属性字段
-- ✅ Q15 [L3] 白马闸实时水位（0.53 → 预期 ≥ 0.7）：S6 模板 6 覆盖实时水位查询
-- ✅ Q19 [L3] 2025 年古运河水位站数量（0.58 → 预期 ≥ 0.7）：S5 明确分区裁剪规则

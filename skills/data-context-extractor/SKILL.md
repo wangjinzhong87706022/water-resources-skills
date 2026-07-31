@@ -28,12 +28,22 @@ metadata:
 ## Prerequisites
 
 - **数据库访问权限:** 可执行 SQL（只读）
-- **pymysql:** 如未安装需先 `pip install pymysql`
+- **pymysql 已预装（由 lib/db.py 内部 import），🚫 禁止 pip install**（沙箱 externally-managed，pip 必失败且白烧轮次）。
+- **导入规范（🚫 禁止手写 pymysql.connect、禁止明文密码）:** 必须用标准导入片段：
+  ```python
+  import os, sys
+  sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+  from db import query
+  ```
 - **参考:** `shared/data_profiling.md` — 数据画像方法论的完整参考
 - 参考 `shared/sql_safety_rules.md` — SQL 安全规则
 - 参考 `shared/statistical_methods.md` — 统计方法（分布特征描述）
 
 ## Workflow
+
+> ⚡ **步骤 1-6 全是只读 SQL，必须合并进同一个 Python 脚本一轮执行**——按步骤拆成 6 个 LLM 回合每轮多烧 30-80s。
+>
+> ⚠️ **分区表画像必须先限窗**：对 RANGE(tm) 分区表（st_river_r/st_was_r/st_pump_r/st_pump_pa 等），`SELECT COUNT(*)`、逐列 NULL 率这类无 tm 条件的全表扫描会被 db.py 分区守卫拒绝或全分区扫描超时。先取 `MAX(时间列)` 锚点，再在近 N 天（如 30 天）采样窗口内做画像，并注明"基于采样窗口"。时间列名不一定是 `tm`（wq_pcp_d 用 `spt`），先 DESC 确认。
 
 1. **探索元数据。**
    ```sql
