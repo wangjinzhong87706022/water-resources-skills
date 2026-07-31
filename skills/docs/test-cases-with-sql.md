@@ -35,13 +35,14 @@ FROM sl323.st_stbprp_b;
 **Q4:** 查询水位站宝应最近30天水位数据。
 
 ```sql
-SELECT r.tm AS '时间', r.z AS '水位(m)'
+SELECT DATE(r.tm) AS '日期', ROUND(AVG(r.z), 2) AS '水位(m)'
 FROM sl323.st_river_r r
 JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
 WHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'
   AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
   AND r.z IS NOT NULL
-ORDER BY r.tm;
+GROUP BY DATE(r.tm)
+ORDER BY DATE(r.tm);
 ```
 
 ### L2 — 多表关联、条件过滤
@@ -93,13 +94,17 @@ GROUP BY b.stnm;
 **Q9:** 查询里运河（河流）最近两个月的水位数据。
 
 ```sql
-SELECT b.stnm AS '测站名称', r.z AS '水位(m)', r.tm AS '时间'
+SELECT b.stnm AS '测站名称',
+       ROUND(AVG(r.z), 2) AS '平均水位(m)',
+       ROUND(MAX(r.z), 2) AS '最高水位(m)',
+       ROUND(MIN(r.z), 2) AS '最低水位(m)'
 FROM sl323.st_river_r r
 JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
 WHERE b.rvnm = '里运河'
   AND r.tm >= DATE_SUB(NOW(), INTERVAL 2 MONTH)
   AND r.z IS NOT NULL
-ORDER BY r.tm DESC;
+GROUP BY b.stnm
+ORDER BY b.stnm;
 ```
 
 **Q10:** 查询各水位站最新的水位值。
@@ -251,19 +256,7 @@ ORDER BY AVG(r.z) DESC;
 **Q22:** 查询水位站宝应这个月的水位数据（同义词测试：本月 = 当月）。
 
 ```sql
-SELECT r.tm AS '时间', r.z AS '水位(m)'
-FROM sl323.st_river_r r
-JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
-WHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'
-  AND DATE_FORMAT(r.tm, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
-  AND r.z IS NOT NULL
-ORDER BY r.tm;
-```
-
-**Q23:** 查询水位站宝应本月内水位数据变化趋势。
-
-```sql
-SELECT DATE(r.tm) AS '日期', AVG(r.z) AS '日平均水位(m)', MAX(r.z) AS '日最高水位(m)', MIN(r.z) AS '日最低水位(m)'
+SELECT DATE(r.tm) AS '日期', ROUND(AVG(r.z), 2) AS '水位(m)'
 FROM sl323.st_river_r r
 JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
 WHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'
@@ -271,6 +264,20 @@ WHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'
   AND r.z IS NOT NULL
 GROUP BY DATE(r.tm)
 ORDER BY DATE(r.tm);
+```
+
+**Q23:** 查询水位站宝应本月内水位数据变化趋势。
+
+```sql
+SELECT ROUND(AVG(r.z), 2) AS '月均水位(m)',
+       ROUND(MAX(r.z), 2) AS '最高水位(m)',
+       ROUND(MIN(r.z), 2) AS '最低水位(m)',
+       ROUND(MAX(r.z) - MIN(r.z), 2) AS '极差(m)'
+FROM sl323.st_river_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+WHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'
+  AND DATE_FORMAT(r.tm, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
+  AND r.z IS NOT NULL;
 ```
 
 **Q24:** 古运河8月的水位数据与扬州闸6月的水位数据对比，各自的平均水位、最高水位和最低水位分别是多少？
@@ -572,20 +579,21 @@ WHERE b.stnm LIKE '%京杭运河%' AND b.sttp = 'WQ';
 **Q3:** 帮我分析一下最近一个月瘦西湖水质变化趋势。
 
 ```sql
-SELECT DATE(d.spt) AS '日期',
-       AVG(d.dox) AS '平均溶解氧(mg/L)',
-       AVG(d.codmn) AS '平均CODMn(mg/L)',
-       AVG(d.nh3n) AS '平均氨氮(mg/L)',
-       AVG(d.tp) AS '平均总磷(mg/L)',
-       AVG(d.ph) AS '平均pH',
-       AVG(d.wtmp) AS '平均水温(℃)'
+SELECT ROUND(AVG(d.dox), 2) AS '平均溶解氧(mg/L)',
+       ROUND(MIN(d.dox), 2) AS '最低溶解氧(mg/L)',
+       ROUND(MAX(d.dox), 2) AS '最高溶解氧(mg/L)',
+       ROUND(AVG(d.codmn), 2) AS '平均CODMn(mg/L)',
+       ROUND(MIN(d.codmn), 2) AS '最低CODMn(mg/L)',
+       ROUND(MAX(d.codmn), 2) AS '最高CODMn(mg/L)',
+       ROUND(AVG(d.nh3n), 3) AS '平均氨氮(mg/L)',
+       ROUND(MIN(d.nh3n), 3) AS '最低氨氮(mg/L)',
+       ROUND(MAX(d.nh3n), 3) AS '最高氨氮(mg/L)',
+       ROUND(AVG(d.tp), 3) AS '平均总磷(mg/L)'
 FROM sl325.wq_pcp_d d
 JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
 WHERE b.stnm LIKE '%瘦西湖%' AND b.sttp = 'WQ'
   AND d.spt >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
-  AND d.spt <= NOW()
-GROUP BY DATE(d.spt)
-ORDER BY DATE(d.spt);
+  AND d.spt <= NOW();
 ```
 
 **Q4:** 查询京杭运河水质站当前水质等级（单因子评价法）。
@@ -711,16 +719,16 @@ ORDER BY '变化幅度' DESC;
 **Q8:** 查询一段时间内所有水质站的水质变化趋势。
 
 ```sql
-SELECT DATE(d.spt) AS '日期', b.stnm AS '测站',
-       AVG(d.dox) AS '平均DO(mg/L)', AVG(d.codmn) AS '平均CODMn(mg/L)',
-       AVG(d.nh3n) AS '平均NH3N(mg/L)', AVG(d.tp) AS '平均TP(mg/L)',
-       AVG(d.ph) AS '平均pH', AVG(d.wtmp) AS '平均水温(℃)'
+SELECT b.stnm AS '测站',
+       ROUND(AVG(d.dox), 2) AS '平均DO(mg/L)', ROUND(AVG(d.codmn), 2) AS '平均CODMn(mg/L)',
+       ROUND(AVG(d.nh3n), 3) AS '平均NH3N(mg/L)', ROUND(AVG(d.tp), 3) AS '平均TP(mg/L)',
+       ROUND(AVG(d.ph), 2) AS '平均pH', ROUND(AVG(d.wtmp), 1) AS '平均水温(℃)'
 FROM sl325.wq_pcp_d d
 JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
 WHERE b.sttp = 'WQ'
   AND d.spt >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-GROUP BY DATE(d.spt), b.stnm
-ORDER BY DATE(d.spt), b.stnm;
+GROUP BY b.stnm
+ORDER BY b.stnm;
 ```
 
 **Q9:** 查询所有水质站的最新数据，包含测站名称和所有指标。
@@ -1354,16 +1362,19 @@ ORDER BY CASE WHEN r.z > rv.GRZ THEN 1 WHEN r.z > rv.WRZ THEN 2 ELSE 3 END, r.z 
 **Q10:** 查询最近30天内是否有站点曾超警戒水位。
 
 ```sql
-SELECT b.stnm AS '测站名称', r.z AS '水位(m)', rv.WRZ AS '警戒水位(m)',
-       r.tm AS '时间',
-       CASE WHEN r.z > rv.GRZ THEN '超保证' WHEN r.z > rv.WRZ THEN '超警戒' END AS '预警类型'
+SELECT b.stnm AS '测站名称',
+       rv.WRZ AS '警戒水位(m)',
+       ROUND(MAX(r.z), 2) AS '最高水位(m)',
+       ROUND(MIN(r.z), 2) AS '最低水位(m)',
+       COUNT(DISTINCT DATE(r.tm)) AS '超警天数'
 FROM sl323.st_river_r r
 JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
 JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD
 WHERE r.tm >= DATE_SUB(NOW(), INTERVAL 30 DAY)
   AND r.z > rv.WRZ
   AND rv.WRZ IS NOT NULL
-ORDER BY r.z - rv.WRZ DESC;
+GROUP BY b.stnm, rv.WRZ
+ORDER BY COUNT(DISTINCT DATE(r.tm)) DESC, MAX(r.z) DESC;
 ```
 
 **Q11:** 扬州市重点河道（古运河、新城河、瘦西湖、沿山河等）实时水位情况。
