@@ -28,8 +28,8 @@ metadata:
 ## Prerequisites
 
 - **数据来源:** 依赖数据 skill 先获取数据，或上下文中已有查询结果
-- **图表能力:** 依赖 water-visualization 生成子图表
-- **排版输出:** Python + matplotlib/plotly + reportlab（PDF，可选）
+- **图表能力:** 依赖 water-visualization 生成子图表（沙箱三铁律：禁 pip install；脚本 write_file 落盘再 bash 执行，禁 heredoc；CJK 字体 `['Noto Sans CJK SC','WenQuanYi Micro Hei','DejaVu Sans']`）
+- **交付形态:** 报告正文直接写在对话回复里，图表为 PNG（绝对路径 `/mnt/user-data/outputs/xxx.png` 内嵌）。**沙箱无 reportlab/plotly 交互导出能力，不承诺 PDF/交互式 HTML**
 - 参考 `shared/statistical_methods.md` — 报告中的统计分析和异常检测
 - 参考 `shared/analysis_validation.md` — 报告结论的置信度评定和陷阱检查
 
@@ -41,13 +41,13 @@ metadata:
    - 专题报告：问题→分析→结论→建议完整结构
 2. **数据获取与预处理。** 调用对应数据 skill，按 shared/statistical_methods.md 做描述统计和异常标记。
 3. **分析。** 识别关键发现（最高/最低/突变/超阈值），计算趋势和对比指标。
-4. **生成图表。** 对每个关键发现生成对应图表。优先 plotly 交互式，备选 matplotlib 静态。
+4. **生成图表。** 对每个关键发现生成对应图表，用 matplotlib 照抄 water-visualization 的 `references/chart_templates.md` 黄金模板，PNG 存 `/mnt/user-data/outputs/`。
 5. **排版。** 按报告类型组织内容结构：
    - **日报**: 标题区块 → KPI 行 → 趋势图 → 数据表
    - **周报**: 摘要 → 逐日趋势 → 同比/环比 → 排名 → 表格
    - **专题**: 背景 → 数据 → 分析 → 发现 → 建议
 6. **添加上下文。** 每张图表附关键结论文字——不要只放图，要解释"图告诉我们什么"。
-7. **导出。** 报告保存为 HTML（推荐，保留交互性）或 PDF（正式汇报）。
+7. **交付。** 完整报告（标题/结论/图/表/发现）**直接写在对话回复正文**，每张图内嵌 `![标题](/mnt/user-data/outputs/xxx.png)`。**禁止**另存 .md 报告文件（前端渲染不出）。
 
 ## Report Templates
 

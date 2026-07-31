@@ -1,6 +1,6 @@
 ---
 name: build-dashboard
-description: "水利仪表盘构建 — 将多个图表和数据源组合为统一看板。支持网格布局、交互联动、自动刷新、导出分享。与 water-visualization 配合使用。"
+description: "水利仪表盘构建 — 将多个图表和数据源组合为统一看板。支持网格布局、KPI 卡片、静态 PNG 快照交付。与 water-visualization 配合使用。"
 version: 1.0.0
 author: dataagent-water-resources
 license: MIT
@@ -28,21 +28,21 @@ metadata:
 ## Prerequisites
 
 - **数据来源:** 先调用对应数据 skill 获取数据
-- **图表生成:** 先调用 water-visualization 生成各子图表
+- **图表生成:** 先调用 water-visualization 生成各子图表（沙箱三铁律：禁 pip install；脚本 write_file 落盘再 bash 执行，禁 heredoc；CJK 字体 `['Noto Sans CJK SC','WenQuanYi Micro Hei','DejaVu Sans']`）
+- **交付形态:** 看板 = matplotlib subplots 拼合的 PNG（绝对路径 `/mnt/user-data/outputs/xxx.png` 内嵌回复正文）。**沙箱无法交付实时刷新、交互联动、plotly HTML**——不要承诺
 - 参考 `shared/data_profiling.md` — 数据画像（接入新数据源时评估数据质量）
 - 参考 `shared/analysis_validation.md` — 分析验证（仪表盘结论的置信度评定）
 
 ## Workflow
 
-1. **明确看板用途。** 监控（实时刷新）、管理（日报/周报）、还是综合报告（一次性）。
+1. **明确看板用途。** 监控快照（一次性）、管理（日报/周报）、还是综合报告。**注：沙箱产出均为静态 PNG 快照，无自动刷新。**
 2. **确定布局结构。**
    - 监控面板：顶部 KPI 卡片行（4~6 个关键指标）+ 下方图表网格
    - 日报面板：左趋势右对比，按业务域分区
    - 综合报告：阶梯式布局，关键结论→支撑图表→详细数据
 3. **生成各子图表。** 调用 water-visualization 按单个图表模板生成，记录每个图表的文件路径。
-4. **组合布局。** 按确定的结构拼接——优先使用 plotly subplots 或 HTML div 网格，matplotlib subplots 作为备选。
-5. **添加联动（可选）。** plotly 图表间共享 hover 事件实现交叉筛选。
-6. **导出。** HTML（交互式）、PNG（静态报告）、PDF（打印）。
+4. **组合布局。** 用 matplotlib `plt.subplots()` / `GridSpec` 拼接为单张 PNG；KPI 卡片用 `ax.text()` 大字号实现。
+5. **交付。** 看板 PNG 内嵌对话回复正文 `![看板](/mnt/user-data/outputs/xxx.png)`，附各分区关键结论文字。
 
 ## Layout Patterns
 

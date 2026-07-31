@@ -33,6 +33,9 @@ metadata:
 - 参考 `shared/sql_quality_check.md` — SQL 质量审查流程（所有 skill 通用）
 - 参考 `shared/sql_patterns.md` — SQL 通用查询模式（窗口函数处理时序数据）
 - 参考 `shared/analysis_validation.md` — 分析验证（综合汇总结果的检查清单）
+- 参考 `references/schema.md` — 完整表结构（来源: 实际 MySQL DDL）
+- 参考 `references/business_rules.md` — 业务规则（闸泵状态编码、启闭口径）
+- 参考 `references/few_shots.md` — SQL 示例（写 SQL 前优先匹配复用）
 
 ### 文件引用约定
 
@@ -44,7 +47,7 @@ metadata:
 | 共享文档 | `shared/db_connection.md` | `$WATER_RESOURCES_ROOT/shared/db_connection.md` |
 | 共享规则 | `shared/sql_safety_rules.md` | `$WATER_RESOURCES_ROOT/shared/sql_safety_rules.md` |
 
-> `WATER_RESOURCES_ROOT` 由部署层设置：DeerFlow 指向 `/mnt/skills`，Hermes 指向 `~/.hermes/skills/water-resources`，开发指向仓库 `…/skills`。
+> `WATER_RESOURCES_ROOT` 由部署层注入（指向 skills 根目录），SKILL.md 与生成代码中不出现任何平台路径字面量；共享资源一律经 `$WATER_RESOURCES_ROOT` 定位。
 
 **标准导入片段**（`__file__` 在 sandbox 暂存脚本中不可靠，勿用）：
 ```python

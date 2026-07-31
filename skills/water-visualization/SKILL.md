@@ -71,7 +71,7 @@ plt.title('标题', fontproperties=font_prop)
    - 水质等级分布 → 堆叠柱状图或阶梯图
    - 闸泵运行状态 → 仪表盘/状态面板
    - 多站水位对比 → 多子图或分组折线
-4. **生成代码（照抄黄金模板）。** 先读 `references/chart_templates.md` 的「**0. 一次成功铁律**」和「黄金模板」，**照抄、只改 4 处**（CSV 路径 / x 列 / y 列 / 标题）。不要从零写脚本、不要自造多子图布局。绘图前 `df.dropna(subset=[绘图列])` 先洗后画。优先 plotly 做交互图，matplotlib 做静态报告图。
+4. **生成代码（照抄黄金模板）。** 先读 `references/chart_templates.md` 的「**0. 一次成功铁律**」和「黄金模板」，**照抄、只改 4 处**（CSV 路径 / x 列 / y 列 / 标题）。不要从零写脚本、不要自造多子图布局。绘图前 `df.dropna(subset=[绘图列])` 先洗后画。默认 matplotlib 静态 PNG（plotly 未必可用，缺则不要安装）。
 5. **执行代码。** 使用 execute_code 工具执行 Python 代码生成图表文件。
 6. **添加上下文注解。** 在图表上用标注、参考线、阴影区突出关键数据点（如警戒水位线、超阈值区域）。
 7. **返回结果：完整报告 + 图都写在「对话回复正文」里，不要另存 .md 报告文件。**
@@ -100,10 +100,9 @@ plt.title('标题', fontproperties=font_prop)
 
 ## Supported Technologies
 
-- **matplotlib** — 基础绑图库，适合静态报告图表
+- **matplotlib** — 基础绘图库（默认，沙箱已预装），静态 PNG 交付
 - **pandas** — 数据处理（DataFrame 直接 plot）
-- **plotly / plotly.express** — 交互式图表（悬停显示数值、缩放、平移、双轴对比），保存为 HTML 可嵌入报告
-- **seaborn** — 统计可视化（可选），适合密度图、箱线图、热力图；未预装则改用 matplotlib 实现，**不要 pip install**
+- **plotly / seaborn** — 未预装则改用 matplotlib 实现，**不要 pip install**
 
 ## Best Practices
 
@@ -117,7 +116,7 @@ plt.title('标题', fontproperties=font_prop)
 
 - 所有图表标题、轴标签使用中文，必须设置 CJK 字体
 - 图表宽度建议 12-14 英寸，高度 6-8 英寸（figsize=(14,7)）
-- 导出 DPI 150+，文件保存为 PNG；plotly 同时保存 HTML
+- 导出 DPI 150+，文件保存为 PNG
 - 多站数据用不同颜色区分，添加图例；颜色至少间隔4色以区分
 - 时间轴 x 轴标签旋转 45 度防止重叠
 - 水位值保留 2 位小数

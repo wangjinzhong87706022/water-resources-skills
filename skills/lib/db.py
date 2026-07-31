@@ -192,8 +192,17 @@ def query(sql, db=DEFAULT_DB, timeout=DEFAULT_TIMEOUT, allow_full_scan=False):
                 )
             return rows
     except pymysql.err.OperationalError as e:
-        if e.args[0] == 3024:  # ER_QUERY_TIMEOUT
-            raise TimeoutError(f"Query timeout after {timeout}s") from None
+        # read_timeout surfaces as client error 2013 (Lost connection during
+        # query); 3024 (ER_QUERY_TIMEOUT) only occurs with server-side
+        # MAX_EXECUTION_TIME. Map both to TimeoutError with an actionable hint.
+        if e.args[0] in (2013, 3024):
+            raise TimeoutError(
+                f"Query timeout after {timeout}s. 常见原因: "
+                "①相关子查询逐行执行 — 改派生表 JOIN "
+                "(JOIN (SELECT stcd, MAX(tm) mt ... GROUP BY stcd) m ...); "
+                "②无 tm 范围条件的全分区扫描 — 加 tm >= ... AND tm < ...。 "
+                f"SQL: {sql[:200]}"
+            ) from None
         hint = _schema_hint(sql, str(e), db)
         if hint:
             raise pymysql.err.OperationalError(e.args[0], f"{e.args[1]}\n\n{hint}") from None
