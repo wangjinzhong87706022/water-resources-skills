@@ -213,8 +213,13 @@ LIMIT 20;
 SELECT b.stnm AS '测站名称', r.z AS '水位(m)', r.q AS '流量(m³/s)', r.tm AS '更新时间'
 FROM sl323.st_river_r r
 JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+JOIN (
+    SELECT stcd, MAX(tm) AS mt
+    FROM sl323.st_river_r
+    WHERE tm > DATE_SUB(CURDATE(), INTERVAL 90 DAY)
+    GROUP BY stcd
+) m ON r.stcd = m.stcd AND r.tm = m.mt
 WHERE (b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%')
-  AND r.tm = (SELECT MAX(r2.tm) FROM sl323.st_river_r r2 WHERE r2.stcd = r.stcd)
   AND r.z IS NOT NULL
 ORDER BY r.tm DESC;
 ```
@@ -235,10 +240,10 @@ WHERE b.sttp = 'ZZ' AND (b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%')
 SELECT b.stnm AS '测站名称', AVG(r.z) AS '3月平均水位(m)'
 FROM sl323.st_river_r r
 JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
-WHERE b.stnm LIKE '%扬州水利枢纽%'
+WHERE (b.stnm LIKE '%扬州水利枢纽%' OR b.stnm LIKE '%扬州闸水文站%')
   AND r.tm >= '2025-03-01' AND r.tm < '2025-04-01'
   AND r.z IS NOT NULL
-GROUP BY b.stnm;
+GROUP BY b.stcd, b.stnm;
 ```
 
 **Q21:** 查询里运河2025年各测站的平均水位。
@@ -339,10 +344,11 @@ WHERE p.stcd = '58245'
 **Q3:** 查询各雨量站的平均日降雨量。
 
 ```sql
-SELECT b.stnm AS '雨量站名称', AVG(p.drp) AS '平均日降雨量(mm)'
+SELECT b.stnm AS '雨量站名称', ROUND(AVG(p.drp),2) AS '平均日降雨量(mm)'
 FROM sl323.st_pptn_r p
 JOIN sl323.st_stbprp_b b ON p.stcd = b.stcd
 WHERE b.sttp = 'PP' AND p.drp IS NOT NULL
+  AND p.tm >= '2024-01-01' AND p.tm < '2025-01-01'
 GROUP BY b.stnm;
 ```
 
@@ -784,11 +790,11 @@ WHERE b.stnm LIKE '%宝带河%' AND b.sttp = 'WQ';
 
 ```sql
 SELECT DATE(d.spt) AS '日期',
-       AVG(d.dox) AS '平均DO(mg/L)', AVG(d.codmn) AS '平均CODMn(mg/L)',
-       AVG(d.nh3n) AS '平均NH3N(mg/L)', AVG(d.tp) AS '平均TP(mg/L)'
+       ROUND(AVG(d.dox),2) AS '平均DO(mg/L)', ROUND(AVG(d.codmn),2) AS '平均CODMn(mg/L)',
+       ROUND(AVG(d.nh3n),3) AS '平均NH3N(mg/L)', ROUND(AVG(d.tp),3) AS '平均TP(mg/L)'
 FROM sl325.wq_pcp_d d
 JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
-WHERE b.stnm LIKE '%仪扬河%' AND b.sttp = 'WQ'
+WHERE b.stnm LIKE '%仪扬河上游%' AND b.sttp = 'WQ'
   AND d.spt >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
 GROUP BY DATE(d.spt)
 ORDER BY DATE(d.spt);

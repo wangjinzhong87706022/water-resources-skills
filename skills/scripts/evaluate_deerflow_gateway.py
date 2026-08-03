@@ -268,6 +268,56 @@ def score_result(r: GatewayEvalResult) -> float:
 # 主流程
 # ============================================================
 
+def cleanup_all_mcp():
+    """题间清理：kill 所有 water_db_mcp.py，保证下一题在干净环境启动。
+
+    根因：DeerFlow 每跑一个 case 泄漏 MCP 子进程，累积后新 case 第一轮 LLM 卡死
+    （轮次0超时）。cron watchdog（1800s 阈值）跟不上连续评测的泄漏速度——实测
+    泄漏进程要存活 30+ 分钟才被清，期间 Q050/Q053 已卡死。故在 harness 内每题/
+    每次重试前主动全清，是比 cron 更精准的兜底。
+    """
+    import subprocess
+    try:
+        subprocess.run(["pkill", "-f", "water_db_mcp.py"],
+                       capture_output=True, timeout=10)
+    except Exception:
+        pass
+
+
+def run_one_case(question: str, model, timeout: int, retries: int = 1):
+    """调用 gateway 跑一个 case；轮次0间歇卡死自动重试。
+
+    间歇卡死特征：agent 第一轮 LLM 就没返回 → llm_round_trips==0 且无 SQL，
+    或直接超时异常。这类失败是非确定性的（Q050 实测单独重跑 0.000→0.950），
+    根因是 DeerFlow session_pool 异常退出时泄漏 MCP 子进程，累积后压垮新 run。
+    故对这类特征自动重试，可把通过率从 ~94% 拉回 ~98%。
+    """
+    last_err = ""
+    for attempt in range(retries + 1):
+        cleanup_all_mcp()  # 每次（含重试）前清理泄漏的 MCP，保证干净启动
+        start = time.time()
+        try:
+            payload = call_gateway(question, model_name=model, timeout=timeout)
+            parsed = parse_run_messages(payload)
+            duration = round(time.time() - start, 1)
+            stall = parsed["llm_round_trips"] == 0 and not parsed["actual_sqls"]
+            if stall and attempt < retries:
+                print(f"  ⚠️ 轮次0疑似间歇卡死，重试 {attempt + 1}/{retries}（{duration}s）")
+                last_err = "round0_stall"
+                time.sleep(3)
+                continue
+            return parsed, duration, (last_err if stall else "")
+        except Exception as e:
+            duration = round(time.time() - start, 1)
+            last_err = str(e)[:300]
+            if attempt < retries:
+                print(f"  ⚠️ 异常重试 {attempt + 1}/{retries}（{duration}s）: {last_err[:60]}")
+                time.sleep(3)
+                continue
+            return None, duration, last_err
+    return None, 0, last_err
+
+
 def main():
     parser = argparse.ArgumentParser(description="DeerFlow Gateway 真实平台评测")
     parser.add_argument("--skill", help="skill 名称")
@@ -277,6 +327,7 @@ def main():
     parser.add_argument("--timeout", type=int, default=900, help="单题超时秒数")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--output", default="reports/eval_gateway")
+    parser.add_argument("--retries", type=int, default=1, help="轮次0间歇卡死自动重试次数（默认1）")
     args = parser.parse_args()
 
     skills_root = Path(os.environ.get("WATER_RESOURCES_ROOT", "/opt/git/water-resources-skills/skills"))
@@ -319,11 +370,14 @@ def main():
             index=case.index, skill=case.skill, level=case.level,
             question=case.question, expected_sql=case.expected_sql,
         )
-        start = time.time()
-        try:
-            payload = call_gateway(case.question, model_name=args.model, timeout=args.timeout)
-            r.duration_sec = round(time.time() - start, 1)
-            parsed = parse_run_messages(payload)
+        parsed, gw_duration, err = run_one_case(case.question, args.model, args.timeout, args.retries)
+        r.duration_sec = gw_duration
+        if err:
+            r.error = err
+            r.completed = False
+            score_result(r)
+            print(f"  ✗ {r.duration_sec}s | error: {r.error[:100]}")
+        else:
             r.final_answer = parsed["final_answer"]
             r.actual_sqls = parsed["actual_sqls"]
             r.tool_trace = parsed["tool_trace"]
@@ -331,12 +385,6 @@ def main():
             r.llm_round_trips = parsed["llm_round_trips"]
             score_result(r)
             print(f"  ✓ {r.duration_sec}s | rounds={r.llm_round_trips} | sqls={len(r.actual_sqls)} | score={r.total_score:.3f}")
-        except Exception as e:
-            r.duration_sec = round(time.time() - start, 1)
-            r.error = str(e)[:300]
-            r.completed = False
-            score_result(r)
-            print(f"  ✗ {r.duration_sec}s | error: {r.error[:100]}")
         results.append(r)
         with open(inc_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(asdict(r), ensure_ascii=False) + "\n")
