@@ -49,12 +49,12 @@ from db import query, query_multi
 ## Pitfalls
 
 - **⚡ 一轮完成"站点识别 + 新鲜度探测 + 主查询"（省轮次，性能第一杠杆）。** 每次 LLM 往返耗 30~80s（decode 受限），**严禁**把"查站点→看数据范围→再查数据"拆成 3 个回合。必须在**一个 Python 脚本**里顺序完成：先 `query()` 站点清单拿到真实 stcd，再 `query()` 取 `MAX(tm)` 锚点，最后用 **Python f-string 把实值拼进主查询**。同一脚本内变量代入是安全的（值已落实，不会产生 `{stcd}` 未填占位符）；被禁止的是**跨回合手写 `{...}` 模板**。照抄 `references/few_shots.md`「标准三件套」。（实测 Q4 拆 6 轮烧 768s，可压到 2~3 轮。）
-- **⚡ "最近 N 天/月"必须锚定 MAX(tm)，禁止锚 CURDATE()。** 库数据滞后（实测停在 2026-06），`DATE_SUB(CURDATE(), ...)` 窗口常落空→0 行→整轮重试。正确做法：先按 stcd 取 `SELECT MAX(tm) FROM st_river_r WHERE stcd IN (...)`（PK 索引，毫秒级），再以该值为终点算窗口 `tm >= DATE_SUB('{锚点}', INTERVAL 30 DAY)`。答复中说明数据截止时间。
+- **⚡ "最近 N 天/月"必须锚定 MAX(tm)，禁止锚 CURDATE()。** 库数据滞后（实测停在 2026-06），`DATE_SUB(CURDATE(), ...)` 窗口常落空→0 行→整轮重试。正确做法：先按 stcd 取 `SELECT MAX(tm) FROM st_river_r WHERE stcd IN (...)`（PK 索引，毫秒级），再以该值为终点算窗口——锚点直接内联子查询(免手写占位):`tm >= DATE_SUB((SELECT MAX(tm) FROM st_river_r WHERE stcd IN (...)), INTERVAL 30 DAY)`。答复中说明数据截止时间。
 - **⚡ 聚合优先，禁止先拉原始行再聚合。** "水位数据/变化/趋势"类问题默认输出**日聚合**（`GROUP BY DATE(tm)` 的 AVG/MAX/MIN）+ 总体统计，**严禁** `LIMIT 500` 拉原始行灌进上下文——大结果表会抬高后续每一轮的 prefill/decode 耗时（实测 Q9 因此 882s）。仅当用户明确要逐条原始记录时才拉明细，且 `LIMIT ≤ 100`。
 
 - **⚠️ 按河道名查必须双匹配 stnm+rvnm（高频 0 行错误）。** 运河/河道的 `rvnm` 字段**经常为 NULL**（实测古运河 3 个水位站 rvnm 全为 NULL，站名"古运河水位站（…）"只存在 `stnm` 里）。**严禁**只写 `WHERE rvnm LIKE '%古运河%'`（必返 0 行），**必须**双匹配：
   ```sql
-  WHERE (b.stnm LIKE '%{河道名}%' OR b.rvnm LIKE '%{河道名}%')
+  WHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')  -- 把"古运河"换成目标河道名
   ```
   覆盖所有"古运河/里运河/X 河"类查询（Q1/Q5/Q8/Q11/Q12/Q14/Q25）。
 
@@ -115,7 +115,7 @@ from db import query, query_multi
 
 1. **识别查询场景。** 河道水位→st_river_r; 水库水位→st_rsvr_r; 防洪指标→st_rvfcch_b。
 2. **识别测站/河道实体。** 参照重点河道映射（business_rules.md）。
-3. **确定时间范围。** "实时/最新"→MAX(tm); "某天左右"→前后3天; "最近"→3天; "当前"→10天; "最近30天"→30 天窗口; "最近2个月"→2 个月窗口。不要把窗口写窄(如把"最近30天"写成单天)。**相对窗口一律锚定该站 `MAX(tm)`**（库数据滞后，锚 `CURDATE()` 常落空返 0 行）：同一脚本内先取锚点，再 `tm >= DATE_SUB('{锚点}', INTERVAL 30 DAY)`。
+3. **确定时间范围。** "实时/最新"→MAX(tm); "某天左右"→前后3天; "最近"→3天; "当前"→10天; "最近30天"→30 天窗口; "最近2个月"→2 个月窗口。不要把窗口写窄(如把"最近30天"写成单天)。**相对窗口一律锚定该站 `MAX(tm)`**（库数据滞后，锚 `CURDATE()` 常落空返 0 行）：同一脚本内先取锚点,再把锚点内联子查询(免手写占位):`tm >= DATE_SUB((SELECT MAX(tm) FROM st_river_r WHERE stcd IN (...)), INTERVAL 30 DAY)`。
 4. **判断回复深度。** 根据用户问题的措辞和语境选择合适深度：
    - **精简模式**：用户问法简短（如"最高水位""多少""最低"），没有"分析""趋势""详细""对比"等词
      - 只查目标数据，不做额外分析
@@ -132,10 +132,7 @@ from db import query, query_multi
 
    > ⚠️ **禁止占位符(高频错误)。** 当题目提到具体测站/河道名(宝应、白马闸、古运河…),要么**单条 SQL 按名 JOIN**(`JOIN st_stbprp_b b ON r.stcd=b.stcd WHERE b.stnm LIKE '%站名%'`),要么**同一 Python 脚本内**先查 stcd 再 f-string 实值代入(「标准三件套」)。**严禁**跨回合留 `{stcd}`/`{dt}` 这类**未填值的占位符**——匹配 0 行。
    >
-   > ❌ 错误(占位符污染,返回 0 行):
-   > ```sql
-   > SELECT z FROM st_river_r WHERE stcd='{stcd}' AND DATE(tm)='{dt}'
-   > ```
+   > ❌ 错误(占位符污染,返回 0 行):把 `{stcd}`、`{dt}` 当字面量写进**提交执行的 SQL**(典型形态 `WHERE stcd='{stcd}'`)——MySQL 视其为未填模板变量,要么直接语法错、要么匹配 0 行(Q014/Q094/Q098 实测因此失分)。**提交执行的 SQL 绝不许出现 `{` `}`**;需要变量值时用下方"按名 JOIN"或"同脚本内 f-string 代入"。
    > ✅ 正确(按名 JOIN，窗口锚 MAX(tm)):
    > ```sql
    > SELECT r.tm, r.z FROM st_river_r r JOIN st_stbprp_b b ON r.stcd=b.stcd

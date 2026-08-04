@@ -113,7 +113,7 @@ rows = query(f"""
          ROUND(AVG(d.wtmp),1)  AS '水温(℃)'
   FROM sl325.wq_pcp_d d
   JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
-  WHERE b.sttp='WQ' AND (b.stnm LIKE '%{STN}%' OR b.rvnm LIKE '%{STN}%')
+  WHERE b.sttp='WQ' AND (b.stnm LIKE '%瘦西湖%' OR b.rvnm LIKE '%瘦西湖%')  -- 换成目标水质站名
     AND d.spt > DATE_SUB((SELECT MAX(spt) FROM sl325.wq_pcp_d), INTERVAL 30 DAY)
   GROUP BY DATE(d.spt) ORDER BY DATE(d.spt)
 """)
@@ -131,7 +131,7 @@ rows = query(f"""
   SELECT b.stnm AS '测站', r.tm AS '预报时间', r.type, r.vals
   FROM slztk.st_mx_preset_r_shj_auto r
   JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
-  WHERE b.sttp='WQ' AND (b.stnm LIKE '%{STN}%' OR b.rvnm LIKE '%{STN}%')
+  WHERE b.sttp='WQ' AND (b.stnm LIKE '%瘦西湖%' OR b.rvnm LIKE '%瘦西湖%')  -- 换成目标水质站名
     AND r.type IN (103,104,105,128)
     AND r.tm BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)
     AND r.taskid = (SELECT taskid FROM slztk.st_mx_taskid_shj_auto

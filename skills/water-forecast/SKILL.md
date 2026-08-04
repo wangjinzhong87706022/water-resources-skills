@@ -65,8 +65,10 @@ from db import query, query_multi
   3. **禁重复执行**：一次成功即停，禁把整段预测分析换任务/窗口重跑。
   4. **一脚本一轮**：末尾一次性 `print` 全部结果（含可视化数据）。
   - 同脚本内需分步时用 f-string 把实值代入主查询（安全；**禁跨回合留 `{taskid}` 占位符**）。
+- **⚠️ 严禁 SQL 残留 `{...}` 占位符（高频语法错；覆盖 Q62/Q65）。** taskid/stcd/type 一律用**内联子查询或按名 JOIN** 落实为具体值（见上"最新 taskid 内联为子查询"模板与 EXISTS 回退），**禁止**把 `{taskid}`/`{stcd}`/`{type}` 等未填变量写进提交执行的 SQL。生成后自检：**SQL 里不许出现 `{` `}`**。
 - **⚡ 预报时间窗必须锚定任务自身时间。** 用该 taskid 下的 `MIN(tm)`~`MAX(tm)`（或任务 tm）圈定窗口，**禁止** `BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)`——最新任务可能很旧，NOW() 窗口与预报 tm 无交集必返 0 行。
 - **⚠️ 模糊时间禁止反问。** "未来/近期"等模糊时间默认取最新有效任务直接查，**禁止向用户反问**（单轮评测反问=0 分），答复中注明实际使用的任务时间即可。
+- **⚠️ 模糊任务指代禁止反问（"某任务"/"某个任务"/"某任务下"）。** 这类措辞一律按"**最新已完成任务**"处理：`taskid = (SELECT taskid FROM slztk.st_mx_taskid_r WHERE stuts='1' ORDER BY tm DESC LIMIT 1)`（断面/预测表无数据时叠加下方 EXISTS 回退）。**禁止调用澄清工具或反问"是哪个任务"**——直接查并在答复注明实际任务时间。断面数据走 `st_mx_rv_dm_r`（列: name/z/Qin/Qout），水位预测走 `st_mx_preset_cal_r`(type='1')。
 - **最新任务可能很旧。** 预测系统不一定每天运行。先查 `SELECT taskid, tm, stuts FROM slztk.st_mx_taskid_r ORDER BY tm DESC LIMIT 1` 确认最新任务时间，若距今超过1天，需告知用户数据非实时。可降级查最近已完成任务(stuts = '1')。
 - **查已完成任务。** 用 `WHERE stuts = '1' ORDER BY tm DESC` 过滤，避免拿到未完成的空任务。
 - **最新已完成任务在子表中可能无数据（必读，0行必回退）。** 断面表 st_mx_rv_dm_r / 预测表 st_mx_preset_cal_r 只覆盖部分任务。若按"最新任务 taskid"过滤返回 0 行，**禁止直接放弃**，必须改用 EXISTS 回退到"有数据的最新任务"：

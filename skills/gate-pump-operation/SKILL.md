@@ -75,7 +75,7 @@ from db import query, query_multi
 
 - **综合汇总查询必须分步执行。** 当用户要求"泵站综合运行状态汇总"或"闸泵综合状态"时，不要尝试用一个复杂 SQL JOIN 所有表（st_gate_r + st_was_r + st_pump_r + st_pump_pa），这会因分区表扫描导致超时。
 - **正确做法：拆分为 2-3 个简单查询。** 先查泵站列表(st_pump_r)，再查闸站列表(st_gate_r)，最后合并结果。每个查询只 JOIN st_stbprp_b 获取名称。
-- **分区表查询必须带时间条件。** st_was_r、st_pump_r、st_pump_pa 按 tm 做 RANGE 分区，不带 WHERE tm 条件会全分区扫描导致超时。"最新"数据的正确做法：先 `SELECT MAX(tm) FROM st_pump_r`（或 st_was_r）取锚点（PK 索引，毫秒级），窗口写 `tm > DATE_SUB('{锚点}', INTERVAL 7 DAY) AND tm <= '{锚点}'`；相关子查询（如 `tm = (SELECT MAX(tm) FROM ... WHERE stcd=...)`）必须带同样的 tm 范围裁剪，禁止无界相关子查询。
+- **分区表查询必须带时间条件。** st_was_r、st_pump_r、st_pump_pa 按 tm 做 RANGE 分区，不带 WHERE tm 条件会全分区扫描导致超时。"最新"数据的正确做法：先 `SELECT MAX(tm) FROM st_pump_r`（或 st_was_r）取锚点（PK 索引，毫秒级），窗口把锚点直接内联子查询(免手写占位):`tm > DATE_SUB((SELECT MAX(tm) FROM st_pump_r), INTERVAL 7 DAY) AND tm <= (SELECT MAX(tm) FROM st_pump_r)`；相关子查询（如 `tm = (SELECT MAX(tm) FROM ... WHERE stcd=...)`）必须带同样的 tm 范围裁剪，禁止无界相关子查询。
 - **避免在分区表上做无限制的 GROUP BY。** 先用时间范围过滤，再聚合。
 
 ## Workflow
@@ -137,7 +137,7 @@ for label, rows in [('闸门', gates), ('泵站', pumps), ('堰闸', was)]:
 ### 分区表时间条件检查
 
 - [ ] **st_was_r/st_pump_r/st_pump_pa 必须带 WHERE tm 条件**：这三个表按 tm 做 RANGE 分区，不带时间条件会全分区扫描导致超时
-- [ ] **时间范围合理**：先 `SELECT MAX(tm)` 取锚点，再写 `tm > DATE_SUB('{锚点}', INTERVAL 7 DAY) AND tm <= '{锚点}'`；禁锚 NOW()/CURDATE()（库数据滞后，窗口会落空）
+- [ ] **时间范围合理**：窗口锚定 MAX(tm) 实值(脚本内 f-string 代入或内联子查询):`tm > DATE_SUB((SELECT MAX(tm) FROM st_pump_r), INTERVAL 7 DAY) AND tm <= (SELECT MAX(tm) FROM st_pump_r)`；禁锚 NOW()/CURDATE()（库数据滞后，窗口会落空）
 
 **常见错误示例**：
 ```sql
