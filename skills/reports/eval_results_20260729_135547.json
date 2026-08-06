@@ -1,0 +1,162 @@
+{
+  "meta": {
+    "timestamp": "20260729_135547",
+    "total_cases": 1,
+    "total_duration_sec": 49.2
+  },
+  "results": [
+    {
+      "index": 1,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "古运河有哪些水位测站？",
+      "expected_sql": "SELECT stcd AS '测站编码', stnm AS '测站名称', sttp AS '测站类型'\nFROM sl323.st_stbprp_b\nWHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ';",
+      "actual_response": "",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 0.0,
+        "has_domain_data": 0.0,
+        "has_numeric_data": 0.0,
+        "response_quality": 0.1,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "keyword_hits": 0,
+        "response_length": 0,
+        "verifiers": [
+          {
+            "name": "domain_coverage",
+            "layer": "final_answer",
+            "score": 0.0,
+            "passed": false,
+            "weight": 0.15,
+            "detail": {
+              "keyword_hits": 0,
+              "keywords": [
+                "水位",
+                "测站",
+                "河流",
+                "水情",
+                "水文",
+                "防洪",
+                "警戒",
+                "保证"
+              ]
+            },
+            "error": ""
+          },
+          {
+            "name": "numeric_presence",
+            "layer": "final_answer",
+            "score": 0.0,
+            "passed": false,
+            "weight": 0.1,
+            "detail": {
+              "number_count": 0
+            },
+            "error": ""
+          },
+          {
+            "name": "response_validity",
+            "layer": "final_answer",
+            "score": 0.0,
+            "passed": false,
+            "weight": 0.1,
+            "detail": {
+              "length": 0,
+              "is_error": true
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_correctness",
+            "layer": "sql_execution",
+            "score": -1.0,
+            "passed": true,
+            "weight": 0.15,
+            "detail": {
+              "reason": "skipped (no db_config or expected_sql)"
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_executes",
+            "layer": "sql_execution",
+            "score": -1.0,
+            "passed": true,
+            "weight": 0.35,
+            "detail": {
+              "reason": "skipped (no trajectory)"
+            },
+            "error": ""
+          },
+          {
+            "name": "tool_trace_sanity",
+            "layer": "trace",
+            "score": -1.0,
+            "passed": true,
+            "weight": 0.1,
+            "detail": {
+              "reason": "skipped (no trajectory)"
+            },
+            "error": ""
+          },
+          {
+            "name": "sql_safety",
+            "layer": "policy",
+            "score": 1.0,
+            "passed": true,
+            "weight": 0.05,
+            "detail": {
+              "issues": [],
+              "sql_count": 0
+            },
+            "error": ""
+          }
+        ],
+        "layer_scores": {
+          "final_answer": 0.0,
+          "policy": 1.0
+        },
+        "hard_fail": false
+      },
+      "total_score": 0.125,
+      "duration_sec": 49.2,
+      "error": "",
+      "engine": "subprocess",
+      "trajectory_path": "",
+      "tool_stats": {},
+      "completed": true,
+      "api_calls": 0,
+      "loaded_skills": [],
+      "missing_skills": []
+    }
+  ],
+  "summary": {
+    "total_duration_sec": 49.2,
+    "avg_score": 0.125,
+    "valid_response_rate": 0.0,
+    "domain_data_rate": 0.0,
+    "numeric_data_rate": 0.0,
+    "pass_rate": 0.0,
+    "by_skill": [
+      {
+        "skill": "water-situation",
+        "count": 1,
+        "avg_score": 0.125,
+        "valid_response_rate": 0.0,
+        "pass_rate": 0.0,
+        "avg_duration": 49.2
+      }
+    ],
+    "by_level": [
+      {
+        "level": "L1",
+        "count": 1,
+        "avg_score": 0.125,
+        "valid_response_rate": 0.0,
+        "pass_rate": 0.0,
+        "avg_duration": 49.2
+      }
+    ]
+  }
+}

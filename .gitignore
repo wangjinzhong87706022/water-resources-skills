@@ -18,3 +18,6 @@ rv.WRZ
 
 # Claude Code 本地配置(含 .claude/settings.local.json 里的明文 token,切勿提交)
 .claude/
+
+# IDE
+.qoder/
