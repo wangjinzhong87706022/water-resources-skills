@@ -85,7 +85,7 @@ from db import query, query_multi
 
 1. **识别查询场景。** 历史监测→sl325.wq_pcp_d; 等级评定→CASE WHEN 6级标准; 水质预测→slztk.st_mx_preset_r_shj_auto。
 2. **识别水质站。** sttp='WQ'，通过 stnm LIKE 匹配站点。
-3. **水质评级。** 按 6 级标准（Ⅰ~劣Ⅴ）对各指标分级，取最差等级。
+3. **水质评级。** 按 6 级标准（Ⅰ~劣Ⅴ）对各指标分级，取最差等级。**阈值是国标固定值，照抄下方模板 ③ 的 CASE WHEN，勿臆造**（GB 3838-2002）。
 4. **水质预测。** 获取最新 taskid，type 映射（103=DO, 104=CODMn, 105=TP, 128=NH3N）。
 5. **跨库查询需带库名前缀:** sl325.wq_pcp_d, slztk.st_mx_preset_r_shj_auto 等。
 6. **质量自检。** 执行 SQL 前确认符合安全规则。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。返回数值做合理性检查（CODMn 0~50mg/L, DO 0~20mg/L）。
@@ -139,6 +139,57 @@ rows = query(f"""
   ORDER BY r.tm
 """)
 print(rows)   # type 映射 103=DO 104=CODMn 105=TP 128=NH3N；同轮内评级
+```
+
+**③ 水质评级单轮模板（GB 3838-2002 单因子评价法，6 档 CASE WHEN 照抄）**：
+
+> ⚠️ **评级阈值是国标固定值，禁止臆造**。下表为 GB 3838-2002 地表水 6 档标准，**综合水质等级 = 各指标评出的最差（最大）那档**（单因子评价法取最差，不取平均/众数）。
+>
+> | 指标(mg/L) | Ⅰ类 | Ⅱ类 | Ⅲ类 | Ⅳ类 | Ⅴ类 | 劣Ⅴ类 |
+> |-----------|------|------|------|------|------|--------|
+> | CODMn (≤) | 2 | 4 | 6 | 10 | 15 | >15 |
+> | DO (≥) | 7.5 | 6 | 5 | 3 | 2 | <2 |
+> | NH3N (≤) | 0.15 | 0.5 | 1 | 1.5 | 2 | >2 |
+> | TP (≤) | 0.02 | 0.1 | 0.2 | 0.3 | 0.4 | >0.4 |
+>
+> 注：DO 越大越好（用 `>=`），CODMn/NH3N/TP 越小越好（用 `<=`）。查"劣于Ⅳ类"等**单档**问题，只需 Ⅳ 类边界：`CODMn>10 OR DO<3 OR NH3N>1.5 OR TP>0.3`。
+
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query
+
+STN = '京杭运河'   # 换成目标水质站名
+rows = query(f"""
+  SELECT b.stnm AS '测站', d.spt AS '采样时间',
+         d.codmn AS 'CODMn', d.dox AS 'DO', d.nh3n AS 'NH3N', d.tp AS 'TP',
+         CASE
+           WHEN d.codmn <= 2 THEN 'Ⅰ类' WHEN d.codmn <= 4 THEN 'Ⅱ类'
+           WHEN d.codmn <= 6 THEN 'Ⅲ类' WHEN d.codmn <= 10 THEN 'Ⅳ类'
+           WHEN d.codmn <= 15 THEN 'Ⅴ类' ELSE '劣Ⅴ类'
+         END AS 'CODMn评级',
+         CASE
+           WHEN d.dox >= 7.5 THEN 'Ⅰ类' WHEN d.dox >= 6 THEN 'Ⅱ类'
+           WHEN d.dox >= 5 THEN 'Ⅲ类' WHEN d.dox >= 3 THEN 'Ⅳ类'
+           WHEN d.dox >= 2 THEN 'Ⅴ类' ELSE '劣Ⅴ类'
+         END AS 'DO评级',
+         CASE
+           WHEN d.nh3n <= 0.15 THEN 'Ⅰ类' WHEN d.nh3n <= 0.5 THEN 'Ⅱ类'
+           WHEN d.nh3n <= 1 THEN 'Ⅲ类' WHEN d.nh3n <= 1.5 THEN 'Ⅳ类'
+           WHEN d.nh3n <= 2 THEN 'Ⅴ类' ELSE '劣Ⅴ类'
+         END AS 'NH3N评级',
+         CASE
+           WHEN d.tp <= 0.02 THEN 'Ⅰ类' WHEN d.tp <= 0.1 THEN 'Ⅱ类'
+           WHEN d.tp <= 0.2 THEN 'Ⅲ类' WHEN d.tp <= 0.3 THEN 'Ⅳ类'
+           WHEN d.tp <= 0.4 THEN 'Ⅴ类' ELSE '劣Ⅴ类'
+         END AS 'TP评级'
+  FROM sl325.wq_pcp_d d
+  JOIN (SELECT stcd, MAX(spt) AS maxSpt FROM sl325.wq_pcp_d GROUP BY stcd) m
+    ON d.stcd = m.stcd AND d.spt = m.maxSpt
+  JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
+  WHERE b.sttp='WQ' AND (b.stnm LIKE '%京杭运河%' OR b.rvnm LIKE '%京杭运河%')  -- 换成目标水质站名
+""")
+print(rows)   # 综合等级 = 上列四档中最差(最大序号)那档;同轮内输出,勿再发新查询
 ```
 
 ## Validation Gate

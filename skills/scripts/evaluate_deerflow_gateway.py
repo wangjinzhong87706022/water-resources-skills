@@ -35,7 +35,7 @@ from evaluate_deerflow_e2e import (
 GATEWAY_URL = os.environ.get("DEERFLOW_GATEWAY_URL", "http://localhost:8001")
 INTERNAL_TOKEN = os.environ.get("DEER_FLOW_INTERNAL_AUTH_TOKEN", "test-token-for-deerflow-testing")
 CSRF_TOKEN = "eval-csrf-token"
-QUERY_TOOL_NAMES = ("water-db_query_water", "query_water", "water-db_query")
+QUERY_TOOL_NAMES = ("water-db_query_water", "water_db_query_water", "query_water", "water-db_query")
 
 _SQL_STRING_RE = re.compile(
     r'("""|\'\'\'|"|\')\s*((?:SELECT|WITH)\b[\s\S]+?)\1',
@@ -177,7 +177,7 @@ def parse_run_messages(payload: dict) -> dict:
                 args = tc.get("args") or {}
                 tool_trace.append(name)
                 sql = args.get("sql") or args.get("query")
-                if sql and any(name.startswith(q) or name in QUERY_TOOL_NAMES for q in QUERY_TOOL_NAMES):
+                if sql and (name.startswith(("water-db", "water_db")) or name in QUERY_TOOL_NAMES):
                     actual_sqls.append(sql)
                 # SKILL.md 新规则下 SQL 藏在 write_file 脚本 / bash 命令里（lib/db.py query()）
                 script_text = args.get("command") or args.get("content") or ""
@@ -190,7 +190,7 @@ def parse_run_messages(payload: dict) -> dict:
                     final_answer = text  # 最后一条无工具调用的 ai 消息
         elif mtype == "tool":
             name = m.get("name") or ""
-            if name in QUERY_TOOL_NAMES or name.startswith("water-db") or name == "bash":
+            if name in QUERY_TOOL_NAMES or name.startswith(("water-db", "water_db")) or name == "bash":
                 tool_results.append(_content_text(m.get("content"))[:5000])
 
     # 兜底：run 以「文本+工具调用」或澄清提问收尾时，取最后一条有文本的 ai 消息

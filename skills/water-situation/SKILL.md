@@ -74,6 +74,17 @@ from db import query, query_multi
 
 - **⚠️ 分区裁剪（跨年/跨月对比必读）。** `st_river_r`/`st_was_r`/`st_pump_r`/`st_pump_pa` 是 `RANGE(tm)` 分区表。WHERE 若用 `YEAR(tm) IN (...)`、`MONTH(tm)=` 这类**把 tm 包进函数**的谓词，优化器拿不到连续区间→扫所有分区→慢甚至超时。必须写成 `tm` 连续区间：`tm >= '2023-01-01' AND tm < '2025-01-01'`。（实测 434s 的"2023 vs 2024 古运河"查询就踩了这个坑，SQL 写成 `YEAR(tm) IN (2023,2024)` 无 tm 范围。）
 
+- **⚡ 全年/全表聚合：最终结果行数必须 < 1000，否则被 `query()` 默认 LIMIT 静默截断→数据不全→整轮重跑。** `db.py` 的 `query()` 默认 `LIMIT 1000`。**单层** `GROUP BY stcd, DATE(tm)` 的全年聚合，结果 = 站点数 × 365 ≈ 上万行，会被截断而 LLM 浑然不觉——看到不完整数据后整轮重写重跑（实测"2024 各河流水位趋势"因此重跑 3 次，单次全年分区扫描 ~60s，共烧 ~130s）。**正确做法 = 双层聚合**：内层子查询按日聚合（中间态，不直接返回），外层再按月/按站聚合把**最终输出**行数压到 < 1000：
+  ```sql
+  SELECT b.stnm, DATE_FORMAT(d.dt,'%Y-%m') AS 年月, ROUND(AVG(d.avg_z),2) AS 月均水位
+  FROM (SELECT stcd, DATE(tm) dt, AVG(z) avg_z FROM sl323.st_river_r
+        WHERE tm >= '2024-01-01' AND tm < '2025-01-01' AND z IS NOT NULL
+        GROUP BY stcd, DATE(tm)) d          -- 内层:站×日(上万行,仅中间态)
+  JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
+  GROUP BY b.stnm, DATE_FORMAT(d.dt,'%Y-%m')  -- 外层:站×月(<1000行,才是最终输出)
+  ```
+  判据：写完 SQL 先估最终行数（分组键基数之积），> 1000 就加一层聚合或 `LIMIT`。
+
 - **`query()` 返回 `list[dict]`，不是 DataFrame。** 不能调用 `.iterrows()`, `.groupby()`, `.describe()` 等 pandas 方法。必须用 `for row in df: row['列名']` 或手动转 DataFrame: `import pandas as pd; df = pd.DataFrame(query(sql))`。
 - **水库数据可能非常稀疏。** st_rsvr_r 表可能仅有最近1天的数据（如仅2025-05-19），远少于河道水情。查询前应先用 `SELECT MIN(tm), MAX(tm), COUNT(*) FROM st_rsvr_r WHERE rz IS NOT NULL` 确认实际数据范围，避免按"最近3个月"查出空结果。
 - **站点编码格式不匹配。** 水库站（510B6180）、河道站（00000001）、闸门/泵站（HPBZCZ*）使用不同编码体系，无法直接 JOIN。跨域关联需先建立编码映射。
@@ -156,6 +167,49 @@ from db import query, query_multi
 10. **质量自检。** 执行 SQL 前确认符合安全规则（只读、有 WHERE、有 LIMIT）。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。返回数值做合理性检查（水位 -1~20m）。
 11. **统计增强（可选）。** 如需百分位分布、移动平均趋势、水位变率异常检测，参考 shared/statistical_methods.md。需窗口函数时参考 shared/sql_patterns.md。
 12. **输出验证。** 交付前按 Validation Gate 检查清单逐项验证，然后按 shared/analysis_validation.md 做置信度评定——特别是同比时注意不完整周期和均值之均值陷阱。
+
+## 单轮模板（照抄，勿拆轮）
+
+> 站点识别 + 时间锚 + 聚合 + 统计全部内联在一个脚本里**一轮完成**。**严禁拉原始行**（大结果抬高后续每轮 prefill/decode 耗时，实测 2.8 万字符 dump 致单题 10 分钟）；**严禁拆多轮**（查站一轮→查数据一轮→算统计一轮）。
+
+**① 水位变化 + 异常分析单轮模板**（某河道某日逐时水位 + IQR 异常检测；按名 JOIN、`tm` 连续区间走分区裁剪、输出仅 ~24 行/站）：
+```python
+import os, sys, statistics
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query
+
+# 改 SQL 里的【河道名】和【两个 tm 时间点】即可,其余照抄
+# —— tm 用连续区间(起 / 起+1天)启用分区裁剪;站名双匹配 stnm+rvnm
+
+# ① 当日逐时水位聚合(按名 JOIN 免单独查 stcd;禁 dump 原始行)
+hourly = query("""
+  SELECT b.stnm AS 测站, DATE_FORMAT(r.tm, '%H:00') AS 时段,
+         ROUND(AVG(r.z),2) AS 均水位, ROUND(MAX(r.z),2) AS 最高, ROUND(MIN(r.z),2) AS 最低,
+         COUNT(*) AS 测次
+  FROM sl323.st_river_r r JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+  WHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')   -- 换成目标河道名
+    AND b.sttp IN ('ZZ','ZQ') AND r.z IS NOT NULL
+    AND r.tm >= '2026-06-01 00:00:00'                       -- 换成目标日期起
+    AND r.tm <  '2026-06-02 00:00:00'                       -- 起始日 + 1 天
+  GROUP BY b.stnm, DATE_FORMAT(r.tm, '%H:00')
+  ORDER BY b.stnm, 时段
+""")
+print("当日逐时水位:", hourly)
+
+# ② 异常检测:IQR 法(同脚本 Python 算,不再发新查询;样本不足则只给描述统计)
+zs = [h['均水位'] for h in hourly if h['均水位'] is not None]
+if len(zs) >= 8:
+    zs.sort(); n = len(zs); q1, q3 = zs[n//4], zs[3*n//4]; iqr = q3 - q1
+    lo, hi = q1 - 1.5*iqr, q3 + 1.5*iqr
+    anom = [h for h in hourly if h['均水位'] is not None and not lo <= h['均水位'] <= hi]
+    sd = statistics.pstdev(zs) or 0
+    print(f"统计: 均值={statistics.mean(zs):.2f} σ={sd:.2f} IQR正常区间=[{lo:.2f},{hi:.2f}]")
+    print("异常时段(IQR 区间外):", anom if anom else "无")
+else:
+    print("当日测次不足,仅描述性统计(无法做 IQR 异常检测)")
+```
+- **多日趋势**:把 `DATE_FORMAT(r.tm,'%H:00')` 换成 `DATE(r.tm)`（按日聚合），`tm` 区间放宽到 `>= 起 AND < 止`。**切勿**写 `YEAR(tm)=`/`MONTH(tm)=`（tm 包进函数→扫所有分区）。
+- **锚定数据实际年份**：库数据有滞后，"今年 6/1"未必有数；先确认目标日期落在该站 `MAX(tm)` 之前。
 
 ## Key Tables
 
