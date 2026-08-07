@@ -223,11 +223,20 @@ def score_result(r: GatewayEvalResult) -> float:
     # 2. 生成了查询 SQL (15%)
     scores["sql_generated"] = 1.0 if r.actual_sqls else 0.0
 
-    # 3. 平台侧 SQL 可复执行 (25%)：取最后一条 SQL 在本地库重放
+    # 3. 平台侧 SQL 可复执行 (25%)：在本地库重放
+    #    actual_sqls[-1] 常是 f-string 模板（标准三件套主查询 WHERE ... IN ({stcd_list})），
+    #    裸花括号让 MySQL 语法错 → 假阴性（agent 实跑满分却判 0）。改为优先重放具体 SQL。
     replay = None
     if r.actual_sqls:
-        replay = execute_sql_safe(r.actual_sqls[-1])
-        scores["sql_replay_ok"] = 1.0 if replay["ok"] else 0.0
+        concrete = [s for s in r.actual_sqls if "{" not in s and "}" not in s]
+        if concrete:
+            replay = execute_sql_safe(concrete[-1])
+            scores["sql_replay_ok"] = 1.0 if replay["ok"] else 0.0
+        else:
+            # 全是模板：仍试重放最后一条。引号内 '{stcd}' → 当字面量能跑、返回空 → ok=1（同现状）；
+            # 裸 {stcd_list} → 语法错，无法证伪 → 中性 0.5，不假阴性。
+            replay = execute_sql_safe(r.actual_sqls[-1])
+            scores["sql_replay_ok"] = 1.0 if replay["ok"] else 0.5
     else:
         scores["sql_replay_ok"] = 0.0
 
@@ -433,7 +442,9 @@ def main():
             f.write(f"### Q{x.index:03d} [{x.skill}/{x.level}] — {x.total_score:.3f}\n\n")
             f.write(f"**Q**: {x.question}\n\n")
             if x.actual_sqls:
-                f.write(f"**平台 SQL**:\n```sql\n{x.actual_sqls[-1][:500]}\n```\n\n")
+                _concrete = [s for s in x.actual_sqls if "{" not in s and "}" not in s]
+                _show = (_concrete or x.actual_sqls)[-1][:500]
+                f.write(f"**平台 SQL**:\n```sql\n{_show}\n```\n\n")
             f.write(f"**最终答案**（前 400 字）:\n```\n{x.final_answer[:400]}\n```\n\n")
             if x.error:
                 f.write(f"**错误**: {x.error}\n\n")
