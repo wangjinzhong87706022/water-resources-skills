@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "timestamp": "20260728_162431",
+    "total_cases": 3
+  },
+  "results": [
+    {
+      "index": 26,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询扬州城区今日降雨量。",
+      "expected_sql": "SELECT DATE(p.tm) AS '日期', SUM(p.drp) AS '日降雨量(mm)'\nFROM sl323.st_pptn_r p\nWHERE p.stcd = '58245'\n  AND DATE(p.tm) = CURDATE()\n  AND p.drp IS NOT NULL\nGROUP BY DATE(p.tm);",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    DATE(tm) as date, \n    SUM(drp) as total_rainfall_mm\nFROM sl323.st_pptn_r\nWHERE stcd = '58245'\n  AND DATE(tm) = CURDATE()\nGROUP BY DATE(tm)\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "actual_sql": "SELECT \n    DATE(tm) as date, \n    SUM(drp) as total_rainfall_mm\nFROM sl323.st_pptn_r\nWHERE stcd =",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.33,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.4,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ]
+      },
+      "total_score": 0.65,
+      "duration_sec": 4.01,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 27,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询2025年扬州城区降雨总量。",
+      "expected_sql": "SELECT SUM(p.drp) AS '2025年累计降雨量(mm)'\nFROM sl323.st_pptn_r p\nWHERE p.stcd = '58245'\n  AND p.tm BETWEEN '2025-01-01' AND '2025-12-31'\n  AND p.drp IS NOT NULL;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT SUM(drp) AS total_rainfall\nFROM sl323.st_pptn_r\nWHERE stcd = '58245'\n  AND tm >= '2025-01-01 00:00:00'\n  AND tm < '2026-01-01 00:00:00'\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "actual_sql": "SELECT SUM(drp) AS total_rainfall\nFROM sl323.st_pptn_r\nWHERE stcd =",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.4,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ]
+      },
+      "total_score": 0.55,
+      "duration_sec": 3.09,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 28,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询各雨量站的平均日降雨量。",
+      "expected_sql": "SELECT b.stnm AS '雨量站名称', AVG(p.drp) AS '平均日降雨量(mm)'\nFROM sl323.st_pptn_r p\nJOIN sl323.st_stbprp_b b ON p.stcd = b.stcd\nWHERE b.sttp = 'PP' AND p.drp IS NOT NULL\nGROUP BY b.stnm;",
+      "actual_response": "我来查询各雨量站的平均日降雨量。\n\n首先，我需要从 `st_pptn_r` 表中获取降雨数据，并关联 `st_stbprp_b` 表获取测站信息。根据业务规则，优先使用 `drp`（时段降水量）按天聚合后计算平均值。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query, query_multi\n\n# 查询各雨量站的平均日降雨量\n# 1. 先按测站和日期聚合 drp 得到日降雨量\n# 2. 再计算各测站的平均日降雨量\nsql = \"\"\"\nWITH daily_rainfall AS (\n    SELECT \n        stcd,\n        DATE(tm) AS rain_date,\n        SUM(drp) AS daily_rain\n    FROM sl323.st_pptn_r\n    WHERE drp IS NOT NULL\n    GROUP BY stcd, DATE(tm)\n)\nSELECT \n    dr.stcd,\n    s.stnm AS station_name,\n    COUNT(dr.rain_date) AS rain_days,\n    ROUND(AVG(dr.daily_rain), 2) AS avg_daily_rain_mm,\n    ROUND(MAX(dr.daily_rain), 2) AS max_daily_rain_mm,\n    ROUND(SUM(dr.daily_rain), 2) AS total_rain_mm\nFROM daily_rainfall dr\nJOIN sl323.st_stbprp_b s ON dr.stcd = s.stcd\nWHERE s.sttp = 'PP'\nGROUP BY dr.stcd, s.stnm\nORDER BY avg_daily_rain_mm DESC\nLIMIT 20\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "actual_sql": "WITH daily_rainfall AS (\n    SELECT \n        stcd,\n        DATE(tm) AS rain_date,\n        SUM(drp) AS daily_rain\n    FROM sl323.st_pptn_r\n    WHERE drp IS NOT NULL\n    GROUP BY stcd, DATE(tm)\n)\nSELECT \n    dr.stcd,\n    s.stnm AS station_name,\n    COUNT(dr.rain_date) AS rain_days,\n    ROUND(AVG(dr.daily_rain), 2) AS avg_daily_rain_mm,\n    ROUND(MAX(dr.daily_rain), 2) AS max_daily_rain_mm,\n    ROUND(SUM(dr.daily_rain), 2) AS total_rain_mm\nFROM daily_rainfall dr\nJOIN sl323.st_stbprp_b s ON dr.stcd = s.stcd\nWHERE s.sttp =",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.4,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "非只读语句"
+        ]
+      },
+      "total_score": 0.85,
+      "duration_sec": 8.29,
+      "error": "",
+      "attribution": {}
+    }
+  ]
+}

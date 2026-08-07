@@ -1,0 +1,58 @@
+{
+  "timestamp": "20260731_162641",
+  "config": {
+    "mode": "gateway_real_platform",
+    "gateway_url": "http://localhost:8001",
+    "model": "(platform default)",
+    "skill": "ALL",
+    "timeout": 900
+  },
+  "summary": {
+    "total": 1,
+    "avg_score": 0.455,
+    "pass_rate": 0.0
+  },
+  "results": [
+    {
+      "index": 4,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询水位站宝应最近30天水位数据。",
+      "expected_sql": "SELECT r.tm AS '时间', r.z AS '水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)\n  AND r.z IS NOT NULL\nORDER BY r.tm;",
+      "final_answer": "查询完成。以下是宝应水位站最近30天的水位数据：\n\n## 宝应水位站（里运河）水位数据\n\n**测站信息**\n- 站名：宝应\n- 站码：51005000\n- 站型：水位站 (ZZ)\n- 所属河道：里运河（人工运河）\n- 高程基准：废黄河口\n- 数据范围：2026-07-01 ~ 2026-07-31（共31天）\n\n**总体统计**\n| 指标 | 数值 (m) |\n|------|---------|\n| 平均水位 | 2.59 |\n| 最高水位 | 2.66 |\n| 最低水位 | 2.51 |\n| 观测次数 | 31 |\n\n**逐日水位数据**\n\n| 日期 | 水位 (m) | 日期 | 水位 (m) |\n|------|---------|------|---------|\n| 7月1日 | 2.60 | 7月17日 | 2.56 |\n| 7月2日 | 2.51 | 7月18日 | 2.53 |\n| 7月3日 | 2.54 | 7月19日 | 2.55 |\n| 7月4日 | 2.61 | 7月20日 | 2.60 |\n| 7月5日 | 2.61 | 7月21日 | 2.65 |\n| 7月6日 | 2.60 | 7月22日 | 2.54 |\n| 7月7日 | 2.54 | 7月23日 | 2.53 |\n| 7月8日 | 2.52 | 7月24日 | 2.55 |\n| 7月9日 | 2.66 | 7月25日 | 2.58 |\n| 7月10日 | 2.60 | 7月26日 | 2.65 |\n| 7月11日 | 2.52 | 7月27日 | 2.63 |\n| 7月12日 | 2.66 | 7月28日 | 2.63 |\n| 7月13日 | 2.63 | 7月29日 | 2.61 |\n| 7月14日 | 2.57 | 7月30日 | 2.57 |\n| 7月15日 | 2.65 | 7月31日 | 2.59 |\n| 7月16日 | 2.57 | | |\n\n**水位变化特点**\n- 水位整体在 2.51~2.66m 之间波动，振幅约 0.15m，变化较为平稳\n- 最高水位出现在 7月9日和7月12日（2.66m）\n- 最低水位出现在 7月2日（2.51m）\n- 日均水位约 2.59m\n\n⚠️ **阈值数据缺失**：该站在防洪指标表中无警戒水位和保证水位记录，无法进行超警戒判断。\n\n**数据局限性说明**：本库中宝应区域仅有 1 个水位测站（宝应站），数据代表性受限于单站空间覆盖范围。",
+      "actual_sqls": [
+        "SELECT DISTINCT b.stcd, b.stnm, b.sttp, b.rvnm, b.hnnm, b.dtmnm\n    FROM st_stbprp_b b\n    WHERE b.stnm LIKE '%宝应%'\n    LIMIT 20",
+        "SELECT MAX(tm) as max_tm FROM st_river_r\n    WHERE stcd IN ('{stcd_list}')",
+        "SELECT\n        r.stcd,\n        DATE(r.tm) AS dt,\n        ROUND(AVG(r.z), 2) AS avg_z,\n        ROUND(MIN(r.z), 2) AS min_z,\n        ROUND(MAX(r.z), 2) AS max_z,\n        COUNT(*) AS obs_cnt\n    FROM st_river_r r\n    WHERE r.stcd IN ('{stcd_list}')\n      AND r.tm >= DATE_SUB('{max_tm}', INTERVAL 30 DAY)\n      AND r.z IS NOT NULL\n    GROUP BY r.stcd, DATE(r.tm)\n    ORDER BY r.stcd, dt",
+        "SELECT\n        r.stcd,\n        ROUND(AVG(r.z), 2) AS avg_z,\n        ROUND(MIN(r.z), 2) AS min_z,\n        ROUND(MAX(r.z), 2) AS max_z,\n        COUNT(*) AS total_obs,\n        MIN(r.tm) AS first_tm,\n        MAX(r.tm) AS last_tm\n    FROM st_river_r r\n    WHERE r.stcd IN ('{stcd_list}')\n      AND r.tm >= DATE_SUB('{max_tm}', INTERVAL 30 DAY)\n      AND r.z IS NOT NULL\n    GROUP BY r.stcd",
+        "SELECT COUNT(*) as cnt FROM st_rvfcch_b\n        WHERE STCD='{s['stcd']}' AND (WRZ IS NOT NULL OR GRZ IS NOT NULL)"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "write_file",
+        "bash"
+      ],
+      "tool_results": [
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "=== 宝应相关站点 ===\n{'stcd': '32100012000357', 'stnm': '宝应湖心', 'sttp': 'WQ', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': '32102311000351_1', 'stnm': '宝应船闸', 'sttp': 'WQ', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': '51005000', 'stnm': '宝应', 'sttp': 'ZZ', 'rvnm': '里运河', 'hnnm': '下游区', 'dtmnm': '废黄河口'}\n{'stcd': '51005010', 'stnm': '宝应抽水站（水文）', 'sttp': 'DP', 'rvnm': '潼河', 'hnnm': '下游区', 'dtmnm': None}\n{'stcd': '58148', 'stnm': '宝应', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'A321000_0005', 'stnm': '大运河船闸（宝应船闸）', 'sttp': 'WQ', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M3441', 'stnm': '宝应山阳镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M3442', 'stnm': '宝应射阳湖镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M5401', 'stnm': '宝应望直港镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M5402', 'stnm': '宝应泾河镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M5403', 'stnm': '宝应黄塍镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M5404', 'stnm': '宝应曹甸镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M5405', 'stnm': '宝应柳堡镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M5406', 'stnm': '宝应范水镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M5407', 'stnm': '宝应夏集镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M5408', 'stnm': '宝应广洋湖镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M5409', 'stnm': '宝应西安丰镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M6501', 'stnm': '宝应鲁垛镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M6502', 'stnm': '宝应小官庄镇', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n{'stcd': 'M6503', 'stnm': '宝应安宜三里', 'sttp': 'PP', 'rvnm': None, 'hnnm': None, 'dtmnm': None}\n\n=== 数据锚点: 2026-07-31 00:00:00 ===\n\n=== 日聚合数据 (共 31 条) ===\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 1), 'avg_z': Decimal('2.60'), 'min_z': Decimal('2.60'), 'max_z': Decimal('2.60'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 2), 'avg_z': Decimal('2.51'), 'min_z': Decimal('2.51'), 'max_z': Decimal('2.51'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 3), 'avg_z': Decimal('2.54'), 'min_z': Decimal('2.54'), 'max_z': Decimal('2.54'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 4), 'avg_z': Decimal('2.61'), 'min_z': Decimal('2.61'), 'max_z': Decimal('2.61'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 5), 'avg_z': Decimal('2.61'), 'min_z': Decimal('2.61'), 'max_z': Decimal('2.61'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 6), 'avg_z': Decimal('2.60'), 'min_z': Decimal('2.60'), 'max_z': Decimal('2.60'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 7), 'avg_z': Decimal('2.54'), 'min_z': Decimal('2.54'), 'max_z': Decimal('2.54'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 8), 'avg_z': Decimal('2.52'), 'min_z': Decimal('2.52'), 'max_z': Decimal('2.52'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 9), 'avg_z': Decimal('2.66'), 'min_z': Decimal('2.66'), 'max_z': Decimal('2.66'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 10), 'avg_z': Decimal('2.60'), 'min_z': Decimal('2.60'), 'max_z': Decimal('2.60'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 11), 'avg_z': Decimal('2.52'), 'min_z': Decimal('2.52'), 'max_z': Decimal('2.52'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 12), 'avg_z': Decimal('2.66'), 'min_z': Decimal('2.66'), 'max_z': Decimal('2.66'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 13), 'avg_z': Decimal('2.63'), 'min_z': Decimal('2.63'), 'max_z': Decimal('2.63'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 14), 'avg_z': Decimal('2.57'), 'min_z': Decimal('2.57'), 'max_z': Decimal('2.57'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 15), 'avg_z': Decimal('2.65'), 'min_z': Decimal('2.65'), 'max_z': Decimal('2.65'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 16), 'avg_z': Decimal('2.57'), 'min_z': Decimal('2.57'), 'max_z': Decimal('2.57'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 17), 'avg_z': Decimal('2.56'), 'min_z': Decimal('2.56'), 'max_z': Decimal('2.56'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 18), 'avg_z': Decimal('2.53'), 'min_z': Decimal('2.53'), 'max_z': Decimal('2.53'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 19), 'avg_z': Decimal('2.55'), 'min_z': Decimal('2.55'), 'max_z': Decimal('2.55'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 20), 'avg_z': Decimal('2.60'), 'min_z': Decimal('2.60'), 'max_z': Decimal('2.60'), 'obs_cnt': 1}\n{'stcd': '51005000', 'dt': datetime.date(2026, 7, 21), 'avg_z': Decimal('2.65'), 'min_z': Decimal('2.65'), 'm"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 0.0,
+        "result_quality": 0.017,
+        "comparison_detail": "stdout matched 1/59 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.455,
+      "duration_sec": 125.7,
+      "llm_round_trips": 5,
+      "error": "",
+      "completed": true
+    }
+  ]
+}

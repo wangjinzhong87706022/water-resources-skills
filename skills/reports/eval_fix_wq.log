@@ -1,0 +1,68 @@
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 13 | 单题超时: 900s
+============================================================
+
+[  1/13] Q044 [water-quality/L1] 瘦西湖水质当前如何。
+  ✓ 237.0s | rounds=10 | sqls=4 | score=0.950
+[  2/13] Q045 [water-quality/L1] 查询京杭运河水质站的最新水质指标。
+  ✓ 365.7s | rounds=8 | sqls=5 | score=1.000
+[  3/13] Q046 [water-quality/L2] 帮我分析一下最近一个月瘦西湖水质变化趋势。
+[db hint] Query returned 0 rows. SQL: SELECT DATE(d.spt) AS '日期',
+       AVG(d.dox) AS '平均溶解氧(mg/L)',
+       AVG(d.codmn) AS '平均CODMn(mg/L)',
+       AVG(d.nh3n) AS '平均氨氮(mg/L)',
+       AVG(d.tp) AS '平均总磷(mg/L)',
+       AVG(d.ph) AS '平均pH'
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 608.3s | rounds=14 | sqls=5 | score=0.740
+[  4/13] Q047 [water-quality/L2] 查询京杭运河水质站当前水质等级（单因子评价法）。
+  ✓ 330.0s | rounds=1 | sqls=0 | score=0.200
+[  5/13] Q048 [water-quality/L2] 查询所有水质站最新一条数据中，哪些指标劣于Ⅳ类。
+  ✓ 382.4s | rounds=6 | sqls=2 | score=0.908
+[  6/13] Q049 [water-quality/L3] 预测一下未来24小时瘦西湖水质指标值及评级。
+[db hint] Query returned 0 rows. SQL: SELECT stnm AS '测站', tm AS '预报时间',
+       codmn AS 'CODMn(mg/L)', dox AS 'DO(mg/L)',
+       nh3n AS 'NH3N(mg/L)', tp AS 'TP(mg/L)',
+       CASE
+         WHEN codmn <= 2 THEN 'Ⅰ类' WHEN codmn <= 4 THEN 
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 617.4s | rounds=13 | sqls=6 | score=0.740
+[  7/13] Q050 [water-quality/L3] 瘦西湖水质监测的具体指标有哪些？最近一个月哪些指标变化最显著？
+  ✓ 343.2s | rounds=3 | sqls=91 | score=0.700
+[  8/13] Q051 [water-quality/L3] 查询一段时间内所有水质站的水质变化趋势。
+[db hint] Query returned 0 rows. SQL: SELECT DATE(d.spt) AS '日期', b.stnm AS '测站',
+       AVG(d.dox) AS '平均DO(mg/L)', AVG(d.codmn) AS '平均CODMn(mg/L)',
+       AVG(d.nh3n) AS '平均NH3N(mg/L)', AVG(d.tp) AS '平均TP(mg/L)',
+       AVG(d.ph) AS '平均
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 50.9s | rounds=2 | sqls=0 | score=0.390
+[  9/13] Q052 [water-quality/L3] 查询所有水质站的最新数据，包含测站名称和所有指标。
+  ✓ 336.2s | rounds=7 | sqls=3 | score=0.756
+[ 10/13] Q053 [water-quality/L3] 查询京杭运河最近一周每天的CODMn变化。
+[db hint] Query returned 0 rows. SQL: SELECT DATE(d.spt) AS '日期', AVG(d.codmn) AS '平均CODMn(mg/L)'
+FROM sl325.wq_pcp_d d
+JOIN sl323.st_stbprp_b b ON d.stcd = b.stcd
+WHERE b.stnm LIKE '%京杭运河%' AND b.sttp = 'WQ'
+  AND d.spt >= DATE_SUB(CURDA
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 418.1s | rounds=16 | sqls=8 | score=0.740
+[ 11/13] Q054 [water-quality/L3] 查询宝带河水质站的最新水质数据及综合评级。
+  ✓ 379.8s | rounds=8 | sqls=4 | score=1.000
+[ 12/13] Q055 [water-quality/L3] 帮我分析一下最近一个月仪扬河上游水质变化趋势。
+[db hint] Query returned 0 rows. SQL: SELECT DATE(d.spt) AS '日期',
+       AVG(d.dox) AS '平均DO(mg/L)', AVG(d.codmn) AS '平均CODMn(mg/L)',
+       AVG(d.nh3n) AS '平均NH3N(mg/L)', AVG(d.tp) AS '平均TP(mg/L)'
+FROM sl325.wq_pcp_d d
+JOIN sl323.st_stbp
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✗ 900.1s | error: timed out
+[ 13/13] Q056 [water-quality/L3] 查询有哪些水质站？分别属于哪条河流？
+  ✓ 460.5s | rounds=10 | sqls=7 | score=0.912
+
+============================================================
+完成 13 题 | 平均分 0.695 | 通过率 76.9%
+============================================================
+📄 JSON: reports/eval_fix_wq/gateway_eval_all_20260731_104047.json
+📄 Markdown: reports/eval_fix_wq/gateway_eval_all_20260731_104047.md

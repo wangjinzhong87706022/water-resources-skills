@@ -1,0 +1,436 @@
+[db hint] Query returned 0 rows. SQL: SELECT stcd AS '测站编码', stnm AS '测站名称', sttp AS '测站类型'
+FROM sl323.st_stbprp_b
+WHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ'
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT 
+  b.stcd,
+  b.stnm,
+  b.sttp,
+  MIN(r.z) AS min_z,
+  MAX(r.z) AS max_z,
+  MIN(r.tm) AS min_z_tm,
+  MAX(r.tm) AS max_z_tm,
+  COUNT(r.z) AS data_count
+FROM sl323.st_river_r r
+JOIN sl323.st_stbpr
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT WRZ, GRZ, OBHTZ FROM st_rvfcch_b WHERE STCD='{stcd}' LIMIT 1
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT STCD, WRZ, GRZ, OBHTZ
+        FROM st_rvfcch_b
+        WHERE STCD IN ('{stcd_list}')
+          AND (WRZ IS NOT NULL OR GRZ IS NOT NULL OR OBHTZ IS NOT NULL)
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '测站名称', AVG(r.z) AS '3月平均水位(m)'
+FROM sl323.st_river_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+WHERE b.stnm LIKE '%扬州水利枢纽%'
+  AND r.tm >= '2025-03-01' AND r.tm < '2025-04-01'
+  A
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT r.stcd, COUNT(r.z) AS data_cnt,
+        ROUND(AVG(r.z), 2) AS avg_water_level,
+        ROUND(MIN(r.z), 2) AS min_water_level,
+        ROUND(MAX(r.z), 2) AS max_water_level
+    FROM st_river_r r
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT DATE_FORMAT(r.tm, '%%Y-%%m-%%d') AS dt,
+               ROUND(AVG(r.z),2) AS avg_z, ROUND(MIN(r.z),2) AS min_z, ROUND(MAX(r.z),2) AS max_z,
+               COUNT(*) AS cnt
+        FROM st_river_r
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT DATE(r.tm) AS '日期', ROUND(AVG(r.z), 2) AS '水位(m)'
+FROM sl323.st_river_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+WHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'
+  AND DATE_FORMAT(r.tm, '%Y-%m')
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT STCD, WRZ, GRZ, OBHTZ
+    FROM sl323.st_rvfcch_b
+    WHERE STCD = '{stcd}'
+    LIMIT 1
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT
+        r.stcd,
+        b.stnm,
+        b.dtmnm,
+        AVG(r.z) AS avg_z,
+        MIN(r.z) AS min_z,
+        MAX(r.z) AS max_z,
+        COUNT(r.z) AS record_cnt,
+        MIN(r.tm) AS first_tm
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT DATE(p.tm) AS '日期', SUM(p.drp) AS '日降雨量(mm)'
+FROM sl323.st_pptn_r p
+WHERE p.stcd = '58245'
+  AND DATE(p.tm) = CURDATE()
+  AND p.drp IS NOT NULL
+GROUP BY DATE(p.tm)
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT p.tm AS '时间', p.drp AS '时段降雨量(mm)'
+FROM sl323.st_pptn_r p
+WHERE p.stcd = '58245'
+  AND DATE(p.tm) = CURDATE()
+  AND p.drp IS NOT NULL AND p.drp > 0
+ORDER BY p.tm DESC
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT 
+        b.stnm AS '雨量站名称',
+        b.stcd AS '站码',
+        b.addvcd AS '区域码',
+        ROUND(SUM(p.drp), 1) AS '累计降雨量(mm)',
+        COUNT(p.tm) AS '记录次数',
+        MIN(p.tm) AS '最早记录时间',
+       
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT d.stcd, b.stnm AS '测站名', d.spt AS '采样时间',
+         d.dox AS '溶解氧_DO',
+         d.codmn AS 'CODMn',
+         d.nh3n AS '氨氮_NH3N',
+         d.tp AS '总磷_TP',
+         d.ph AS 'pH'
+  FROM sl325.wq_
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT DATE(spt) AS '日期',
+           ROUND(AVG(dox),2) AS '溶解氧(mg/L)',
+           ROUND(AVG(codmn),2) AS 'CODMn(mg/L)',
+           ROUND(AVG(nh3n),3) AS '氨氮(mg/L)',
+           ROUND(AVG(tp),3) AS '总磷(
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT stnm AS '测站', tm AS '预报时间',
+       codmn AS 'CODMn(mg/L)', dox AS 'DO(mg/L)',
+       nh3n AS 'NH3N(mg/L)', tp AS 'TP(mg/L)',
+       CASE
+         WHEN codmn <= 2 THEN 'Ⅰ类' WHEN codmn <= 4 THEN 
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT r.stcd, r.z
+FROM sl323.st_river_r r
+JOIN (
+    SELECT stcd, MAX(tm) as mt FROM sl323.st_river_r
+    WHERE tm > DATE_SUB('{max_tm}', INTERVAL 90 DAY)
+    GROUP BY stcd
+) m ON r.stcd = m.stcd AND
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT taskid, r.stcd AS '测站编码', REPLACE(b.stnm, '计算水位', '') AS '测站名称',
+       tm AS '预报时间', vals AS '预报值'
+FROM slztk.st_mx_preset_cal_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+WHERE b.stnm IN (
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 98 | 单题超时: 900s
+============================================================
+
+[  1/98] Q001 [water-situation/L1] 古运河有哪些水位测站？
+  ✓ 35.8s | rounds=3 | sqls=1 | score=0.790
+[  2/98] Q002 [water-situation/L1] 查询宝应水位站的所属河流、水系、流域、测站类别。
+  ✓ 26.1s | rounds=4 | sqls=1 | score=1.000
+[  3/98] Q003 [water-situation/L1] 查询测站总数。
+  ✓ 9.1s | rounds=3 | sqls=1 | score=1.000
+[  4/98] Q004 [water-situation/L1] 查询水位站宝应最近30天水位数据。
+  ✓ 743.3s | rounds=5 | sqls=6 | score=1.000
+[  5/98] Q005 [water-situation/L2] 查询古运河(河流名称)水位站的数量。
+  ✓ 10.8s | rounds=3 | sqls=1 | score=0.700
+[  6/98] Q006 [water-situation/L2] 查询建站最早和最晚的测站名称及其建站时间。
+  ✓ 10.5s | rounds=3 | sqls=2 | score=1.000
+[  7/98] Q007 [water-situation/L2] 查询水位站数量最多、最少的河流。
+  ✓ 19.9s | rounds=6 | sqls=4 | score=0.850
+[  8/98] Q008 [water-situation/L2] 查询古运河历史最高/低水位。
+  ✓ 502.9s | rounds=7 | sqls=3 | score=1.000
+[  9/98] Q009 [water-situation/L2] 查询里运河（河流）最近两个月的水位数据。
+  ✓ 727.9s | rounds=5 | sqls=6 | score=0.938
+[ 10/98] Q010 [water-situation/L2] 查询各水位站最新的水位值。
+  ✓ 283.6s | rounds=5 | sqls=2 | score=0.866
+[ 11/98] Q011 [water-situation/L3] 2024年古运河平均水位。
+  ✓ 288.2s | rounds=5 | sqls=3 | score=0.750
+[ 12/98] Q012 [water-situation/L3] 古运河2024年2、3月份水位对比。
+  ✓ 476.7s | rounds=11 | sqls=15 | score=0.700
+[ 13/98] Q013 [water-situation/L3] 请比较2023年和2024年古运河的平均水位。
+  ✓ 299.0s | rounds=5 | sqls=3 | score=0.750
+[ 14/98] Q014 [water-situation/L3] 古运河2024年2月水位分布情况。
+  ✓ 304.3s | rounds=5 | sqls=5 | score=0.963
+[ 15/98] Q015 [water-situation/L3] 查询水位站白马闸的实时水位是多少。
+  ✓ 33.3s | rounds=7 | sqls=4 | score=1.000
+[ 16/98] Q016 [water-situation/L3] 查询各类型测站的数量。
+  ✓ 409.5s | rounds=3 | sqls=1 | score=1.000
+[ 17/98] Q017 [water-situation/L3] 查询全部测站的名称（分页展示前20条）。
+  ✓ 33.7s | rounds=3 | sqls=2 | score=1.000
+[ 18/98] Q018 [water-situation/L3] 古运河水情（模糊查询，用户只输入"古运河"三个字）。
+  ✓ 694.7s | rounds=12 | sqls=20 | score=0.550
+[ 19/98] Q019 [water-situation/L3] 查询2025年古运河水位站点的数量。
+  ✓ 256.6s | rounds=5 | sqls=3 | score=1.000
+[ 20/98] Q020 [water-situation/L3] 扬州水利枢纽3月份平均水位。
+  ✓ 322.2s | rounds=8 | sqls=14 | score=0.540
+[ 21/98] Q021 [water-situation/L3] 查询里运河2025年各测站的平均水位。
+  ✓ 326.7s | rounds=8 | sqls=6 | score=1.000
+[ 22/98] Q022 [water-situation/L3] 查询水位站宝应这个月的水位数据（同义词测试：本月 = 当月）。
+  ✓ 401.8s | rounds=11 | sqls=19 | score=0.740
+[ 23/98] Q023 [water-situation/L3] 查询水位站宝应本月内水位数据变化趋势。
+  ✓ 436.1s | rounds=15 | sqls=17 | score=0.740
+[ 24/98] Q024 [water-situation/L3] 古运河8月的水位数据与扬州闸6月的水位数据对比，各自的平均水位、最高水位和最低水位分别是多少？
+  ✓ 405.3s | rounds=9 | sqls=21 | score=0.806
+[ 25/98] Q025 [water-situation/L3] 查询2024年古运河相关测站的年平均水位。
+  ✓ 279.8s | rounds=5 | sqls=2 | score=1.000
+[ 26/98] Q026 [rainfall/L1] 查询扬州城区今日降雨量。
+  ✓ 28.4s | rounds=6 | sqls=3 | score=0.790
+[ 27/98] Q027 [rainfall/L1] 查询2025年扬州城区降雨总量。
+  ✓ 32.5s | rounds=3 | sqls=2 | score=1.000
+[ 28/98] Q028 [rainfall/L1] 查询各雨量站的平均日降雨量。
+  ✓ 701.4s | rounds=5 | sqls=2 | score=0.735
+[ 29/98] Q029 [rainfall/L2] 24年扬州城区降雨总量大概是多少？哪天降雨最大？
+  ✓ 244.7s | rounds=3 | sqls=2 | score=1.000
+[ 30/98] Q030 [rainfall/L2] 2024年扬州各区域累计降雨量最高的前三个区域。
+  ✓ 318.6s | rounds=9 | sqls=6 | score=0.950
+[ 31/98] Q031 [rainfall/L2] 查询最近三天各雨量站的累计降雨量。
+  ✓ 256.6s | rounds=5 | sqls=2 | score=0.905
+[ 32/98] Q032 [rainfall/L3] 查询未来2小时短临扬州市区降雨预测。
+  ✓ 338.2s | rounds=12 | sqls=8 | score=0.800
+[ 33/98] Q033 [rainfall/L3] 查询2024年扬州城区哪天降雨量最大。
+  ✓ 265.6s | rounds=5 | sqls=3 | score=1.000
+[ 34/98] Q034 [rainfall/L3] 扬州城区历史最大单日降雨量是多少？出现在哪一天？
+  ✓ 306.6s | rounds=10 | sqls=7 | score=0.700
+[ 35/98] Q035 [rainfall/L3] 查询最近三年各雨量站的年降雨量。
+  ✓ 377.1s | rounds=9 | sqls=8 | score=0.800
+[ 36/98] Q036 [rainfall/L3] 查询各雨量站的2026年的累计降雨量（预期结果为空）。
+  ✓ 244.1s | rounds=5 | sqls=2 | score=1.000
+[ 37/98] Q037 [rainfall/L3] 查询2024年扬州城区累计降雨量最高的前三天。
+  ✓ 19.8s | rounds=3 | sqls=1 | score=1.000
+[ 38/98] Q038 [rainfall/L3] 查询2026年累计降雨量最多/最少的测站（预期结果为空，测试空结果处理）。
+  ✓ 37.7s | rounds=5 | sqls=2 | score=1.000
+[ 39/98] Q039 [rainfall/L3] 请帮我查询一下24年扬州城区降雨总量，按月统计。
+  ✓ 687.9s | rounds=4 | sqls=2 | score=1.000
+[ 40/98] Q040 [rainfall/L3] 对比2023年和2024年扬州城区各月降雨量。
+  ✓ 461.8s | rounds=18 | sqls=7 | score=0.950
+[ 41/98] Q041 [rainfall/L3] 查询今天有没有下雨？扬州城区当前降雨情况。
+  ✓ 264.1s | rounds=8 | sqls=5 | score=0.790
+[ 42/98] Q042 [rainfall/L3] 查询最近一周扬州市各雨量站的累计降雨量排名。
+  ✓ 382.5s | rounds=11 | sqls=13 | score=0.855
+[ 43/98] Q043 [rainfall/L3] 查询扬州城区2024年降雨日数（有雨的天数）。
+  ✓ 22.1s | rounds=4 | sqls=1 | score=1.000
+[ 44/98] Q044 [water-quality/L1] 瘦西湖水质当前如何。
+  ✓ 540.0s | rounds=4 | sqls=4 | score=0.750
+[ 45/98] Q045 [water-quality/L1] 查询京杭运河水质站的最新水质指标。
+  ✓ 298.3s | rounds=4 | sqls=3 | score=0.750
+[ 46/98] Q046 [water-quality/L2] 帮我分析一下最近一个月瘦西湖水质变化趋势。
+  ✓ 730.2s | rounds=20 | sqls=14 | score=0.950
+[ 47/98] Q047 [water-quality/L2] 查询京杭运河水质站当前水质等级（单因子评价法）。
+  ✓ 280.0s | rounds=4 | sqls=2 | score=1.000
+[ 48/98] Q048 [water-quality/L2] 查询所有水质站最新一条数据中，哪些指标劣于Ⅳ类。
+  ✓ 290.9s | rounds=6 | sqls=2 | score=0.987
+[ 49/98] Q049 [water-quality/L3] 预测一下未来24小时瘦西湖水质指标值及评级。
+  ✓ 635.9s | rounds=18 | sqls=14 | score=0.740
+[ 50/98] Q050 [water-quality/L3] 瘦西湖水质监测的具体指标有哪些？最近一个月哪些指标变化最显著？
+  ✗ 900.0s | error: timed out
+[ 51/98] Q051 [water-quality/L3] 查询一段时间内所有水质站的水质变化趋势。
+  ✓ 713.0s | rounds=21 | sqls=10 | score=0.852
+[ 52/98] Q052 [water-quality/L3] 查询所有水质站的最新数据，包含测站名称和所有指标。
+  ✓ 127.9s | rounds=5 | sqls=1 | score=0.980
+[ 53/98] Q053 [water-quality/L3] 查询京杭运河最近一周每天的CODMn变化。
+  ✓ 631.5s | rounds=14 | sqls=14 | score=0.950
+[ 54/98] Q054 [water-quality/L3] 查询宝带河水质站的最新水质数据及综合评级。
+  ✓ 37.7s | rounds=4 | sqls=2 | score=1.000
+[ 55/98] Q055 [water-quality/L3] 帮我分析一下最近一个月仪扬河上游水质变化趋势。
+  ✗ 900.1s | error: timed out
+[ 56/98] Q056 [water-quality/L3] 查询有哪些水质站？分别属于哪条河流？
+  ✓ 334.9s | rounds=6 | sqls=3 | score=1.000
+[ 57/98] Q057 [water-forecast/L1] 查询未来24小时扬州市重点河道水位预测。
+  ✓ 784.6s | rounds=26 | sqls=14 | score=0.740
+[ 58/98] Q058 [water-forecast/L1] 查询最新预测任务的状态。
+  ✓ 24.7s | rounds=4 | sqls=1 | score=0.900
+[ 59/98] Q059 [water-forecast/L2] 预测未来24小时古运河水位站的水位变化趋势。[db hint] Query returned 0 rows. SQL: SELECT r.tm AS '预报时间', r.vals AS '预报水位(m)'
+FROM slztk.st_mx_preset_cal_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+WHERE b.stnm LIKE '%古运河%'
+  AND r.type = '1'
+  AND r.tm BETWEEN NOW() AND DATE_AD
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT
+    p.stnm AS station_name,
+    p.stcd AS station_code,
+    COUNT(*) AS forecast_count,
+    ROUND(MIN(p.vals), 2) AS min_level,
+    ROUND(MAX(p.vals), 2) AS max_level,
+    ROUND(AVG(p.vals), 2)
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '测站名称',
+       MIN(r.vals) AS '最低预测水位(m)',
+       MAX(r.vals) AS '最高预测水位(m)',
+       MIN(r.tm) AS '预测起始',
+       MAX(r.tm) AS '预测终止'
+FROM slztk.st_mx_preset_cal_r r
+JOIN sl323.st_stbp
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '测站名称',
+       latest.z AS '当前水位(m)',
+       pred.vals AS '预测水位(m)',
+       pred.vals - latest.z AS '水位变化(m)',
+       pred.tm AS '预测时间'
+FROM slztk.st_mx_preset_cal_r pred
+JOIN sl323.s
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT dm.name AS '断面名称', dm.z AS '水位(m)', dm.Qin AS '入流(m³/s)', dm.Qout AS '出流(m³/s)', dm.tm AS '时间'
+FROM slztk.st_mx_rv_dm_r dm
+WHERE dm.taskid = (SELECT taskid FROM slztk.st_mx_taskid_r WHERE stuts
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT p.stcd, p.stnm,
+       COUNT(*) as record_cnt,
+       ROUND(MIN(p.vals), 2) as min_flow,
+       ROUND(MAX(p.vals), 2) as max_flow,
+       ROUND(AVG(p.vals), 2) as avg_flow
+FROM slztk.st_mx_pres
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '测站名称', r.tm AS '预报时间', r.vals AS '预报流量(m³/s)'
+FROM slztk.st_mx_preset_cal_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+WHERE r.type = '2'
+  AND r.tm BETWEEN NOW() AND DATE_ADD(NOW
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT r.tm AS '预报时间', r.vals AS '预报水位(m)'
+FROM slztk.st_mx_preset_cal_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+WHERE b.stnm LIKE '%瘦西湖%'
+  AND r.type = '1'
+  AND r.tm BETWEEN NOW() AND DATE_AD
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT taskid AS '任务ID', tm AS '调度时间',
+       CASE WHEN stuts = '0' THEN '计算中' WHEN stuts = '1' THEN '已完成' END AS '状态',
+       CASE WHEN type = '1' THEN '滚动预报' WHEN type = '2' THEN '模型计算' END AS '类型'
+
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '测站名称', g.gtname AS '闸门名称', g.gtophgt AS '开度(m)', 
+       g.gto AS '过闸流量(m³/s)', 
+       CASE WHEN g.gtophgt > 0 THEN '开启' ELSE '关闭' END AS '状态', 
+       g.tm AS '时间'
+FROM sl323.st_ga
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '闸站', g.gtname AS '闸门名称', 
+       ROUND(g.gtophgt, 3) AS '开度(m)', 
+       ROUND(g.gto, 3) AS '过闸流量(m³/s)',
+       CASE WHEN g.gtophgt > 0 THEN '开启' ELSE '关闭' END AS '状态', 
+       g.tm
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '闸站', g.gtname AS '闸门', g.gtopnum AS '开启孔数', g.gtophgt AS '开度(m)'
+FROM sl323.st_gate_r g
+JOIN sl323.st_stbprp_b b ON g.stcd = b.stcd
+JOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT w.upz AS '闸上水位(m)', w.dwz AS '闸下水位(m)', w.tgtq AS '总过闸流量(m³/s)',
+       w.tm AS '时间'
+FROM sl323.st_was_r w
+JOIN (SELECT stcd, MAX(tm) AS mt FROM sl323.st_was_r WHERE stcd = '{gate_stcd}' GROUP 
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT STCD, WRZ, GRZ, OBHTZ
+        FROM st_rvfcch_b
+        WHERE STCD = '{stcd}'
+        LIMIT 1
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS stnm, rv.GRZ AS grz,
+       MAX(d.z) AS max_z,
+       ROUND(MAX(d.z) - rv.GRZ, 3) AS exceed_grz,
+       MIN(d.tm) AS first_tm, MAX(d.tm) AS last_tm
+FROM sl323.st_river_r d
+JOIN sl323.
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT r.stcd, r.tm, r.z, r.q, r.wptn, b.stnm, b.rvnm, b.dtmnm
+FROM st_river_r r
+JOIN st_stbprp_b b ON r.stcd = b.stcd
+JOIN (
+    SELECT stcd, MAX(tm) AS mt
+    FROM st_river_r
+    WHERE stcd IN (
+   
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '测站名称', r.z AS '水位(m)', rv.GRZ AS '保证水位(m)',
+       r.tm AS '时间', rv.GRZ AS '保证水位'
+FROM sl323.st_river_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+JOIN sl323.st_rvfcch_b rv ON r.s
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+
+  ✓ 713.5s | rounds=14 | sqls=6 | score=0.740
+[ 60/98] Q060 [water-forecast/L2] 查询未来24小时所有站点的预测水位，按站分组显示最高/最低预测值。
+  ✓ 418.8s | rounds=12 | sqls=19 | score=0.740
+[ 61/98] Q061 [water-forecast/L2] 查询最新的模型计算任务列表（已完成的）。
+  ✓ 39.5s | rounds=3 | sqls=1 | score=0.800
+[ 62/98] Q062 [water-forecast/L3] 对比当前水位与未来24小时预测水位的差异。
+  ✗ 900.1s | error: timed out
+[ 63/98] Q063 [water-forecast/L3] 查询河道断面数据（某任务下的所有断面水位）。
+  ✓ 125.4s | rounds=4 | sqls=1 | score=0.790
+[ 64/98] Q064 [water-forecast/L3] 查询最新已完成任务的预测起止时间。
+  ✓ 277.3s | rounds=6 | sqls=3 | score=0.800
+[ 65/98] Q065 [water-forecast/L3] 查询未来24小时所有站点的预测流量（type='2'）。
+  ✓ 301.7s | rounds=6 | sqls=5 | score=0.790
+[ 66/98] Q066 [water-forecast/L3] 查询历史上有多少次预测任务已完成。
+  ✓ 263.9s | rounds=7 | sqls=7 | score=0.900
+[ 67/98] Q067 [water-forecast/L3] 预测瘦西湖未来24小时水位变化。
+  ✓ 432.6s | rounds=25 | sqls=6 | score=0.740
+[ 68/98] Q068 [water-forecast/L3] 查询最新任务中预测水位最高和最低的站点。
+  ✓ 441.1s | rounds=16 | sqls=18 | score=0.950
+[ 69/98] Q069 [water-forecast/L3] 查询今天有哪些预测任务，分别是什么状态？
+  ✓ 36.0s | rounds=6 | sqls=3 | score=0.790
+[ 70/98] Q070 [gate-pump-operation/L1] 查询所有闸站的最新启闭状态。
+  ✓ 547.0s | rounds=4 | sqls=2 | score=0.928
+[ 71/98] Q071 [gate-pump-operation/L1] 查询当前开启状态的泵站最新水情数据。
+  ✓ 32.9s | rounds=4 | sqls=1 | score=0.850
+[ 72/98] Q072 [gate-pump-operation/L2] 查询念四闸站最新的上下游水位和过闸流量。
+  ✓ 478.8s | rounds=5 | sqls=8 | score=1.000
+[ 73/98] Q073 [gate-pump-operation/L2] 查询泵站综合运行状态汇总。
+  ✓ 382.5s | rounds=7 | sqls=12 | score=0.850
+[ 74/98] Q074 [gate-pump-operation/L2] 查询润扬河闸各闸门最新开度。
+  ✓ 280.3s | rounds=5 | sqls=5 | score=1.000
+[ 75/98] Q075 [gate-pump-operation/L3] 查询当前所有正在排水的泵站及其抽水流量排名。
+  ✓ 263.3s | rounds=4 | sqls=2 | score=0.850
+[ 76/98] Q076 [gate-pump-operation/L3] 查询当前所有堰闸的水位差排名（上下游水位差最大的前10）。
+  ✓ 261.0s | rounds=4 | sqls=1 | score=1.000
+[ 77/98] Q077 [gate-pump-operation/L3] 查询军桥站各泵的最新工情数据（电压、电流、功率）。
+  ✓ 278.3s | rounds=6 | sqls=4 | score=0.850
+[ 78/98] Q078 [gate-pump-operation/L3] 查询当前所有正在引水的泵站及其引水量。
+  ✓ 243.1s | rounds=4 | sqls=1 | score=0.850
+[ 79/98] Q079 [gate-pump-operation/L3] 查询戴庄排涝站闸门的开度历史记录（最近10条）。
+  ✓ 252.1s | rounds=4 | sqls=2 | score=1.000
+[ 80/98] Q080 [gate-pump-operation/L3] 查询新城河闸上下游水位及过闸流量（堰闸水情）。
+  ✓ 30.3s | rounds=5 | sqls=2 | score=1.000
+[ 81/98] Q081 [gate-pump-operation/L3] 查询所有闸门的开启孔数统计。
+  ✓ 537.2s | rounds=5 | sqls=4 | score=0.790
+[ 82/98] Q082 [gate-pump-operation/L3] 统计当前有多少闸门处于开启状态、多少处于关闭状态。
+  ✓ 270.1s | rounds=4 | sqls=5 | score=1.000
+[ 83/98] Q083 [gate-pump-operation/L3] 查询有哪些闸站和泵站？分别属于哪个管理区域？
+  ✓ 40.3s | rounds=5 | sqls=3 | score=0.974
+[ 84/98] Q084 [gate-pump-operation/L3] 查询扬州水利枢纽泵站当前的运行状态。
+  ✓ 551.8s | rounds=6 | sqls=12 | score=0.850
+[ 85/98] Q085 [water-warning/L1] 查询当前超警戒水位的站点。
+  ✓ 313.4s | rounds=7 | sqls=5 | score=1.000
+[ 86/98] Q086 [water-warning/L1] 查询防洪预警汇总（多少站正常、超警戒、超保证）。
+  ✓ 298.7s | rounds=5 | sqls=4 | score=1.000
+[ 87/98] Q087 [water-warning/L2] 扬州市重点河道水位实时情况（含超警戒判断）。
+  ✓ 323.5s | rounds=5 | sqls=3 | score=0.750
+[ 88/98] Q088 [water-warning/L2] 查询水质低于Ⅳ类的站点。
+  ✓ 313.4s | rounds=4 | sqls=1 | score=0.925
+[ 89/98] Q089 [water-warning/L2] 扬州市重点河道指定测站当前水位如何。
+  ✓ 297.8s | rounds=7 | sqls=6 | score=1.000
+[ 90/98] Q090 [water-warning/L3] 24年8月20号左右，扬州古运河、新城河、瘦西湖最高水位及是否超标。
+  ✓ 383.1s | rounds=10 | sqls=8 | score=0.625
+[ 91/98] Q091 [water-warning/L3] 查询所有站点的预警水位配置（有警戒水位的站）。
+  ✓ 305.6s | rounds=9 | sqls=1 | score=0.779
+[ 92/98] Q092 [water-warning/L3] 综合查询：当前有多少闸站超警戒水位、哪些泵站正在排水、整体防洪形势。
+  ✓ 325.4s | rounds=5 | sqls=5 | score=0.900
+[ 93/98] Q093 [water-warning/L3] 查询当前所有站点的预警状态一览（包含正常站）。
+  ✓ 315.1s | rounds=5 | sqls=1 | score=0.923
+[ 94/98] Q094 [water-warning/L3] 查询最近30天内是否有站点曾超警戒水位。
+  ✓ 341.9s | rounds=8 | sqls=8 | score=0.944
+[ 95/98] Q095 [water-warning/L3] 扬州市重点河道（古运河、新城河、瘦西湖、沿山河等）实时水位情况。
+  ✓ 323.8s | rounds=6 | sqls=6 | score=0.940
+[ 96/98] Q096 [water-warning/L3] 查询所有水质站的最新水质综合评级，标注低于Ⅲ类的站点。
+  ✓ 113.0s | rounds=4 | sqls=1 | score=0.940
+[ 97/98] Q097 [water-warning/L3] 2024年8月扬州城区降雨量最大的那天，各重点河道水位是否超警戒？
+  ✗ 900.1s | error: timed out
+[ 98/98] Q098 [water-warning/L3] 查询历史上超保证水位（GRZ）的站点及出现时间。
+  ✓ 120.0s | rounds=8 | sqls=5 | score=0.790
+
+============================================================
+完成 98 题 | 平均分 0.846 | 通过率 93.9%
+============================================================
+📄 JSON: reports/eval_verify_20260801_120825/gateway_eval_all_20260801_211943.json
+📄 Markdown: reports/eval_verify_20260801_120825/gateway_eval_all_20260801_211943.md

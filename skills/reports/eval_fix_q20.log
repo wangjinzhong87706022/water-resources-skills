@@ -1,0 +1,21 @@
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 1 | 单题超时: 900s
+============================================================
+
+[  1/1] Q020 [water-situation/L3] 扬州水利枢纽3月份平均水位。
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '测站名称', AVG(r.z) AS '3月平均水位(m)'
+FROM sl323.st_river_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+WHERE b.stnm LIKE '%扬州水利枢纽%'
+  AND r.tm >= '2025-03-01' AND r.tm < '2025-04-01'
+  A
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 243.7s | rounds=9 | sqls=6 | score=0.740
+
+============================================================
+完成 1 题 | 平均分 0.740 | 通过率 100.0%
+============================================================
+📄 JSON: reports/eval_fix_q20/gateway_eval_all_20260731_091424.json
+📄 Markdown: reports/eval_fix_q20/gateway_eval_all_20260731_091424.md

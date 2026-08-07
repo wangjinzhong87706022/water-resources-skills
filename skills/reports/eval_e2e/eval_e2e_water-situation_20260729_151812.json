@@ -1,0 +1,74 @@
+{
+  "timestamp": "20260729_151812",
+  "config": {
+    "skill": "water-situation",
+    "model": "Qwen3.6-27B-Q5_K_S.gguf",
+    "base_url": "http://172.28.101.81:8080/v1",
+    "timeout": 120,
+    "range": "1-2",
+    "e2e_mode": "direct_openai_api",
+    "note": "Direct OpenAI API call, bypassing hermes CLI and DeerFlow Gateway. Simulates DeerFlow first-pass skill loading."
+  },
+  "summary": {
+    "total": 2,
+    "completed": 2,
+    "timeout": 0,
+    "avg_score": 0.745
+  },
+  "results": [
+    {
+      "index": 1,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "古运河有哪些水位测站？",
+      "expected_sql": "SELECT stcd AS '测站编码', stnm AS '测站名称', sttp AS '测站类型'\nFROM sl323.st_stbprp_b\nWHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ';",
+      "actual_response": "我来查询古运河的水位测站信息。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    b.stcd AS 站码,\n    b.stnm AS 站名,\n    b.sttp AS 站类,\n    b.rvnm AS 河流名称,\n    b.hnnm AS 水系名称,\n    b.bsnm AS 流域名称,\n    b.addvcd AS 行政区划码,\n    b.dtmnm AS 高程基准,\n    b.esstym AS 建站年月\nFROM st_stbprp_b b\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n    AND b.sttp IN ('ZZ', 'ZQ')\nORDER BY b.stcd\n\"\"\"\n\nresult = query(sql)\nprint(f\"共找到 {len(result)} 个古运河水位测站：\")\nprint(\"-\" * 80)\nfor row in result:\n    print(f\"站码: {row['站码']}\")\n    print(f\"站名: {row['站名']}\")\n    print(f\"站类: {row['站类']}\")\n    print(f\"河流: {row['河流名称']}\")\n    print(f\"水系: {row['水系名称']}\")\n    print(f\"流域: {row['流域名称']}\")\n    print(f\"区划: {row['行政区划码']}\")\n    print(f\"基准: {row['高程基准']}\")\n    print(f\"建站: {row['建站年月']}\")\n    print(\"-\" * 80)\n```",
+      "extracted_code": "import os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    b.stcd AS 站码,\n    b.stnm AS 站名,\n    b.sttp AS 站类,\n    b.rvnm AS 河流名称,\n    b.hnnm AS 水系名称,\n    b.bsnm AS 流域名称,\n    b.addvcd AS 行政区划码,\n    b.dtmnm AS 高程基准,\n    b.esstym AS 建站年月\nFROM st_stbprp_b b\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n    AND b.sttp IN ('ZZ', 'ZQ')\nORDER BY b.stcd\n\"\"\"\n\nresult = query(sql)\nprint(f\"共找到 {len(result)} 个古运河水位测站：\")\nprint(\"-\" * 80)\nfor row in result:\n    print(f\"站码: {row['站码']}\")\n    print(f\"站名: {row['站名']}\")\n    print(f\"站类: {row['站类']}\")\n    print(f\"河流: {row['河流名称']}\")\n    print(f\"水系: {row['水系名称']}\")\n    print(f\"流域: {row['流域名称']}\")\n    print(f\"区划: {row['行政区划码']}\")\n    print(f\"基准: {row['高程基准']}\")\n    print(f\"建站: {row['建站年月']}\")\n    print(\"-\" * 80)",
+      "code_type": "python",
+      "execution_result": {
+        "ok": true,
+        "stdout": "共找到 7 个古运河水位测站：\n--------------------------------------------------------------------------------\n站码: HT0021002001000010\n站名: 古运河水文站（钞关泵站）\n站类: ZQ\n河流: None\n水系: None\n流域: None\n区划: 321002\n基准: None\n建站: None\n--------------------------------------------------------------------------------\n站码: HT0021071050000019\n站名: 古运河水文站（扬子江南路古运河大桥）\n站类: ZQ\n河流: None\n水系: None\n流域: None\n区划: 321003\n基准: None\n建站: None\n--------------------------------------------------------------------------------\n站码: HT0021071050000023\n站名: 古运河水位站（新城河口）\n站类: ZZ\n河流: None\n水系: None\n流域: None\n区划: 321003\n基准: None\n建站: None\n--------------------------------------------------------------------------------\n站码: HT0021071050000038\n站名: 古运河水文站(大运河博物馆)\n站类: ZQ\n河流: None\n水系: None\n流域: None\n区划: None\n基准: None\n建站: None\n--------------------------------------------------------------------------------\n站码: HT0021071151000019\n站名: 古运河水文站（扬子津体育公园）\n站类: ZQ\n河流: None\n水系: None\n流域: None\n区划: 321003\n基准: None\n建站: None\n--------------------------------------------------------------------------------\n站码: HT0031003103000021\n站名: 古运河水位站（春江路）\n站类: ZZ\n河流: None\n水系: None\n流域: None\n区划: 321003\n基准: None\n建站: None\n--------------------------------------------------------------------------------\n站码: HT0031071050000029\n站名: 古运河水位站(三湾公园)\n站类: ZZ\n河流: None\n水系: None\n流域: None\n区划: 321002\n基准: None\n建站: None\n--------------------------------------------------------------------------------",
+        "stderr": "",
+        "returncode": 0
+      },
+      "execution_error": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "code_extraction": 1.0,
+        "execution_success": 1.0,
+        "result_quality": 0.3
+      },
+      "total_score": 0.79,
+      "duration_sec": 11.05,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 2,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询宝应水位站的所属河流、水系、流域、测站类别。",
+      "expected_sql": "SELECT stnm AS '测站名称', rvnm AS '河流', hnnm AS '水系', bsnm AS '流域', sttp AS '测站类别'\nFROM sl323.st_stbprp_b\nWHERE stnm = '宝应';",
+      "actual_response": "我来查询宝应水位站的详细信息。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    stcd AS 站码,\n    stnm AS 测站名称,\n    sttp AS 测站类别,\n    rvnm AS 所属河流,\n    hnnm AS 水系,\n    bsnm AS 流域,\n    addvcd AS 行政区划码,\n    dtmnm AS 高程基准,\n    esstym AS 建站年月\nFROM sl323.st_stbprp_b\nWHERE stnm LIKE '%宝应%'\nLIMIT 10\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "extracted_code": "import os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    stcd AS 站码,\n    stnm AS 测站名称,\n    sttp AS 测站类别,\n    rvnm AS 所属河流,\n    hnnm AS 水系,\n    bsnm AS 流域,\n    addvcd AS 行政区划码,\n    dtmnm AS 高程基准,\n    esstym AS 建站年月\nFROM sl323.st_stbprp_b\nWHERE stnm LIKE '%宝应%'\nLIMIT 10\n\"\"\"\n\nresult = query(sql)\nprint(result)",
+      "code_type": "python",
+      "execution_result": {
+        "ok": true,
+        "stdout": "[{'站码': '32100012000357', '测站名称': '宝应湖心', '测站类别': 'WQ', '所属河流': None, '水系': None, '流域': None, '行政区划码': '321084', '高程基准': None, '建站年月': None}, {'站码': '32102311000351_1', '测站名称': '宝应船闸', '测站类别': 'WQ', '所属河流': None, '水系': None, '流域': None, '行政区划码': '321084', '高程基准': None, '建站年月': None}, {'站码': '51005000', '测站名称': '宝应', '测站类别': 'ZZ', '所属河流': '里运河', '水系': '下游区', '流域': '淮河', '行政区划码': '321023', '高程基准': '废黄河口', '建站年月': '191209'}, {'站码': '51005010', '测站名称': '宝应抽水站（水文）', '测站类别': 'DP', '所属河流': '潼河', '水系': '下游区', '流域': '淮河', '行政区划码': '321023', '高程基准': None, '建站年月': None}, {'站码': '58148', '测站名称': '宝应', '测站类别': 'PP', '所属河流': None, '水系': None, '流域': None, '行政区划码': '321023', '高程基准': None, '建站年月': None}, {'站码': 'A321000_0005', '测站名称': '大运河船闸（宝应船闸）', '测站类别': 'WQ', '所属河流': None, '水系': None, '流域': None, '行政区划码': '321084', '高程基准': None, '建站年月': None}, {'站码': 'M3441', '测站名称': '宝应山阳镇', '测站类别': 'PP', '所属河流': None, '水系': None, '流域': None, '行政区划码': '321023', '高程基准': None, '建站年月': None}, {'站码': 'M3442', '测站名称': '宝应射阳湖镇', '测站类别': 'PP', '所属河流': None, '水系': None, '流域': None, '行政区划码': '321023', '高程基准': None, '建站年月': None}, {'站码': 'M5401', '测站名称': '宝应望直港镇', '测站类别': 'PP', '所属河流': None, '水系': None, '流域': None, '行政区划码': '321023', '高程基准': None, '建站年月': None}, {'站码': 'M5402', '测站名称': '宝应泾河镇', '测站类别': 'PP', '所属河流': None, '水系': None, '流域': None, '行政区划码': '321023', '高程基准': None, '建站年月': None}]",
+        "stderr": "",
+        "returncode": 0
+      },
+      "execution_error": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "code_extraction": 1.0,
+        "execution_success": 1.0,
+        "result_quality": 0.0
+      },
+      "total_score": 0.7,
+      "duration_sec": 4.1,
+      "error": "",
+      "completed": true
+    }
+  ]
+}

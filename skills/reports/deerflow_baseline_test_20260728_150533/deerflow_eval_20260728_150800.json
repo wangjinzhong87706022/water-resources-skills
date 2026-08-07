@@ -1,0 +1,230 @@
+{
+  "meta": {
+    "timestamp": "20260728_150800",
+    "total_cases": 10
+  },
+  "results": [
+    {
+      "index": 1,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "古运河有哪些水位测站？",
+      "expected_sql": "SELECT stcd AS '测站编码', stnm AS '测站名称', sttp AS '测站类型'\nFROM sl323.st_stbprp_b\nWHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ';",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    b.stcd,\n    b.stnm AS station_name,\n    b.sttp AS station_type,\n    b.dtmnm AS elevation_datum,\n    b.dtel AS elevation,\n    b.addvcd AS admin_code\nFROM sl323.st_stbprp_b b\nWHERE b.rvnm LIKE '%古运河%'\nORDER BY b.stcd\n\"\"\"\n\nstations = query(sql)\nprint(f\"找到 {len(stations)} 个古运河水位测站：\")\nfor s in stations:\n    print(f\"- 站码: {s['stcd']}, 站名: {s['station_name']}, 类型: {s['station_type']}, 基准: {s['elevation_datum']}\")\n```",
+      "actual_sql": "SELECT \n    b.stcd,\n    b.stnm AS station_name,\n    b.sttp AS station_type,\n    b.dtmnm AS elevation_datum,\n    b.dtel AS elevation,\n    b.addvcd AS admin_code\nFROM sl323.st_stbprp_b b\nWHERE b.rvnm LIKE",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 0.5,
+        "response_quality": 0.4,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ]
+      },
+      "total_score": 0.62,
+      "duration_sec": 33.21,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 2,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询宝应水位站的所属河流、水系、流域、测站类别。",
+      "expected_sql": "SELECT stnm AS '测站名称', rvnm AS '河流', hnnm AS '水系', bsnm AS '流域', sttp AS '测站类别'\nFROM sl323.st_stbprp_b\nWHERE stnm = '宝应';",
+      "actual_response": "我来查询宝应水位站的基础信息。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    b.stcd,\n    b.stnm AS 测站名称,\n    b.sttp AS 测站类型代码,\n    b.rvnm AS 所属河流,\n    b.addvcd AS 行政区划码,\n    b.dtmnm AS 高程基准,\n    b.dtmel AS 基准高程差\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%宝应%'\nLIMIT 10\n\"\"\"\n\nrows = query(sql)\nfor r in rows:\n    print(r)\n```",
+      "actual_sql": "SELECT \n    b.stcd,\n    b.stnm AS 测站名称,\n    b.sttp AS 测站类型代码,\n    b.rvnm AS 所属河流,\n    b.addvcd AS 行政区划码,\n    b.dtmnm AS 高程基准,\n    b.dtmel AS 基准高程差\nFROM st_stbprp_b b\nWHERE b.stnm LIKE",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 0.5,
+        "response_quality": 0.2,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ]
+      },
+      "total_score": 0.68,
+      "duration_sec": 10.29,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 3,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询测站总数。",
+      "expected_sql": "SELECT COUNT(*) AS '测站总数'\nFROM sl323.st_stbprp_b;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询测站总数（按 stcd 去重）\nsql = \"\"\"\nSELECT COUNT(DISTINCT stcd) AS total_stations\nFROM sl323.st_stbprp_b\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "actual_sql": "SELECT COUNT(DISTINCT stcd) AS total_stations\nFROM sl323.st_stbprp_b",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.33,
+        "has_numeric_data": 0.5,
+        "response_quality": 0.7,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 WHERE 条件"
+        ]
+      },
+      "total_score": 0.6,
+      "duration_sec": 27.13,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 4,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询水位站宝应最近30天水位数据。",
+      "expected_sql": "SELECT r.tm AS '时间', r.z AS '水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)\n  AND r.z IS NOT NULL\nORDER BY r.tm;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    r.tm AS 时间,\n    r.z AS 水位_m,\n    r.q AS 流量_m3s,\n    b.stnm AS 站名,\n    b.rvnm AS 所属河道,\n    b.dtmnm AS 高程基准\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%宝应%'\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)\nORDER BY r.tm DESC\nLIMIT 100\n\"\"\"\n\nresults = query(sql)\nresults\n```",
+      "actual_sql": "SELECT \n    r.tm AS 时间,\n    r.z AS 水位_m,\n    r.q AS 流量_m3s,\n    b.stnm AS 站名,\n    b.rvnm AS 所属河道,\n    b.dtmnm AS 高程基准\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.33,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ]
+      },
+      "total_score": 0.73,
+      "duration_sec": 11.11,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 5,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询古运河(河流名称)水位站的数量。",
+      "expected_sql": "SELECT COUNT(*) AS '水位站数量'\nFROM sl323.st_stbprp_b\nWHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ';",
+      "actual_response": "我来查询古运河的水位站数量。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询古运河的水位站数量\nsql = \"\"\"\nSELECT COUNT(DISTINCT b.stcd) as station_count\nFROM st_stbprp_b b\nWHERE b.rvnm LIKE '%古运河%'\n  AND b.sttp IN ('ZZ', 'ZQ')  -- ZZ=水位站, ZQ=水文站\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "actual_sql": "SELECT COUNT(DISTINCT b.stcd) as station_count\nFROM st_stbprp_b b\nWHERE b.rvnm LIKE",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 0.5,
+        "response_quality": 0.4,
+        "sql_safe": 1.0,
+        "safety_issues": []
+      },
+      "total_score": 0.62,
+      "duration_sec": 18.74,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 6,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询建站最早和最晚的测站名称及其建站时间。",
+      "expected_sql": "SELECT stnm AS '测站名称', esstym AS '建站时间'\nFROM sl323.st_stbprp_b\nWHERE esstym = (SELECT MIN(esstym) FROM sl323.st_stbprp_b)\nUNION ALL\nSELECT stnm AS '测站名称', esstym AS '建站时间'\nFROM sl323.st_stbprp_b\nWHERE esstym = (SELECT MAX(esstym) FROM sl323.st_stbprp_b);",
+      "actual_response": "我来查询测站基础信息表中的建站时间，找出最早和最晚建站的测站。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询所有测站的建站时间，按建站时间排序\nsql = \"\"\"\nSELECT \n    b.stcd,\n    b.stnm,\n    b.sttp,\n    b.bldtm,\n    b.rvnm,\n    b.addvcd\nFROM st_stbprp_b b\nWHERE b.bldtm IS NOT NULL\nORDER BY b.bldtm ASC\n\"\"\"\n\nrows = query(sql)\n\nif not rows:\n    print(\"未找到包含建站时间数据的测站。\")\nelse:\n    print(f\"共找到 {len(rows)} 个有建站时间记录的测站。\\n\")\n    \n    # 最早建站的测站\n    earliest = rows[0]\n    print(\"=\" * 60)\n    print(\"🟢 建站最早的测站\")\n    print(\"=\" * 60)\n    print(f\"测站名称: {earliest['stnm']}\")\n    print(f\"测站编码: {earliest['stcd']}\")\n    print(f\"测站类型: {earliest['sttp']}\")\n    print(f\"建站时间: {earliest['bldtm']}\")\n    print(f\"所属河流: {earliest['rvnm']}\")\n    print(f\"行政区划: {earliest['addvcd']}\")\n    \n    print()\n    \n    # 最晚建站的测站\n    latest = rows[-1]\n    print(\"=\" * 60)\n    print(\"🔴 建站最晚的测站\")\n    print(\"=\" * 60)\n    print(f\"测站名称: {latest['stnm']}\")\n    print(f\"测站编码: {latest['stcd']}\")\n    print(f\"测站类型: {latest['sttp']}\")\n    print(f\"建站时间: {latest['bldtm']}\")\n    print(f\"所属河流: {latest['rvnm']}\")\n    print(f\"行政区划: {latest['addvcd']}\")\n    \n    print()\n    print(\"=\" * 60)\n    print(\"📊 建站时间分布概览\")\n    print(\"=\" * 60)\n    print(f\"最早建站: {earliest['bldtm']}\")\n    print(f\"最晚建站: {latest['bldtm']}\")\n    \n    # 统计各年代建站数量\n    from collections import defaultdict\n    decade_count = defaultdict(int)\n    for row in rows:\n        bldtm = row['bldtm']\n        if bldtm:\n            # 提取年份\n            year = bldtm[:4] if len(bldtm) >= 4 else '未知'\n            decade = f\"{year[:3]}0年代\" if year != '未知' else '未知'\n            decade_count[decade] += 1\n    \n    print(\"\\n各年代建站数量:\")\n    for decade in sorted(decade_count.keys()):\n        print(f\"  {decade}: {decade_count[decade]} 个\")\n```",
+      "actual_sql": "SELECT \n    b.stcd,\n    b.stnm,\n    b.sttp,\n    b.bldtm,\n    b.rvnm,\n    b.addvcd\nFROM st_stbprp_b b\nWHERE b.bldtm IS NOT NULL\nORDER BY b.bldtm ASC",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.2,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ]
+      },
+      "total_score": 0.7,
+      "duration_sec": 16.05,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 7,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询水位站数量最多、最少的河流。",
+      "expected_sql": "SELECT b.rvnm AS '河流名称', COUNT(b.stcd) AS '水位站数量'\nFROM sl323.st_stbprp_b b\nWHERE b.sttp = 'ZZ' AND b.rvnm IS NOT NULL AND b.rvnm != ''\nGROUP BY b.rvnm\nHAVING COUNT(b.stcd) = (SELECT MIN(stcd_count) FROM (SELECT COUNT(stcd) AS stcd_count FROM sl323.st_stbprp_b WHERE sttp = 'ZZ' AND rvnm IS NOT NULL AND rvnm != '' GROUP BY rvnm) AS min_count)\n   OR COUNT(b.stcd) = (SELECT MAX(stcd_count) FROM (SELECT COUNT(stcd) AS stcd_count FROM sl323.st_stbprp_b WHERE sttp = 'ZZ' AND rvnm IS NOT NULL AND rvnm != '' GROUP BY rvnm) AS max_count)\nORDER BY COUNT(b.stcd);",
+      "actual_response": "我将查询各河流（`rvnm`）对应的水位站（`sttp='ZZ'`）数量，找出最多和最少的河流。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询各河流的水位站数量\nsql = \"\"\"\nSELECT b.rvnm, COUNT(DISTINCT b.stcd) AS station_count\nFROM sl323.st_stbprp_b b\nWHERE b.sttp = 'ZZ'\n  AND b.rvnm IS NOT NULL\n  AND b.rvnm != ''\nGROUP BY b.rvnm\nORDER BY station_count DESC\n\"\"\"\n\nresults = query(sql)\nprint(f\"共查询到 {len(results)} 条河流记录\")\nfor row in results:\n    print(f\"{row['rvnm']}: {row['station_count']} 站\")\n```",
+      "actual_sql": "SELECT b.rvnm, COUNT(DISTINCT b.stcd) AS station_count\nFROM sl323.st_stbprp_b b\nWHERE b.sttp =",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 0.5,
+        "response_quality": 0.4,
+        "sql_safe": 1.0,
+        "safety_issues": []
+      },
+      "total_score": 0.62,
+      "duration_sec": 4.73,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 8,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询古运河历史最高/低水位。",
+      "expected_sql": "SELECT b.stnm AS '测站名称',\n       MAX(r.z) AS '历史最高水位(m)',\n       MIN(r.z) AS '历史最低水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%') AND r.z IS NOT NULL\nGROUP BY b.stnm;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询古运河各站点历史最高/最低水位\nsql = \"\"\"\nSELECT \n    b.stnm AS station_name,\n    b.stcd AS station_code,\n    MIN(r.z) AS min_water_level,\n    MAX(r.z) AS max_water_level,\n    MIN(r.tm) AS min_time,\n    MAX(r.tm) AS max_time,\n    COUNT(*) AS record_count\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%'\nGROUP BY b.stcd, b.stnm\nORDER BY b.stnm\n\"\"\"\n\nresults = query(sql)\nresults\n```",
+      "actual_sql": "SELECT \n    b.stnm AS station_name,\n    b.stcd AS station_code,\n    MIN(r.z) AS min_water_level,\n    MAX(r.z) AS max_water_level,\n    MIN(r.tm) AS min_time,\n    MAX(r.tm) AS max_time,\n    COUNT(*) AS record_count\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.rvnm LIKE",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.33,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": []
+      },
+      "total_score": 0.73,
+      "duration_sec": 4.64,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 9,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询里运河（河流）最近两个月的水位数据。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '水位(m)', r.tm AS '时间'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.rvnm = '里运河'\n  AND r.tm >= DATE_SUB(NOW(), INTERVAL 2 MONTH)\n  AND r.z IS NOT NULL\nORDER BY r.tm DESC;",
+      "actual_response": "我来查询里运河最近两个月的水位数据。\n\n首先，我需要确认里运河包含哪些测站，然后查询这些测站最近两个月的水位数据。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query, query_multi\n\n# Step 1: 查询里运河的所有测站\nstations = query(\"\"\"\n    SELECT stcd, stnm, rvnm, dtmnm, dtmel\n    FROM st_stbprp_b\n    WHERE rvnm LIKE '%里运河%' OR stnm LIKE '%里运河%'\n    ORDER BY stcd\n\"\"\")\n\nprint(\"=== 里运河测站列表 ===\")\nfor s in stations:\n    print(f\"  {s['stcd']} | {s['stnm']} | 基准: {s['dtmnm']} (偏移: {s['dtmel']})\")\n\n# Step 2: 查询最近两个月的水位数据\nif stations:\n    stcd_list = [s['stcd'] for s in stations]\n    stcd_str = ','.join([f\"'{s}'\" for s in stcd_list])\n    \n    water_data = query(f\"\"\"\n        SELECT \n            r.stcd,\n            b.stnm,\n            r.tm,\n            r.z,\n            r.q,\n            r.wptn,\n            CASE r.wptn \n                WHEN 4 THEN '涨' \n                WHEN 5 THEN '落' \n                WHEN 6 THEN '平' \n                ELSE '未知' \n            END as wptn_desc\n        FROM st_river_r r\n        JOIN st_stbprp_b b ON r.stcd = b.stcd\n        WHERE r.stcd IN ({stcd_str})\n          AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 2 MONTH)\n        ORDER BY r.stcd, r.tm\n    \"\"\")\n    \n    print(f\"\\n=== 水位数据记录数: {len(water_data)} ===\")\n    \n    # 按站点分组统计\n    from collections import defaultdict\n    station_data = defaultdict(list)\n    for row in water_data:\n        station_data[row['stcd']].append(row)\n    \n    for stcd, rows in station_data.items():\n        print(f\"\\n--- {rows[0]['stnm']} ({stcd}) ---\")\n        print(f\"  记录数: {len(rows)}\")\n        if rows:\n            z_values = [r['z'] for r in rows if r['z'] is not None]\n            if z_values:\n                print(f\"  水位范围: {min(z_values):.2f} ~ {max(z_values):.2f} m\")\n                print(f\"  平均水位: {sum(z_values)/len(z_values):.2f} m\")\n                print(f\"  时间范围: {rows[0]['tm']} ~ {rows[-1]['tm']}\")\n```",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": []
+      },
+      "total_score": 0.82,
+      "duration_sec": 14.6,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 10,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询各水位站最新的水位值。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '最新水位(m)', r.tm AS '更新时间'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r GROUP BY stcd) latest\n  ON r.stcd = latest.stcd AND r.tm = latest.maxTm\nWHERE b.sttp = 'ZZ'\nORDER BY r.z DESC;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询各水位站（ZZ类型）的最新水位\n# 策略：先找出每个水位站的最大时间 tm，再关联获取该时刻的水位 z\nsql = \"\"\"\nSELECT \n    b.stcd,\n    b.stnm AS station_name,\n    b.rvnm AS river_name,\n    b.dtmnm AS elevation_datum,\n    r.tm AS latest_time,\n    ROUND(r.z, 2) AS water_level_m,\n    r.wptn AS water_trend_code\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.sttp = 'ZZ'\n  AND (r.stcd, r.tm) IN (\n      SELECT stcd, MAX(tm) \n      FROM sl323.st_river_r \n      WHERE stcd IN (SELECT stcd FROM sl323.st_stbprp_b WHERE sttp = 'ZZ')\n      GROUP BY stcd\n  )\nORDER BY b.rvnm, b.stnm\n\"\"\"\n\nresults = query(sql)\nresults\n```",
+      "actual_sql": "SELECT \n    b.stcd,\n    b.stnm AS station_name,\n    b.rvnm AS river_name,\n    b.dtmnm AS elevation_datum,\n    r.tm AS latest_time,\n    ROUND(r.z, 2) AS water_level_m,\n    r.wptn AS water_trend_code\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.sttp =",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.33,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.4,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ]
+      },
+      "total_score": 0.65,
+      "duration_sec": 6.34,
+      "error": "",
+      "attribution": {}
+    }
+  ]
+}

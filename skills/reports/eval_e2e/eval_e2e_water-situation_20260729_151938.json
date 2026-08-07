@@ -1,0 +1,76 @@
+{
+  "timestamp": "20260729_151938",
+  "config": {
+    "skill": "water-situation",
+    "model": "Qwen3.6-27B-Q5_K_S.gguf",
+    "base_url": "http://172.28.101.81:8080/v1",
+    "timeout": 120,
+    "range": "1-2",
+    "e2e_mode": "direct_openai_api",
+    "note": "Direct OpenAI API call, bypassing hermes CLI and DeerFlow Gateway. Simulates DeerFlow first-pass skill loading."
+  },
+  "summary": {
+    "total": 2,
+    "completed": 2,
+    "timeout": 0,
+    "avg_score": 0.55
+  },
+  "results": [
+    {
+      "index": 1,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "古运河有哪些水位测站？",
+      "expected_sql": "SELECT stcd AS '测站编码', stnm AS '测站名称', sttp AS '测站类型'\nFROM sl323.st_stbprp_b\nWHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ';",
+      "actual_response": "我来查询古运河的水位测站信息。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    b.stcd,\n    b.stnm AS station_name,\n    b.sttp AS station_type,\n    b.rvnm AS river_name,\n    b.hnnm AS water_system,\n    b.bsnm AS basin,\n    b.addvcd AS admin_code,\n    b.esstym AS establishment_date,\n    b.dtmnm AS elevation_datum\nFROM st_stbp_b b\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\nORDER BY b.stcd\n\"\"\"\n\nresults = query(sql)\nprint(f\"共找到 {len(results)} 个古运河相关测站：\")\nprint(\"-\" * 80)\nfor row in results:\n    print(f\"站码: {row['stcd']}\")\n    print(f\"  站名: {row['station_name']}\")\n    print(f\"  类型: {row['station_type']}\")\n    print(f\"  河名: {row['river_name']}\")\n    print(f\"  水系: {row['water_system']}\")\n    print(f\"  流域: {row['basin']}\")\n    print(f\"  行政区: {row['addvcd']}\")\n    print(f\"  建站时间: {row['establishment_date']}\")\n    print(f\"  高程基准: {row['elevation_datum']}\")\n    print(\"-\" * 80)\n```",
+      "extracted_code": "import os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    b.stcd,\n    b.stnm AS station_name,\n    b.sttp AS station_type,\n    b.rvnm AS river_name,\n    b.hnnm AS water_system,\n    b.bsnm AS basin,\n    b.addvcd AS admin_code,\n    b.esstym AS establishment_date,\n    b.dtmnm AS elevation_datum\nFROM st_stbp_b b\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\nORDER BY b.stcd\n\"\"\"\n\nresults = query(sql)\nprint(f\"共找到 {len(results)} 个古运河相关测站：\")\nprint(\"-\" * 80)\nfor row in results:\n    print(f\"站码: {row['stcd']}\")\n    print(f\"  站名: {row['station_name']}\")\n    print(f\"  类型: {row['station_type']}\")\n    print(f\"  河名: {row['river_name']}\")\n    print(f\"  水系: {row['water_system']}\")\n    print(f\"  流域: {row['basin']}\")\n    print(f\"  行政区: {row['addvcd']}\")\n    print(f\"  建站时间: {row['establishment_date']}\")\n    print(f\"  高程基准: {row['elevation_datum']}\")\n    print(\"-\" * 80)",
+      "code_type": "python",
+      "execution_result": {
+        "ok": false,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"/tmp/tmpv5enct5c.py\", line 21, in <module>\n    results = query(sql)\n              ^^^^^^^^^^\n  File \"/opt/git/water-resources-skills/skills/lib/db.py\", line 117, in query\n    cur.execute(sql)\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/cursors.py\", line 153, in execute\n    result = self._query(query)\n             ^^^^^^^^^^^^^^^^^^\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/cursors.py\", line 322, in _query\n    conn.query(q)\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/connections.py\", line 575, in query\n    self._affected_rows = self._read_query_result(unbuffered=unbuffered)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/connections.py\", line 826, in _read_query_result\n    result.read()\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/connections.py\", line 1203, in read\n    first_packet = self.connection._read_packet()\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/connections.py\", line 782, in _read_packet\n    packet.raise_for_error()\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/protocol.py\", line 219, in raise_for_error\n    err.raise_mysql_exception(self._data)\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/err.py\", line 150, in raise_mysql_exception\n    raise errorclass(errno, errval)\npymysql.err.ProgrammingError: (1146, \"Table 'sl323.st_stbp_b' doesn't exist\")",
+        "returncode": 1
+      },
+      "execution_error": "Traceback (most recent call last):\n  File \"/tmp/tmpv5enct5c.py\", line 21, in <module>\n    results = query(sql)\n              ^^^^^^^^^^\n  File \"/opt/git/water-resources-skills/skills/lib/db.py\", line 117, in query\n    cur.execute(sql)\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/cursors.py\", line 153, in execute\n    result = self._query(query)\n             ^^^^^^^^^^^^^^^^^^\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/cursors.py\", line 322, in _query\n    conn.query(q)\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/connections.py\", line 575, in query\n    self._affected_rows = self._read_query_result(unbuffered=unbuffered)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/connections.py\", line 826, in _read_query_result\n    result.read()\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/connections.py\", line 1203, in read\n    first_packet = self.connection._read_packet()\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/connections.py\", line 782, in _read_packet\n    packet.raise_for_error()\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/protocol.py\", line 219, in raise_for_error\n    err.raise_mysql_exception(self._data)\n  File \"/opt/git/hermes-agent/venv/lib/python3.11/site-packages/pymysql/err.py\", line 150, in raise_mysql_exception\n    raise errorclass(errno, errval)\npymysql.err.ProgrammingError: (1146, \"Table 'sl323.st_stbp_b' doesn't exist\")",
+      "scores": {
+        "has_valid_response": 1.0,
+        "code_extraction": 1.0,
+        "execution_success": 0.0,
+        "result_quality": 0.0
+      },
+      "total_score": 0.4,
+      "duration_sec": 9.6,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 2,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询宝应水位站的所属河流、水系、流域、测站类别。",
+      "expected_sql": "SELECT stnm AS '测站名称', rvnm AS '河流', hnnm AS '水系', bsnm AS '流域', sttp AS '测站类别'\nFROM sl323.st_stbprp_b\nWHERE stnm = '宝应';",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    b.stcd AS 站点编码,\n    b.stnm AS 站点名称,\n    b.rvnm AS 所属河流,\n    b.hnnm AS 所属水系,\n    b.bsnm AS 所属流域,\n    b.sttp AS 测站类型代码,\n    CASE b.sttp \n        WHEN 'ZZ' THEN '水位站'\n        WHEN 'ZQ' THEN '水文站'\n        WHEN 'RR' THEN '水库站'\n        WHEN 'YC' THEN '雨量站'\n        WHEN 'PQ' THEN '泵站站'\n        WHEN 'GZ' THEN '闸门站'\n        ELSE b.sttp \n    END AS 测站类别,\n    b.dtmnm AS 高程基准,\n    b.dtmel AS 基准转换值,\n    b.esstym AS 建站年月\nFROM sl323.st_stbprp_b b\nWHERE b.stnm LIKE '%宝应%'\nLIMIT 10\n\"\"\"\n\nresults = query(sql)\nresults\n```",
+      "extracted_code": "import os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    b.stcd AS 站点编码,\n    b.stnm AS 站点名称,\n    b.rvnm AS 所属河流,\n    b.hnnm AS 所属水系,\n    b.bsnm AS 所属流域,\n    b.sttp AS 测站类型代码,\n    CASE b.sttp \n        WHEN 'ZZ' THEN '水位站'\n        WHEN 'ZQ' THEN '水文站'\n        WHEN 'RR' THEN '水库站'\n        WHEN 'YC' THEN '雨量站'\n        WHEN 'PQ' THEN '泵站站'\n        WHEN 'GZ' THEN '闸门站'\n        ELSE b.sttp \n    END AS 测站类别,\n    b.dtmnm AS 高程基准,\n    b.dtmel AS 基准转换值,\n    b.esstym AS 建站年月\nFROM sl323.st_stbprp_b b\nWHERE b.stnm LIKE '%宝应%'\nLIMIT 10\n\"\"\"\n\nresults = query(sql)\nresults",
+      "code_type": "python",
+      "execution_result": {
+        "ok": true,
+        "stdout": "",
+        "stderr": "",
+        "returncode": 0
+      },
+      "execution_error": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "code_extraction": 1.0,
+        "execution_success": 1.0,
+        "result_quality": 0.0,
+        "comparison_detail": "Actual rows: 0, Expected rows: 2",
+        "match_type": "result_f1"
+      },
+      "total_score": 0.7,
+      "duration_sec": 6.18,
+      "error": "",
+      "completed": true
+    }
+  ]
+}

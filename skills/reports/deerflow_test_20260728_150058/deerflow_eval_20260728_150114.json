@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "timestamp": "20260728_150114",
+    "total_cases": 5
+  },
+  "results": [
+    {
+      "index": 1,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "古运河有哪些水位测站？",
+      "expected_sql": "SELECT stcd AS '测站编码', stnm AS '测站名称', sttp AS '测站类型'\nFROM sl323.st_stbprp_b\nWHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ';",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    b.stcd,\n    b.stnm AS station_name,\n    b.sttp AS station_type,\n    b.dtmnm AS elevation_datum,\n    b.dtmel AS datum_elevation,\n    b.addvcd AS admin_code,\n    b.addvnm AS admin_name\nFROM sl323.st_stbprp_b b\nWHERE b.rvnm LIKE '%古运河%'\nORDER BY b.stcd\n\"\"\"\n\nresults = query(sql)\nresults\n```",
+      "actual_sql": "SELECT \n    b.stcd,\n    b.stnm AS station_name,\n    b.sttp AS station_type,\n    b.dtmnm AS elevation_datum,\n    b.dtmel AS datum_elevation,\n    b.addvcd AS admin_code,\n    b.addvnm AS admin_name\nFROM sl323.st_stbprp_b b\nWHERE b.rvnm LIKE",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.0,
+        "has_numeric_data": 0.5,
+        "response_quality": 0.4,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ]
+      },
+      "total_score": 0.43,
+      "duration_sec": 3.8,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 2,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询宝应水位站的所属河流、水系、流域、测站类别。",
+      "expected_sql": "SELECT stnm AS '测站名称', rvnm AS '河流', hnnm AS '水系', bsnm AS '流域', sttp AS '测站类别'\nFROM sl323.st_stbprp_b\nWHERE stnm = '宝应';",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query, query_multi\n\nsql = \"\"\"\nSELECT \n    b.stcd,\n    b.stnm AS station_name,\n    b.sttp AS station_type_code,\n    b.rvnm AS river_name,\n    b.addvcd AS admin_division_code,\n    b.dtmnm AS elevation_datum,\n    b.dtmel AS datum_elevation_offset\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%宝应%'\nLIMIT 10\n\"\"\"\n\nresults = query(sql)\nresults\n```",
+      "actual_sql": "SELECT \n    b.stcd,\n    b.stnm AS station_name,\n    b.sttp AS station_type_code,\n    b.rvnm AS river_name,\n    b.addvcd AS admin_division_code,\n    b.dtmnm AS elevation_datum,\n    b.dtmel AS datum_elevation_offset\nFROM st_stbprp_b b\nWHERE b.stnm LIKE",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.0,
+        "has_numeric_data": 0.5,
+        "response_quality": 0.2,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ]
+      },
+      "total_score": 0.38,
+      "duration_sec": 3.49,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 3,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询测站总数。",
+      "expected_sql": "SELECT COUNT(*) AS '测站总数'\nFROM sl323.st_stbprp_b;",
+      "actual_response": "我来查询测站总数。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询测站总数（按 stcd 去重）\nsql = \"\"\"\nSELECT COUNT(DISTINCT stcd) AS total_stations\nFROM sl323.st_stbprp_b\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "actual_sql": "SELECT COUNT(DISTINCT stcd) AS total_stations\nFROM sl323.st_stbprp_b",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.33,
+        "has_numeric_data": 0.5,
+        "response_quality": 0.7,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 WHERE 条件"
+        ]
+      },
+      "total_score": 0.6,
+      "duration_sec": 2.41,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 4,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询水位站宝应最近30天水位数据。",
+      "expected_sql": "SELECT r.tm AS '时间', r.z AS '水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)\n  AND r.z IS NOT NULL\nORDER BY r.tm;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    r.tm AS 时间,\n    r.z AS 水位,\n    b.stnm AS 站名,\n    b.dtmnm AS 高程基准\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%宝应%'\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)\nORDER BY r.tm DESC\nLIMIT 100\n\"\"\"\n\ndf = query(sql)\ndf\n```",
+      "actual_sql": "SELECT \n    r.tm AS 时间,\n    r.z AS 水位,\n    b.stnm AS 站名,\n    b.dtmnm AS 高程基准\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.33,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.4,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ]
+      },
+      "total_score": 0.65,
+      "duration_sec": 3.57,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 5,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询古运河(河流名称)水位站的数量。",
+      "expected_sql": "SELECT COUNT(*) AS '水位站数量'\nFROM sl323.st_stbprp_b\nWHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ';",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询古运河（rvnm）下的水位站（sttp='ZZ'）数量\nsql = \"\"\"\nSELECT COUNT(DISTINCT b.stcd) AS station_count\nFROM sl323.st_stbprp_b b\nWHERE b.rvnm LIKE '%古运河%'\n  AND b.sttp = 'ZZ'\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "actual_sql": "SELECT COUNT(DISTINCT b.stcd) AS station_count\nFROM sl323.st_stbprp_b b\nWHERE b.rvnm LIKE",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.33,
+        "has_numeric_data": 0.5,
+        "response_quality": 0.4,
+        "sql_safe": 1.0,
+        "safety_issues": []
+      },
+      "total_score": 0.53,
+      "duration_sec": 2.86,
+      "error": "",
+      "attribution": {}
+    }
+  ]
+}

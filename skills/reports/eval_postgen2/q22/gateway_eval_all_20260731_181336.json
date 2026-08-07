@@ -1,0 +1,71 @@
+{
+  "timestamp": "20260731_181336",
+  "config": {
+    "mode": "gateway_real_platform",
+    "gateway_url": "http://localhost:8001",
+    "model": "(platform default)",
+    "skill": "ALL",
+    "timeout": 900
+  },
+  "summary": {
+    "total": 1,
+    "avg_score": 0.993,
+    "pass_rate": 1.0
+  },
+  "results": [
+    {
+      "index": 22,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "查询水位站宝应这个月的水位数据（同义词测试：本月 = 当月）。",
+      "expected_sql": "SELECT DATE(r.tm) AS '日期', ROUND(AVG(r.z), 2) AS '水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'\n  AND DATE_FORMAT(r.tm, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')\n  AND r.z IS NOT NULL\nGROUP BY DATE(r.tm)\nORDER BY DATE(r.tm);",
+      "final_answer": "查询完成。以下是宝应水位站本月水位数据的汇总：\n\n---\n\n## 宝应站 2026年7月水位数据\n\n**站点信息**\n- 测站：宝应（水位站，sttp=ZZ）\n- 所属水体：里运河（人工运河）\n- 高程基准：废黄河口\n- 数据截止：2026-07-31 00:00\n\n**本月统计**\n| 指标 | 数值 |\n|------|------|\n| 有数据天数 | 31天（全覆盖） |\n| 平均水位 | 2.59m |\n| 最低水位 | 2.51m（7月2日） |\n| 最高水位 | 2.66m（7月9日、12日） |\n\n**每日水位一览**\n\n水位整体在 2.51~2.66m 之间波动，变化幅度约 0.15m，属于正常波动范围。月中（7月9日、12日）出现两次 2.66m 的小高峰，其余时间基本维持在 2.5~2.6m 区间。\n\n**⚠️ 阈值说明**：该站防洪指标数据（警戒水位/保证水位）在系统中缺失，无法进行超警戒判断。\n\n**数据局限性**：本库里运河宝应段仅 1 个水位测站，结论基于单站数据。",
+      "actual_sqls": [
+        "SELECT DISTINCT b.stcd, b.stnm, b.sttp, b.rvnm, b.dtmnm\n    FROM st_stbprp_b b\n    WHERE b.stnm LIKE '%宝应%'\n    LIMIT 20",
+        "SELECT MIN(tm) as min_tm, MAX(tm) as max_tm, COUNT(*) as total_rows\n    FROM st_river_r\n    WHERE stcd = '{stcd}'",
+        "SELECT\n        DATE(r.tm) AS dt,\n        COUNT(*) AS cnt,\n        ROUND(AVG(r.z), 2) AS avg_z,\n        ROUND(MIN(r.z), 2) AS min_z,\n        ROUND(MAX(r.z), 2) AS max_z,\n        MAX(r.wptn) AS last_wptn\n    FROM st_river_r r\n    WHERE r.stcd = '{stcd}'\n      AND r.tm >= '2026-07-01'\n      AND r.tm < '2026-08-01'\n      AND r.z IS NOT NULL\n    GROUP BY DATE(r.tm)\n    ORDER BY dt",
+        "SELECT COUNT(*) as cnt\n    FROM st_rvfcch_b\n    WHERE STCD = '{stcd}' AND (WRZ IS NOT NULL OR GRZ IS NOT NULL)",
+        "SELECT WRZ, GRZ, OBHTZ\n        FROM st_rvfcch_b\n        WHERE STCD = '{stcd}'\n        LIMIT 1",
+        "SELECT b.stcd, b.stnm, b.sttp, b.rvnm, b.dtmnm, b.hnnm, b.bsnm\n    FROM st_stbprp_b b\n    WHERE b.stcd = '{stcd}'",
+        "SELECT MIN(tm) as min_tm, MAX(tm) as max_tm, COUNT(*) as total_rows\n    FROM st_river_r\n    WHERE stcd = '{stcd}'",
+        "SELECT\n        DATE(r.tm) AS dt,\n        COUNT(*) AS cnt,\n        ROUND(AVG(r.z), 2) AS avg_z,\n        ROUND(MIN(r.z), 2) AS min_z,\n        ROUND(MAX(r.z), 2) AS max_z,\n        MAX(r.wptn) AS last_wptn\n    FROM st_river_r r\n    WHERE r.stcd = '{stcd}'\n      AND r.tm >= '2026-07-01'\n      AND r.tm < '2026-08-01'\n      AND r.z IS NOT NULL\n    GROUP BY DATE(r.tm)\n    ORDER BY dt",
+        "SELECT COUNT(*) as cnt\n    FROM st_rvfcch_b\n    WHERE STCD = '{stcd}' AND (WRZ IS NOT NULL OR GRZ IS NOT NULL)",
+        "SELECT WRZ, GRZ, OBHTZ\n        FROM st_rvfcch_b\n        WHERE STCD = '{stcd}'\n        LIMIT 1",
+        "SELECT b.stcd, b.stnm, b.sttp, b.rvnm, b.dtmnm, b.hnnm, b.bsnm\n    FROM st_stbprp_b b\n    WHERE b.stcd = '{stcd}'",
+        "SELECT MIN(tm) as min_tm, MAX(tm) as max_tm, COUNT(*) as total_rows\n    FROM st_river_r\n    WHERE stcd = '{stcd}'",
+        "SELECT\n        DATE(r.tm) AS dt,\n        COUNT(*) AS cnt,\n        ROUND(AVG(r.z), 2) AS avg_z,\n        ROUND(MIN(r.z), 2) AS min_z,\n        ROUND(MAX(r.z), 2) AS max_z,\n        MAX(r.wptn) AS last_wptn\n    FROM st_river_r r\n    WHERE r.stcd = '{stcd}'\n      AND r.tm >= '2026-07-01'\n      AND r.tm < '2026-08-01'\n      AND r.z IS NOT NULL\n    GROUP BY DATE(r.tm)\n    ORDER BY dt",
+        "SELECT COUNT(*) as cnt\n    FROM st_rvfcch_b\n    WHERE STCD = '{stcd}' AND (WRZ IS NOT NULL OR GRZ IS NOT NULL)",
+        "SELECT WRZ, GRZ, OBHTZ\n        FROM st_rvfcch_b\n        WHERE STCD = '{stcd}'\n        LIMIT 1"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "write_file",
+        "bash",
+        "write_file",
+        "read_file",
+        "write_file",
+        "bash"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "=== 宝应相关站点 ===\n  stcd=32100012000357, stnm=宝应湖心, sttp=WQ, rvnm=None, dtmnm=None\n  stcd=32102311000351_1, stnm=宝应船闸, sttp=WQ, rvnm=None, dtmnm=None\n  stcd=51005000, stnm=宝应, sttp=ZZ, rvnm=里运河, dtmnm=废黄河口\n  stcd=51005010, stnm=宝应抽水站（水文）, sttp=DP, rvnm=潼河, dtmnm=None\n  stcd=58148, stnm=宝应, sttp=PP, rvnm=None, dtmnm=None\n  stcd=A321000_0005, stnm=大运河船闸（宝应船闸）, sttp=WQ, rvnm=None, dtmnm=None\n  stcd=M3441, stnm=宝应山阳镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M3442, stnm=宝应射阳湖镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M5401, stnm=宝应望直港镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M5402, stnm=宝应泾河镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M5403, stnm=宝应黄塍镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M5404, stnm=宝应曹甸镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M5405, stnm=宝应柳堡镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M5406, stnm=宝应范水镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M5407, stnm=宝应夏集镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M5408, stnm=宝应广洋湖镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M5409, stnm=宝应西安丰镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M6501, stnm=宝应鲁垛镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M6502, stnm=宝应小官庄镇, sttp=PP, rvnm=None, dtmnm=None\n  stcd=M6503, stnm=宝应安宜三里, sttp=PP, rvnm=None, dtmnm=None\n\n使用站点: 宝应湖心 (stcd=32100012000357), 高程基准: 未记录\n\n=== 数据范围 ===\n  最早: None\n  最晚: None\n  总记录数: 0\n  数据锚点: None\n\n=== 宝应站 2026年7月水位数据（日聚合）===\n站点: 宝应湖心\n高程基准: 未记录\n数据截止: None\n日期              记录数      平均水位(m)      最低水位(m)      最高水位(m)   水势\n-----------------------------------------------------------------\n\n=== 阈值数据检查 ===\n⚠️ 该站阈值数据缺失，无法进行超警戒判断\n\nStd Error:\n[db hint] Query returned 0 rows. SQL: \n    SELECT\n        DATE(r.tm) AS dt,\n        COUNT(*) AS cnt,\n        ROUND(AVG(r.z), 2) AS avg_z,\n        ROUND(MIN(r.z), 2) AS min_z,\n        ROUND(MAX(r.z), 2) AS max_z,\n        MAX(r.wptn) AS las\n[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.\n",
+        "=== 站点信息 ===\n  站名: 宝应\n  站码: 51005000\n  类型: ZZ (水位站)\n  河流: 里运河 (人工运河)\n  高程基准: 废黄河口\n  水系: 下游区\n\n=== 数据范围 ===\n  最早: 2023-04-11 11:00:00\n  最晚: 2026-07-31 00:00:00\n  总记录数: 24158\n\n=== 宝应站 2026年7月水位数据（日聚合）===\n水体: 里运河（人工运河）\n高程基准: 废黄河口\n数据截止: 2026-07-31 00:00:00\n日期              记录数      平均水位(m)      最低水位(m)      最高水位(m)   水势\n-----------------------------------------------------------------\n2026-07-01        1          2.6          2.6          2.6     \n2026-07-02        1         2.51         2.51         2.51     \n2026-07-03        1         2.54         2.54         2.54     \n2026-07-04        1         2.61         2.61         2.61     \n2026-07-05        1         2.61         2.61         2.61     \n2026-07-06        1          2.6          2.6          2.6     \n2026-07-07        1         2.54         2.54         2.54     \n2026-07-08        1         2.52         2.52         2.52     \n2026-07-09        1         2.66         2.66         2.66     \n2026-07-10        1          2.6          2.6          2.6     \n2026-07-11        1         2.52         2.52         2.52     \n2026-07-12        1         2.66         2.66         2.66     \n2026-07-13        1         2.63         2.63         2.63     \n2026-07-14        1         2.57         2.57         2.57     \n2026-07-15        1         2.65         2.65         2.65     \n2026-07-16        1         2.57         2.57         2.57     \n2026-07-17        1         2.56         2.56         2.56     \n2026-07-18        1         2.53         2.53         2.53     \n2026-07-19        1         2.55         2.55         2.55     \n2026-07-20        1          2.6          2.6          2.6     \n2026-07-21        1         2.65         2.65         2.65     \n2026-07-22        1         2.54         2.54         2.54     \n2026-07-23        1         2.53         2.53         2.53     \n2026-07-24        1         2.55         2.55         2.55     \n2026-07-25        1         2.58         2.58         2.58     \n2026-07-26        1         2.65         2.65         2.65     \n2026-07-27        1         2.63         2.63         2.63     \n2026-07-28        1         2.63         2.63         2.63     \n2026-07-29        1         2.61         2.61         2.61     \n2026-07-30        1         2.57         2.57         2.57     \n2026-07-31        1         2.59         2.59         2.59     \n-----------------------------------------------------------------\n本月统计: 有数据 31 天, 平均水位 2.59m, 最低 2.51m, 最高 2.66m\n\n=== 阈值数据检查 ===\n⚠️ 该站阈值数据缺失，无法进行超警戒判断\n"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.978,
+        "comparison_detail": "stdout matched 44/45 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.993,
+      "duration_sec": 333.7,
+      "llm_round_trips": 8,
+      "error": "",
+      "completed": true
+    }
+  ]
+}

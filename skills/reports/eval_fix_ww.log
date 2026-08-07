@@ -1,0 +1,79 @@
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 14 | 单题超时: 900s
+============================================================
+
+[  1/14] Q085 [water-warning/L1] 查询当前超警戒水位的站点。
+[db hint] Query returned 0 rows. SQL: SELECT 
+    r.stcd,
+    b.stnm AS '站点名称',
+    ROUND(r.z, 2) AS '当前水位(m)',
+    rv.GRZ AS '保证水位(m)',
+    ROUND(r.z - rv.GRZ, 2) AS '超保证(m)',
+    r.tm AS '观测时间'
+FROM sl323.st_river_r r
+JOIN sl323.st_stbp
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 263.3s | rounds=5 | sqls=2 | score=0.864
+[  2/14] Q086 [water-warning/L1] 查询防洪预警汇总（多少站正常、超警戒、超保证）。
+  ✓ 203.3s | rounds=6 | sqls=3 | score=0.900
+[  3/14] Q087 [water-warning/L2] 扬州市重点河道水位实时情况（含超警戒判断）。
+  ✓ 589.0s | rounds=11 | sqls=3 | score=0.767
+[  4/14] Q088 [water-warning/L2] 查询水质低于Ⅳ类的站点。
+  ✓ 498.6s | rounds=6 | sqls=4 | score=0.902
+[  5/14] Q089 [water-warning/L2] 扬州市重点河道指定测站当前水位如何。
+  ✓ 312.0s | rounds=7 | sqls=2 | score=0.833
+[  6/14] Q090 [water-warning/L3] 24年8月20号左右，扬州古运河、新城河、瘦西湖最高水位及是否超标。
+  ✓ 279.4s | rounds=7 | sqls=19 | score=0.880
+[  7/14] Q091 [water-warning/L3] 查询所有站点的预警水位配置（有警戒水位的站）。
+  ✓ 695.7s | rounds=9 | sqls=5 | score=0.741
+[  8/14] Q092 [water-warning/L3] 综合查询：当前有多少闸站超警戒水位、哪些泵站正在排水、整体防洪形势。
+  ✗ 900.0s | error: timed out
+[  9/14] Q093 [water-warning/L3] 查询当前所有站点的预警状态一览（包含正常站）。
+  ✓ 855.0s | rounds=13 | sqls=4 | score=0.739
+[ 10/14] Q094 [water-warning/L3] 查询最近30天内是否有站点曾超警戒水位。
+[db hint] Query returned 0 rows. SQL: SELECT 
+    r.stcd,
+    b.stnm AS station_name,
+    ROUND(MAX(r.z), 2) AS max_water_level,
+    rv.GRZ AS guarantee_level,
+    COUNT(*) AS exceed_count,
+    MAX(r.tm) AS last_exceed_time
+FROM sl323.st_
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '测站名称', r.z AS '水位(m)', rv.WRZ AS '警戒水位(m)',
+       r.tm AS '时间',
+       CASE WHEN r.z > rv.GRZ THEN '超保证' WHEN r.z > rv.WRZ THEN '超警戒' END AS '预警类型'
+FROM sl323.st_river_r r
+JOIN sl32
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 395.2s | rounds=7 | sqls=4 | score=0.790
+[ 11/14] Q095 [water-warning/L3] 扬州市重点河道（古运河、新城河、瘦西湖、沿山河等）实时水位情况。
+[db hint] Query returned 0 rows. SQL: SELECT r.stcd, r.tm, r.z, r.q
+FROM st_river_r r
+WHERE r.stcd IN ('62705460', '62705461', 'HP0071003002000020')
+ORDER BY r.stcd, r.tm DESC
+LIMIT 10
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 435.2s | rounds=8 | sqls=4 | score=0.783
+[ 12/14] Q096 [water-warning/L3] 查询所有水质站的最新水质综合评级，标注低于Ⅲ类的站点。
+  ✓ 367.4s | rounds=17 | sqls=3 | score=0.804
+[ 13/14] Q097 [water-warning/L3] 2024年8月扬州城区降雨量最大的那天，各重点河道水位是否超警戒？
+  ✓ 199.5s | rounds=10 | sqls=8 | score=0.844
+[ 14/14] Q098 [water-warning/L3] 查询历史上超保证水位（GRZ）的站点及出现时间。
+[db hint] Query returned 0 rows. SQL: SELECT DISTINCT TABLE_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='sl325' AND COLUMN_NAME LIKE '%GRZ%' LIMIT 10
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '测站名称', r.z AS '水位(m)', rv.GRZ AS '保证水位(m)',
+       r.tm AS '时间', rv.GRZ AS '保证水位'
+FROM sl323.st_river_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+JOIN sl323.st_rvfcch_b rv ON r.s
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 179.1s | rounds=11 | sqls=8 | score=0.740
+
+============================================================
+完成 14 题 | 平均分 0.756 | 通过率 92.9%
+============================================================
+📄 JSON: reports/eval_fix_ww/gateway_eval_all_20260731_105616.json
+📄 Markdown: reports/eval_fix_ww/gateway_eval_all_20260731_105616.md

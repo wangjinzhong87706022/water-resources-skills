@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "timestamp": "20260728_145911",
+    "total_cases": 3
+  },
+  "results": [
+    {
+      "index": 1,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "古运河有哪些水位测站？",
+      "expected_sql": "SELECT stcd AS '测站编码', stnm AS '测站名称', sttp AS '测站类型'\nFROM sl323.st_stbprp_b\nWHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ';",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询古运河相关的水位/水文测站\n# 策略：通过 st_stbprp_b 中的 rvnm (河名) 字段筛选包含\"古运河\"的站点\n# 同时限制 sttp (站型) 为 ZZ (水位站) 或 ZQ (水文站)，排除水库站(RR)等\nsql = \"\"\"\nSELECT \n    b.stcd,\n    b.stnm AS station_name,\n    b.sttp AS station_type,\n    b.rvnm AS river_name,\n    b.addvcd AS admin_code,\n    b.dtmnm AS datum_name,\n    b.dtmel AS datum_elevation\nFROM sl323.st_stbprp_b b\nWHERE b.rvnm LIKE '%古运河%'\n  AND b.sttp IN ('ZZ', 'ZQ')\nORDER BY b.stcd\n\"\"\"\n\nstations = query(sql)\n\n# 格式化输出\nprint(f\"共找到 {len(stations)} 个古运河相关测站：\\n\")\nprint(f\"{'站码':<10} {'站名':<15} {'站型':<5} {'河名':<15} {'高程基准':<10} {'基准高程':<10}\")\nprint(\"-\" * 70)\n\nfor s in stations:\n    sttp_map = {'ZZ': '水位站', 'ZQ': '水文站', 'RR': '水库站'}\n    sttp_cn = sttp_map.get(s['sttp'], s['sttp'])\n    datum = s['dtmnm'] if s['dtmnm'] else '未记录'\n    el = f\"{s['dtmel']}\" if s['dtmel'] is not None else 'NULL'\n    print(f\"{s['stcd']:<10} {s['station_name']:<15} {sttp_cn:<5} {s['river_name']:<15} {datum:<10} {el:<10}\")\n```",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": []
+      },
+      "total_score": 0.93,
+      "duration_sec": 11.07,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 2,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询宝应水位站的所属河流、水系、流域、测站类别。",
+      "expected_sql": "SELECT stnm AS '测站名称', rvnm AS '河流', hnnm AS '水系', bsnm AS '流域', sttp AS '测站类别'\nFROM sl323.st_stbprp_b\nWHERE stnm = '宝应';",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\nsql = \"\"\"\nSELECT \n    b.stcd,\n    b.stnm AS station_name,\n    b.sttp AS station_type_code,\n    b.rvnm AS river_name,\n    b.addvcd AS admin_code,\n    b.dtmnm AS datum_name,\n    b.dtmel AS datum_elevation\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%宝应%'\nLIMIT 10\n\"\"\"\n\nrows = query(sql)\nrows\n```",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.0,
+        "has_numeric_data": 0.5,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": []
+      },
+      "total_score": 0.5,
+      "duration_sec": 3.34,
+      "error": "",
+      "attribution": {}
+    },
+    {
+      "index": 3,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询测站总数。",
+      "expected_sql": "SELECT COUNT(*) AS '测站总数'\nFROM sl323.st_stbprp_b;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询测站总数（按 stcd 去重，因为同一测站可能有 ZZ/ZQ/RR 多种类型记录）\nsql = \"\"\"\nSELECT COUNT(DISTINCT stcd) AS total_stations\nFROM st_stbprp_b\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.33,
+        "has_numeric_data": 0.5,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": []
+      },
+      "total_score": 0.6,
+      "duration_sec": 2.5,
+      "error": "",
+      "attribution": {}
+    }
+  ]
+}

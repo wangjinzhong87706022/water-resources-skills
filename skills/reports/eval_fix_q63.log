@@ -1,0 +1,18 @@
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 1 | 单题超时: 900s
+============================================================
+
+[  1/1] Q063 [water-forecast/L3] 查询河道断面数据（某任务下的所有断面水位）。
+[db hint] Query returned 0 rows. SQL: SELECT dm.name AS '断面名称', dm.z AS '水位(m)', dm.Qin AS '入流(m³/s)', dm.Qout AS '出流(m³/s)', dm.tm AS '时间'
+FROM slztk.st_mx_rv_dm_r dm
+WHERE dm.taskid = (SELECT taskid FROM slztk.st_mx_taskid_r WHERE stuts
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 275.6s | rounds=6 | sqls=3 | score=0.790
+
+============================================================
+完成 1 题 | 平均分 0.790 | 通过率 100.0%
+============================================================
+📄 JSON: reports/eval_fix_q63/gateway_eval_all_20260731_091625.json
+📄 Markdown: reports/eval_fix_q63/gateway_eval_all_20260731_091625.md
