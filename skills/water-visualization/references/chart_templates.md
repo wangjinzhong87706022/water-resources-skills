@@ -12,16 +12,29 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 
-# CJK 字体（按宿主机实测安装情况排序：Noto 已装、WenQuanYi 备选；切勿改成未安装的字体）
-matplotlib.rcParams['font.sans-serif'] = ['Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']
+# CJK 字体（实测安装 Noto Sans CJK JP；JP 含汉字字形，简体中文渲染正常；SC 仅兼容兜底）
+matplotlib.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']
 matplotlib.rcParams['axes.unicode_minus'] = False
+
+# A 风格 rcParams（极简现代，对标 AntV）—— 去顶/右框、淡虚线网格、柔和轴色、白底、无框图例
+plt.rcParams.update({
+    'axes.spines.top': False, 'axes.spines.right': False,
+    'axes.edgecolor': '#bfbfbf', 'axes.linewidth': 0.8,
+    'axes.labelcolor': '#595959', 'axes.titleweight': 'bold',   # bold=700，字体实测支持，避免 findfont 警告
+    'xtick.color': '#8c8c8c', 'ytick.color': '#8c8c8c',
+    'figure.facecolor': 'white', 'axes.facecolor': 'white',
+    'legend.frameon': False,
+})
+# AntV 配色常量（后续模板引用）
+PALETTE = ['#5B8FF9', '#5AD8A6', '#5D7092', '#F6BD16', '#E8684A', '#6DC8EC', '#9270CA']
+NORMAL, WARN, DANGER = '#52C41A', '#FAAD14', '#F4664A'   # 正常 / 警戒 / 保证·超警
 
 # 输出目录（DeerFlow sandbox 可写路径；绘图前必须保证存在）
 OUT_DIR = '/mnt/user-data/outputs'
 os.makedirs(OUT_DIR, exist_ok=True)
 ```
 
-> **字体说明（重要）**：宿主机实测只装了 `Noto Sans CJK SC`，**未装** `WenQuanYi Micro Hei` / `SimHei`。上面的列表把已装的 Noto 放第一位，不要改、不要花时间找字体。乱码只因用错字体名。
+> **字体说明（重要）**：宿主机实测安装的是 `Noto Sans CJK JP`（不是 SC，也非 WenQuanYi/SimHei）。JP 含 CJK 汉字字形，简体中文渲染正常（实测通过）。字体列表以 JP 首选、SC 兼容兜底，不要改、不要花时间找别的字体。乱码只因用错字体名。
 
 ---
 
@@ -49,8 +62,17 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 
-matplotlib.rcParams['font.sans-serif'] = ['Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']
+# CJK 字体 + A 风格 rcParams（自包含，照抄即用）
+matplotlib.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']
 matplotlib.rcParams['axes.unicode_minus'] = False
+plt.rcParams.update({
+    'axes.spines.top': False, 'axes.spines.right': False,
+    'axes.edgecolor': '#bfbfbf', 'axes.linewidth': 0.8,
+    'axes.labelcolor': '#595959', 'axes.titleweight': 'bold',
+    'xtick.color': '#8c8c8c', 'ytick.color': '#8c8c8c',
+    'figure.facecolor': 'white', 'legend.frameon': False,
+})
+PALETTE = ['#5B8FF9', '#5AD8A6', '#5D7092', '#F6BD16', '#E8684A', '#6DC8EC', '#9270CA']
 OUT_DIR = '/mnt/user-data/outputs'
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -65,13 +87,13 @@ df = pd.read_csv(CSV_PATH)
 df = df.dropna(subset=[Y_COL])                 # 先洗：丢掉空值，防 None 报错
 
 fig, ax = plt.subplots(figsize=(14, 6))
-for key, g in df.groupby(GROUP_COL):
+for idx, (key, g) in enumerate(df.groupby(GROUP_COL)):
     g = g.sort_values(X_COL)
-    ax.plot(g[X_COL], g[Y_COL], marker='o', label=f'{key}')
+    ax.plot(g[X_COL], g[Y_COL], marker='o', color=PALETTE[idx % len(PALETTE)], label=f'{key}')
 
-ax.set_title(TITLE, fontsize=16)
+ax.set_title(TITLE, fontsize=14, color='#262626', pad=14)
 ax.set_xlabel(X_COL); ax.set_ylabel('平均水位 (m)')
-ax.legend(); ax.grid(True, alpha=0.3)
+ax.grid(True, axis='y', alpha=0.3, linestyle='--', color='#d9d9d9')
 plt.tight_layout()
 
 out = os.path.join(OUT_DIR, OUT_NAME)
@@ -94,17 +116,17 @@ df = df.dropna(subset=['z'])          # 先洗后画
 
 fig, ax = plt.subplots(figsize=(14, 6))
 
-for stnm, group in df.groupby('stnm'):
-    ax.plot(group['tm'], group['z'], marker='o', markersize=3, label=stnm)
+for idx, (stnm, group) in enumerate(df.groupby('stnm')):
+    ax.plot(group['tm'], group['z'], marker='o', markersize=3, color=PALETTE[idx % len(PALETTE)], label=stnm)
 
-ax.set_title('水位变化趋势', fontsize=16)
+ax.set_title('水位变化趋势', fontsize=14, color='#262626', pad=14)
 ax.set_xlabel('时间', fontsize=12)
 ax.set_ylabel('水位 (m)', fontsize=12)
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 plt.xticks(rotation=45)
 ax.legend(fontsize=10)
-ax.grid(True, alpha=0.3)
+ax.grid(True, axis='y', alpha=0.3, linestyle='--', color='#d9d9d9')
 plt.tight_layout()
 OUT_DIR = '/mnt/user-data/outputs'
 os.makedirs(OUT_DIR, exist_ok=True)
@@ -123,31 +145,31 @@ df = df.dropna(subset=['z'])          # 先洗后画
 fig, ax = plt.subplots(figsize=(14, 6))
 
 # 水位线
-ax.plot(df['tm'], df['z'], marker='o', markersize=3, color='#2196F3', label='实测水位')
+ax.plot(df['tm'], df['z'], marker='o', markersize=3, color='#5B8FF9', label='实测水位')
 
 # 警戒水位线（水平虚线）
 if df['wrz'].notna().any():
     wrz = df['wrz'].iloc[0]
-    ax.axhline(y=wrz, color='#FF9800', linestyle='--', linewidth=2, label=f'警戒水位 {wrz}m')
+    ax.axhline(y=wrz, color=WARN, linestyle='--', linewidth=1.8, label=f'警戒水位 {wrz}m')
 
 # 保证水位线
 if df['grz'].notna().any():
     grz = df['grz'].iloc[0]
-    ax.axhline(y=grz, color='#F44336', linestyle='--', linewidth=2, label=f'保证水位 {grz}m')
+    ax.axhline(y=grz, color=DANGER, linestyle='--', linewidth=1.8, label=f'保证水位 {grz}m')
 
 # 超警戒区域高亮
 if df['wrz'].notna().any():
     ax.fill_between(df['tm'], df['z'], df['wrz'].iloc[0],
                     where=(df['z'] > df['wrz'].iloc[0]),
-                    alpha=0.2, color='red', label='超警戒区域')
+                    alpha=0.15, color=DANGER, label='超警戒区域')
 
-ax.set_title('水位与警戒水位对比', fontsize=16)
+ax.set_title('水位与警戒水位对比', fontsize=14, color='#262626', pad=14)
 ax.set_xlabel('时间', fontsize=12)
 ax.set_ylabel('水位 (m)', fontsize=12)
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
 plt.xticks(rotation=45)
 ax.legend(fontsize=10)
-ax.grid(True, alpha=0.3)
+ax.grid(True, axis='y', alpha=0.3, linestyle='--', color='#d9d9d9')
 plt.tight_layout()
 OUT_DIR = '/mnt/user-data/outputs'
 os.makedirs(OUT_DIR, exist_ok=True)
@@ -165,22 +187,22 @@ df = df.dropna(subset=['drp'])        # 先洗后画
 
 fig, ax = plt.subplots(figsize=(14, 6))
 
-colors = ['#1976D2' if v < 25 else '#FF9800' if v < 50 else '#F44336'
+colors = ['#5B8FF9' if v < 25 else '#F6BD16' if v < 50 else '#E8684A'
           for v in df['drp']]
 
 ax.bar(df['tm'], df['drp'], color=colors, width=0.8)
-ax.set_title('日降雨量', fontsize=16)
+ax.set_title('日降雨量', fontsize=14, color='#262626', pad=14)
 ax.set_xlabel('日期', fontsize=12)
 ax.set_ylabel('降雨量 (mm)', fontsize=12)
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
 plt.xticks(rotation=45)
 
 # 降雨等级参考线
-for threshold, label, color in [(25, '大雨 25mm', '#FF9800'), (50, '暴雨 50mm', '#F44336')]:
+for threshold, label, color in [(25, '大雨 25mm', WARN), (50, '暴雨 50mm', DANGER)]:
     ax.axhline(y=threshold, color=color, linestyle=':', alpha=0.6)
     ax.text(df['tm'].iloc[0], threshold + 1, label, fontsize=9, color=color)
 
-ax.grid(True, alpha=0.3, axis='y')
+ax.grid(True, alpha=0.3, axis='y', linestyle='--', color='#d9d9d9')
 plt.tight_layout()
 OUT_DIR = '/mnt/user-data/outputs'
 os.makedirs(OUT_DIR, exist_ok=True)
@@ -205,9 +227,9 @@ for i, year in enumerate(years):
     year_data = df[df['year'] == year]
     offset = (i - len(years)/2 + 0.5) * bar_width
     ax.bar(year_data['month'] + offset, year_data['total_rain'],
-            width=bar_width, label=f'{year}年')
+            width=bar_width, color=PALETTE[i % len(PALETTE)], label=f'{year}年')
 
-ax.set_title('月度降雨量对比', fontsize=16)
+ax.set_title('月度降雨量对比', fontsize=14, color='#262626', pad=14)
 ax.set_xlabel('月份', fontsize=12)
 ax.set_ylabel('降雨量 (mm)', fontsize=12)
 ax.set_xticks(range(1, 13))
@@ -230,14 +252,14 @@ df['spt'] = pd.to_datetime(df['spt'])   # CSV 读入的采样时间是字符串�
 df = df.dropna(subset=['spt'])          # 先洗后画（各指标列的 NaN 会自然显示为断点）
 
 indicators = {
-    'dox': ('溶解氧 DO (mg/L)', '#4CAF50'),
-    'codmn': ('高锰酸盐 CODMn (mg/L)', '#FF9800'),
-    'nh3n': ('氨氮 NH3N (mg/L)', '#2196F3'),
-    'tp': ('总磷 TP (mg/L)', '#9C27B0')
+    'dox': ('溶解氧 DO (mg/L)', PALETTE[0]),
+    'codmn': ('高锰酸盐 CODMn (mg/L)', PALETTE[3]),
+    'nh3n': ('氨氮 NH3N (mg/L)', PALETTE[1]),
+    'tp': ('总磷 TP (mg/L)', PALETTE[6])
 }
 
 fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-fig.suptitle('水质指标变化趋势', fontsize=16)
+fig.suptitle('水质指标变化趋势', fontsize=15, color='#262626')
 
 for idx, (col, (label, color)) in enumerate(indicators.items()):
     ax = axes[idx // 2][idx % 2]
@@ -246,7 +268,7 @@ for idx, (col, (label, color)) in enumerate(indicators.items()):
     ax.set_xlabel('采样时间', fontsize=10)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
-    ax.grid(True, alpha=0.3)
+    ax.grid(True, axis='y', alpha=0.3, linestyle='--', color='#d9d9d9')
 
 plt.tight_layout()
 OUT_DIR = '/mnt/user-data/outputs'
@@ -264,8 +286,8 @@ df['spt'] = pd.to_datetime(df['spt'])          # CSV 读入的采样时间是字
 df = df.dropna(subset=['grade']).sort_values('spt')   # 先洗后画
 
 grade_colors = {
-    'Ⅰ类': '#4CAF50', 'Ⅱ类': '#8BC34A', 'Ⅲ类': '#CDDC39',
-    'Ⅳ类': '#FFC107', 'Ⅴ类': '#FF9800', '劣Ⅴ类': '#F44336'
+    'Ⅰ类': '#5AD8A6', 'Ⅱ类': '#A0D911', 'Ⅲ类': '#F6BD16',
+    'Ⅳ类': '#FAAD14', 'Ⅴ类': '#FA8C16', '劣Ⅴ类': '#E8684A'
 }
 
 fig, ax = plt.subplots(figsize=(14, 5))
@@ -276,11 +298,11 @@ for i in range(len(df) - 1):
     ax.hlines(y=grade, xmin=df.iloc[i]['spt'], xmax=df.iloc[i+1]['spt'],
               colors=color, linewidth=4)
 
-ax.set_title('水质综合等级变化', fontsize=16)
+ax.set_title('水质综合等级变化', fontsize=14, color='#262626', pad=14)
 ax.set_xlabel('采样时间', fontsize=12)
 ax.set_ylabel('水质等级', fontsize=12)
 plt.xticks(rotation=45)
-ax.grid(True, alpha=0.3, axis='x')
+ax.grid(True, alpha=0.3, axis='x', linestyle='--', color='#d9d9d9')
 
 # 图例
 from matplotlib.patches import Patch
@@ -303,11 +325,11 @@ df_gate = df_gate.dropna(subset=['gtophgt'])   # 先洗后画
 df_pump = df_pump.dropna(subset=['pmpq'])
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
-fig.suptitle('闸泵运行状态', fontsize=16)
+fig.suptitle('闸泵运行状态', fontsize=15, color='#262626')
 
 # 左：闸门开度
 gate_data = df_gate.sort_values('gtophgt', ascending=True)
-colors = ['#4CAF50' if h > 0 else '#BDBDBD' for h in gate_data['gtophgt']]
+colors = ['#5AD8A6' if h > 0 else '#BFBFBF' for h in gate_data['gtophgt']]
 ax1.barh(gate_data['gtname'], gate_data['gtophgt'], color=colors)
 ax1.set_title('闸门开度 (m)', fontsize=12)
 ax1.set_xlabel('开度 (m)')
@@ -316,7 +338,7 @@ for i, v in enumerate(gate_data['gtophgt']):
 
 # 右：泵站流量
 pump_data = df_pump.sort_values('pmpq', ascending=True)
-colors = ['#2196F3' if q > 0 else '#BDBDBD' for q in pump_data['pmpq']]
+colors = ['#5B8FF9' if q > 0 else '#BFBFBF' for q in pump_data['pmpq']]
 ax2.barh(pump_data['stnm'], pump_data['pmpq'], color=colors)
 ax2.set_title('泵站抽水流量 (m³/s)', fontsize=12)
 ax2.set_xlabel('流量 (m³/s)')
@@ -342,24 +364,24 @@ fig, ax = plt.subplots(figsize=(14, 6))
 
 # 实测水位
 ax.plot(actual_df['tm'], actual_df['z'], marker='o', markersize=3,
-        color='#2196F3', label='实测水位', linewidth=2)
+        color='#5B8FF9', label='实测水位', linewidth=2)
 
 # 预测水位
 ax.plot(forecast_df['tm'], forecast_df['vals'], marker='s', markersize=3,
-        color='#FF9800', label='预测水位', linewidth=2, linestyle='--')
+        color='#F6BD16', label='预测水位', linewidth=2, linestyle='--')
 
 # 误差区间（如果有）
 if 'upper' in forecast_df.columns:
     ax.fill_between(forecast_df['tm'], forecast_df['lower'], forecast_df['upper'],
-                    alpha=0.15, color='#FF9800', label='预测区间')
+                    alpha=0.15, color='#F6BD16', label='预测区间')
 
-ax.set_title('预测水位 vs 实测水位', fontsize=16)
+ax.set_title('预测水位 vs 实测水位', fontsize=14, color='#262626', pad=14)
 ax.set_xlabel('时间', fontsize=12)
 ax.set_ylabel('水位 (m)', fontsize=12)
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:%M'))
 plt.xticks(rotation=45)
 ax.legend(fontsize=10)
-ax.grid(True, alpha=0.3)
+ax.grid(True, axis='y', alpha=0.3, linestyle='--', color='#d9d9d9')
 plt.tight_layout()
 OUT_DIR = '/mnt/user-data/outputs'
 os.makedirs(OUT_DIR, exist_ok=True)
@@ -376,8 +398,8 @@ df = df.dropna(subset=['z']).reset_index(drop=True)   # 先洗后画（reset_ind
 
 fig, ax = plt.subplots(figsize=(14, max(4, len(df) * 0.5)))
 
-status_colors = {'正常': '#4CAF50', '黄色预警': '#FFC107', '红色预警': '#F44336'}
-colors = [status_colors.get(s, '#BDBDBD') for s in df['status']]
+status_colors = {'正常': NORMAL, '黄色预警': WARN, '红色预警': DANGER}
+colors = [status_colors.get(s, '#BFBFBF') for s in df['status']]
 
 ax.barh(df['stnm'], df['z'], color=colors)
 for i, row in df.iterrows():
@@ -390,13 +412,13 @@ if 'wrz' in df.columns:
         if pd.notna(row['wrz']):
             ax.plot(row['wrz'], i, 'v', color='orange', markersize=8)
 
-ax.set_title('水位预警状态汇总', fontsize=16)
+ax.set_title('水位预警状态汇总', fontsize=14, color='#262626', pad=14)
 ax.set_xlabel('水位 (m)', fontsize=12)
 
 from matplotlib.patches import Patch
 legend_elements = [Patch(facecolor=c, label=l) for l, c in status_colors.items()]
 ax.legend(handles=legend_elements, fontsize=10, loc='lower right')
-ax.grid(True, alpha=0.3, axis='x')
+ax.grid(True, alpha=0.3, axis='x', linestyle='--', color='#d9d9d9')
 plt.tight_layout()
 OUT_DIR = '/mnt/user-data/outputs'
 os.makedirs(OUT_DIR, exist_ok=True)
