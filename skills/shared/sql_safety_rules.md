@@ -9,6 +9,29 @@
 - **严禁** INTO OUTFILE / LOAD DATA INFILE / LOAD_FILE()
 - **严禁** 访问 mysql / information_schema / performance_schema 之外的系统库
 
+## 运行时语法硬约束（违反 = 执行报错，必返空）
+
+> 以下由 `db.py` 运行时强制，**不是建议**。违反直接导致 SQL 报错、返回空结果。
+
+- **禁止 CTE / `WITH ... AS`** — 运行时只放行以 `SELECT` 开头的语句，CTE 会被拒绝。
+  需要中间结果时**改用子查询**（derived table）：
+  ```sql
+  -- ❌ 禁止
+  WITH latest AS (SELECT stcd, MAX(tm) mt FROM t GROUP BY stcd) SELECT ...
+  -- ✅ 改用子查询
+  SELECT ... FROM t JOIN (SELECT stcd, MAX(tm) mt FROM t GROUP BY stcd) latest
+         ON t.stcd = latest.stcd AND t.tm = latest.mt
+  ```
+- **含单位/特殊字符的列别名必须加引号** — 别名里的 `()` `／` `³` 等会被 MySQL 当函数/语法错。
+  ```sql
+  -- ❌ 报错：near '(m)'
+  SELECT r.z AS 水位(m), ROUND(r.z - rv.WRZ, 2) AS 超警戒(m) FROM ...
+  -- ✅ 加单引号
+  SELECT r.z AS '水位(m)', ROUND(r.z - rv.WRZ, 2) AS '超警戒(m)' FROM ...
+  ```
+- **禁止使用不存在的列** — 常见幻觉列：`st_stbprp_b.addvnm`（区域名称，**不存在**，只有 `addvcd` 行政区划码）、`st_stbprp_b.area`、`st_stbprp_b.region`。需要区域名时只能用 `addvcd` 码，或 JOIN 行政区划字典表。
+
+
 ## 性能安全规则
 
 - **禁止无 WHERE 条件的全表扫描** — 必须包含时间范围或测站过滤条件

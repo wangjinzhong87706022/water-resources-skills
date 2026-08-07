@@ -27,13 +27,16 @@ metadata:
 ## Prerequisites
 
 - **数据库:** MySQL 192.168.100.103:3306，slztk(预测表) + sl323(测站表)（只读）
-- **pymysql:** execute_code 环境可能未安装，首次使用需先运行 `pip install pymysql`
+- **pymysql 已由 lib/db.py 内部处理，🚫 禁止 pip install**（沙箱 externally-managed，pip 必失败且白烧 3-5 个轮次）。
 - **DB 助手模块:** 使用 `from db import query, query_multi`（见 shared/db_connection.md），自动处理连接管理、30s 超时、空结果提示。**不要手写 pymysql 连接代码。**
 - 参考 `shared/sql_safety_rules.md` — SQL 安全规则（所有 skill 通用）
 - 参考 `shared/sql_quality_check.md` — SQL 质量审查流程（所有 skill 通用）
 - 参考 `shared/statistical_methods.md` — 统计分析方法（预测精度评估、偏差分析）
 - 参考 `shared/sql_patterns.md` — SQL 通用查询模式（预测 vs 实测跨表对齐）
 - 参考 `shared/analysis_validation.md` — 分析验证（预测结果的可信度评定）
+- 参考 `references/schema.md` — 完整表结构（来源: 实际 MySQL DDL）
+- 参考 `references/business_rules.md` — 业务规则（任务状态、type 编码口径）
+- 参考 `references/few_shots.md` — SQL 示例（写 SQL 前优先匹配复用）
 
 ### 文件引用约定
 
@@ -45,7 +48,7 @@ metadata:
 | 共享文档 | `shared/db_connection.md` | `$WATER_RESOURCES_ROOT/shared/db_connection.md` |
 | 共享规则 | `shared/sql_safety_rules.md` | `$WATER_RESOURCES_ROOT/shared/sql_safety_rules.md` |
 
-> `WATER_RESOURCES_ROOT` 由部署层设置：DeerFlow 指向 `/mnt/skills`，Hermes 指向 `~/.hermes/skills/water-resources`，开发指向仓库 `…/skills`。
+> `WATER_RESOURCES_ROOT` 由部署层注入（指向 skills 根目录），SKILL.md 与生成代码中不出现任何平台路径字面量；共享资源一律经 `$WATER_RESOURCES_ROOT` 定位。
 
 **标准导入片段**（`__file__` 在 sandbox 暂存脚本中不可靠，勿用）：
 ```python
@@ -56,16 +59,65 @@ from db import query, query_multi
 
 ## Pitfalls
 
-- **最新任务可能很旧。** 预测系统不一定每天运行。先查 `SELECT taskid, tm, stuts FROM slztk.st_mx_taskid_r ORDER BY tm DESC LIMIT 1` 确认最新任务时间，若距今超过1天，需告知用户数据非实时。可降级查最近已完成任务(stuts=1)。
-- **查已完成任务。** 用 `WHERE stuts = 1 ORDER BY tm DESC` 过滤，避免拿到未完成的空任务。
+- **⚡ 单轮数据获取（性能第一杠杆，每轮 LLM 往返 30–80s，往返预算 ≤4）。不要为读中间结果而结束本轮**——taskid 探测、时效检查、EXISTS 回退、主查询全部写进**同一个 Python 脚本**一轮跑完（脚本内多次 `query()` 零额外往返）。硬性禁令：
+  1. **禁 schema 探查**（`SHOW COLUMNS`/`INFORMATION_SCHEMA`/`SELECT DATABASE()`）——列名见下方 Key Tables。
+  2. **禁独立 taskid 轮**：最新有效 taskid **内联为子查询**（见下方模板），不得单独查一轮再代入。首查就直接用带 EXISTS 的内联 taskid，不要等 0 行后再回退多烧一轮。
+  3. **禁重复执行**：一次成功即停，禁把整段预测分析换任务/窗口重跑。
+  4. **一脚本一轮**：末尾一次性 `print` 全部结果（含可视化数据）。
+  - 同脚本内需分步时用 f-string 把实值代入主查询（安全；**禁跨回合留 `{taskid}` 占位符**）。
+- **⚠️ 严禁 SQL 残留 `{...}` 占位符（高频语法错；覆盖 Q62/Q65）。** taskid/stcd/type 一律用**内联子查询或按名 JOIN** 落实为具体值（见上"最新 taskid 内联为子查询"模板与 EXISTS 回退），**禁止**把 `{taskid}`/`{stcd}`/`{type}` 等未填变量写进提交执行的 SQL。生成后自检：**SQL 里不许出现 `{` `}`**。
+- **⚡ 预报时间窗必须锚定任务自身时间。** 用该 taskid 下的 `MIN(tm)`~`MAX(tm)`（或任务 tm）圈定窗口，**禁止** `BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)`——最新任务可能很旧，NOW() 窗口与预报 tm 无交集必返 0 行。
+- **⚠️ 模糊时间禁止反问。** "未来/近期"等模糊时间默认取最新有效任务直接查，**禁止向用户反问**（单轮评测反问=0 分），答复中注明实际使用的任务时间即可。
+- **⚠️ 模糊任务指代禁止反问（"某任务"/"某个任务"/"某任务下"）。** 这类措辞一律按"**最新已完成任务**"处理：`taskid = (SELECT taskid FROM slztk.st_mx_taskid_r WHERE stuts='1' ORDER BY tm DESC LIMIT 1)`（断面/预测表无数据时叠加下方 EXISTS 回退）。**禁止调用澄清工具或反问"是哪个任务"**——直接查并在答复注明实际任务时间。断面数据走 `st_mx_rv_dm_r`（列: name/z/Qin/Qout），水位预测走 `st_mx_preset_cal_r`(type='1')。
+- **最新任务可能很旧。** 预测系统不一定每天运行。先查 `SELECT taskid, tm, stuts FROM slztk.st_mx_taskid_r ORDER BY tm DESC LIMIT 1` 确认最新任务时间，若距今超过1天，需告知用户数据非实时。可降级查最近已完成任务(stuts = '1')。
+- **查已完成任务。** 用 `WHERE stuts = '1' ORDER BY tm DESC` 过滤，避免拿到未完成的空任务。
+- **最新已完成任务在子表中可能无数据（必读，0行必回退）。** 断面表 st_mx_rv_dm_r / 预测表 st_mx_preset_cal_r 只覆盖部分任务。若按"最新任务 taskid"过滤返回 0 行，**禁止直接放弃**，必须改用 EXISTS 回退到"有数据的最新任务"：
+  ```sql
+  SELECT t.taskid FROM slztk.st_mx_taskid_r t
+  WHERE t.stuts = '1'
+    AND EXISTS (SELECT 1 FROM slztk.st_mx_rv_dm_r d WHERE d.taskid = t.taskid)
+  ORDER BY t.tm DESC LIMIT 1
+  ```
+  （查预测数据时把 EXISTS 里的表换成 st_mx_preset_cal_r。）取到该 taskid 后重新执行原查询，并在答复中说明实际使用的任务时间。
 
 ## Workflow
 
 1. **获取最新任务 ID。** `SELECT taskid FROM slztk.st_mx_taskid_r ORDER BY tm DESC LIMIT 1`
-2. **查询预测数据。** 用 taskid 过滤 st_mx_preset_cal_r，type='1' 为水位。
+2. **查询预测数据。** 用 taskid 过滤 st_mx_preset_cal_r，type='1' 为水位。**步骤 1-2（含时效检查与 EXISTS 回退）在同一个 Python 脚本内一轮完成**，f-string 实值代入。
 3. **JOIN 测站信息。** 跨库: slztk 表 JOIN sl323.st_stbprp_b。
 4. **模型结果。** 可查询 st_mx_rv_dm_r 获取河道断面数据。
 5. **质量自检。** 执行 SQL 前确认符合安全规则。预测数据需检查最新任务时间，若距当前超过1天需告知用户。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。
+
+## 单轮模板（照抄，勿拆轮）
+
+未来水位预报**一个脚本一轮跑完**：把"有数据的最新已完成 taskid"**内联为 EXISTS 子查询**，不单独查一轮 taskid。
+
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query
+
+sql = """
+SELECT b.stnm AS '测站', p.tm AS '预报时间', p.vals AS '预测水位(m)'
+FROM slztk.st_mx_preset_cal_r p
+JOIN sl323.st_stbprp_b b ON p.stcd = b.stcd
+WHERE p.type = '1'
+  AND p.taskid = (
+    SELECT t.taskid FROM slztk.st_mx_taskid_r t
+    WHERE t.stuts = '1'
+      AND EXISTS (SELECT 1 FROM slztk.st_mx_preset_cal_r d WHERE d.taskid = t.taskid)
+    ORDER BY t.tm DESC LIMIT 1
+  )
+  AND (b.stnm LIKE '%古运河%' OR b.stnm LIKE '%瘦西湖%')
+ORDER BY b.stnm, p.tm
+"""
+rows = query(sql)
+for row in rows:                        # 打印全行，勿截断
+    print(row)
+```
+
+- 断面数据把 `st_mx_preset_cal_r` 换成 `st_mx_rv_dm_r`（EXISTS 里同步替换）。
+- 站点用 `stnm LIKE` 内联，**禁**单独查站码轮。
 
 ## Validation Gate
 
@@ -78,7 +130,7 @@ from db import query, query_multi
   SELECT taskid, tm, stuts FROM slztk.st_mx_taskid_r ORDER BY tm DESC LIMIT 1
   ```
 - [ ] **时效性判断**：若最新任务距今超过 24 小时，**必须告知用户**"⚠️ 预测数据非实时（最新任务时间：YYYY-MM-DD HH:mm）"
-- [ ] **降级策略**：若最新任务未完成(stuts=0)，可降级查询最近已完成任务(stuts=1)
+- [ ] **降级策略**：若最新任务未完成(stuts = '0')，可降级查询最近已完成任务(stuts = '1')
 
 ## Key Tables
 
@@ -94,7 +146,7 @@ from db import query, query_multi
 - **st_mx_preset_cal_r.type 是 varchar(5):** `type = '1'`（水位）不是 `type = 1`
 - **st_mx_taskid_r 的 PK 是 uuid**，不是 taskid
 - **st_mx_preset_cal_r 无 PK**，只有 INDEX
-- **任务状态:** stuts=0 未完成, stuts=1 已完成
+- **任务状态:** stuts 是 char(1)，`stuts = '0'` 未完成, `stuts = '1'` 已完成（必须带引号）
 
 ## Related Skills
 

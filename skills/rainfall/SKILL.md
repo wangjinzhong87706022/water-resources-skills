@@ -29,7 +29,7 @@ metadata:
 ## Prerequisites
 
 - **数据库:** MySQL 192.168.100.103:3306，数据库 sl323（只读）
-- **pymysql:** execute_code 环境可能未安装，首次使用需先运行 `pip install pymysql`
+- **pymysql 已由 lib/db.py 内部处理，🚫 禁止 pip install**（沙箱 externally-managed，pip 必失败且白烧 3-5 个轮次）。
 - **DB 助手模块:** 使用 `from db import query, query_multi`（见 shared/db_connection.md），自动处理连接管理、30s 超时、空结果提示。**不要手写 pymysql 连接代码。**
 - 参考 `references/schema.md` — 完整表结构（来源: 实际 MySQL DDL）
 - 参考 `references/business_rules.md` — 业务规则（来源: domains/evidens.txt）
@@ -50,7 +50,7 @@ metadata:
 | 共享文档 | `shared/db_connection.md` | `$WATER_RESOURCES_ROOT/shared/db_connection.md` |
 | 共享规则 | `shared/sql_safety_rules.md` | `$WATER_RESOURCES_ROOT/shared/sql_safety_rules.md` |
 
-> `WATER_RESOURCES_ROOT` 由部署层设置：DeerFlow 指向 `/mnt/skills`，Hermes 指向 `~/.hermes/skills/water-resources`，开发指向仓库 `…/skills`。
+> `WATER_RESOURCES_ROOT` 由部署层注入（指向 skills 根目录），SKILL.md 与生成代码中不出现任何平台路径字面量；共享资源一律经 `$WATER_RESOURCES_ROOT` 定位。
 
 **标准导入片段**（`__file__` 在 sandbox 暂存脚本中不可靠，勿用）：
 ```python
@@ -58,6 +58,22 @@ import os, sys
 sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
 from db import query, query_multi
 ```
+
+## Pitfalls
+
+- **⚡ 单轮数据获取（性能第一杠杆，每轮 LLM 往返 30–80s，往返预算 ≤4）。不要为读中间结果而结束本轮**——站点识别、`MAX(tm)`/`MAX(FYMDH)` 锚点、聚合主查询全部写进**同一个 Python 脚本**一轮跑完。硬性禁令：
+  1. **禁 schema 探查**（`SHOW COLUMNS`/`INFORMATION_SCHEMA`/`SELECT DATABASE()`/`SELECT DISTINCT col`）——列名见下方 Key Tables。
+  2. **禁独立锚点轮**：`MAX(tm)`/最新 `FYMDH` **内联为子查询**，不得单独查一轮再代入。
+  3. **禁站点独立发现轮**：站名用 `stnm LIKE` 内联 JOIN；扬州城区直接用固定 `stcd='58245'`。
+  4. **禁重复执行**：一次成功即停，禁换时间窗重跑同一统计。
+  5. **一脚本一轮**：末尾一次性 `print` 全部结果（含可视化数据）。同脚本内需分步时用 f-string 实值代入（**禁跨回合留 `{stcd}` 占位符**）。
+- **⚡ 相对时间窗锚定 MAX(tm)，禁锚 CURDATE()/NOW()。** 库数据滞后于挂钟（实测停在 2026-06），锚 CURDATE() 的窗口常落空返 0 行。
+- **⚡ 聚合优先。** 降雨"趋势/变化/分布"默认 `GROUP BY DATE(tm)` 日聚合 + SUM(drp)，禁拉原始行灌上下文。
+- **⚠️ 模糊时间（"一段时间/近期"）默认近 30 天（锚 MAX(tm)）直接查，禁止向用户反问**——单轮评测反问=0 分。
+- **⚠️ 分区裁剪：st_pptn_r/f_rnfl_h 是 RANGE 分区表**，禁 `YEAR(tm) IN (...)` 把 tm 包进函数，必须写 tm 连续区间；年度统计写 `tm >= '2024-01-01' AND tm < '2025-01-01'`（**不要** `BETWEEN '2024-01-01' AND '2024-12-31'`——datetime 上界丢掉整个 12-31）。
+
+- **⚠️ 区域/站名列只在 `st_stbprp_b`，雨量表 `st_pptn_r` 只有 stcd+drp+tm。** 按区域聚合**必须 `JOIN st_stbprp_b b ON p.stcd=b.stcd`** 再 `GROUP BY b.addvcd`；禁止从 st_pptn_r 直接 SELECT addvcd（报 `Unknown column`）。也**禁止幻觉列 `addvnm`**（区域名称列不存在，只有 `addvcd` 码）。覆盖 Q30。
+- **⚠️ 含单位/特殊字符的列别名必须加引号**（如 `AS '降雨量(mm)'`），**禁 CTE/`WITH`**（改子查询）。
 
 ## Workflow
 
@@ -72,9 +88,10 @@ from db import query, query_multi
    - **标准模式**：用户问法包含"多少""情况""查一下"等中性词
      - 回答目标数据 + 1-2 个相关指标（如总量/均值/极值）
      - 不画图，不做趋势分析
-   - **详细模式**：用户明确要求"分析""趋势""对比""详细""变化""可视化""图"等词
+   - **详细模式**：用户明确要求"分析""趋势""对比""详细""变化"等词
      - 可以做多维度统计分析（按月/季度聚合、同比/环比）
-     - 可以画图（matplotlib），中文字体使用 `plt.rcParams['font.sans-serif'] = ['WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'DejaVu Sans']`
+     - **画图仅当用户明确说"画图/图表/可视化"才触发**（与 water-situation 口径一致）；"分析/趋势/对比"默认文字结论+数据表，不画图
+     - 画图时中文字体使用 `plt.rcParams['font.sans-serif'] = ['Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans']`
      - 可以做异常检测、趋势分析
 
    > **`drp` vs `dyp` 决策规则**：`dyp` 是日降水量但数据可能不全。优先用 `SUM(drp) GROUP BY DATE(tm)` 按天聚合。如果 `few_shots.md` 有对应的 SQL，直接使用不要怀疑。
@@ -84,6 +101,45 @@ from db import query, query_multi
 5. **预报场景。** f_rnfl_h JOIN f_rnfl_info_r，过滤 UNITNAME='2' AND TYPE='2'，取最新 FYMDH。降雨量字段是 **RN** 不是 f_rnfl。
 6. **质量自检。** 执行 SQL 前确认符合安全规则。结果为空时按 shared/sql_quality_check.md Step 3 策略重试。返回数值做合理性检查（日降雨量 0~500mm）。
 7. **输出格式。** 根据判断的回复深度选择合适的输出格式：精简模式→只给出数值和日期；标准模式→给出查询范围+数值+简要说明；详细模式→完整上下文+分析。
+
+## 单轮模板（照抄，勿拆轮）
+
+**① 实时/区域降雨统计**（锚点内联，一轮跑完）：
+
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))
+from db import query
+
+sql = """
+SELECT DATE(p.tm) AS '日期', ROUND(SUM(p.drp), 1) AS '降雨量(mm)'
+FROM sl323.st_pptn_r p
+WHERE p.stcd = '58245'
+  AND p.tm >= DATE_SUB((SELECT MAX(tm) FROM sl323.st_pptn_r), INTERVAL 30 DAY)
+GROUP BY DATE(p.tm)
+ORDER BY DATE(p.tm)
+"""
+rows = query(sql)
+for row in rows:                        # 打印全行，勿截断
+    print(row)
+```
+
+**② 降雨预报**（最新 FYMDH 内联）：
+
+```python
+sql = """
+SELECT i.adcd_name AS '区域', h.YMDH AS '预报时间', ROUND(SUM(h.RN), 1) AS '预报降雨量(mm)'
+FROM sl323.f_rnfl_h h
+JOIN sl323.f_rnfl_info_r i ON h.ID = i.id
+WHERE h.UNITNAME = '2' AND h.TYPE = '2'
+  AND h.FYMDH = (SELECT MAX(FYMDH) FROM sl323.f_rnfl_h WHERE UNITNAME='2' AND TYPE='2')
+GROUP BY i.adcd_name, h.YMDH
+ORDER BY i.adcd_name, h.YMDH
+"""
+```
+
+- 区域聚合按 `b.addvcd`（`JOIN st_stbprp_b`），**无 `addvnm` 列**。
+- 一次成功即停：**禁**换窗口重跑同一统计。
 
 ## Validation Gate
 

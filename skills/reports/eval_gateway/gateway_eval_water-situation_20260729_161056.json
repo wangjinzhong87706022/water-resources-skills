@@ -1,0 +1,1100 @@
+{
+  "timestamp": "20260729_161056",
+  "config": {
+    "mode": "gateway_real_platform",
+    "gateway_url": "http://localhost:8001",
+    "model": "(platform default)",
+    "skill": "water-situation",
+    "timeout": 900
+  },
+  "summary": {
+    "total": 25,
+    "avg_score": 0.781,
+    "pass_rate": 0.76
+  },
+  "results": [
+    {
+      "index": 1,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "古运河有哪些水位测站？",
+      "expected_sql": "SELECT stcd AS '测站编码', stnm AS '测站名称', sttp AS '测站类型'\nFROM sl323.st_stbprp_b\nWHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ';",
+      "final_answer": "古运河共有 **11 个水位测站**，具体信息如下：\n\n| 序号 | 站码 | 站名 | 测站类型 | 所属水系 | 行政区 |\n|------|------|------|----------|----------|--------|\n| 1 | 51004110 | 扬州闸闸上游（水文） | DD | 大运河 | 321002 |\n| 2 | 51004111 | 扬州闸闸下游（水文） | DD | 大运河 | 321002 |\n| 3 | 510D4440 | 黄金坝泵站（水文） | DP | 大运河 | 321003 |\n| 4 | GYHCKD000000001 | 古运河岔口东 | WQ | - | 321084（生态） |\n| 5 | HT0021002001000010 | 古运河水文站（钞关泵站） | ZQ | - | 321002 |\n| 6 | HT0021071050000019 | 古运河水文站（扬子江南路古运河大桥） | ZQ | - | 321003 |\n| 7 | HT0021071050000023 | 古运河水位站（新城河口） | ZZ | - | 321003 |\n| 8 | HT0021071050000038 | 古运河水文站(大运河博物馆) | ZQ | - | - |\n| 9 | HT0021071151000019 | 古运河水文站（扬子津体育公园） | ZQ | - | 321003 |\n| 10 | HT0031003103000021 | 古运河水位站（春江路） | ZZ | - | 321003 |\n| 11 | HT0031071050000029 | 古运河水位站(三湾公园) | ZZ | - | 321002 |\n\n**测站类型说明：**\n- **ZZ** — 水位站（3个）：新城河口、春江路、三湾公园\n- **ZQ** — 水文站（4个）：钞关泵站、扬子江南路古运河大桥、大运河博物馆、扬子津体育公园\n- **DD** — 河道站（2个）：扬州闸闸上游、扬州闸闸下游\n- **DP** — 泵站水文站（1个）：黄金坝泵站\n- **WQ** — 水质站（1个）：古运河岔口东（生态站）\n\n其中前 3 个站点属于\"大运河\"水系，其余站点 `rvnm` 为空，通过站名关联到古运河。",
+      "actual_sqls": [
+        "SELECT DISTINCT b.stcd, b.stnm, b.rvnm, b.hnnm, b.sttp, b.dtmnm, b.addvcd, b.locality\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%'\nLIMIT 50"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "[{\"stcd\": \"51004110\", \"stnm\": \"扬州闸闸上游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"sttp\": \"DD\", \"dtmnm\": null, \"addvcd\": \"321002\", \"locality\": \"\"}, {\"stcd\": \"51004111\", \"stnm\": \"扬州闸闸下游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"sttp\": \"DD\", \"dtmnm\": null, \"addvcd\": \"321002\", \"locality\": \"\"}, {\"stcd\": \"510D4440\", \"stnm\": \"黄金坝泵站（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"sttp\": \"DP\", \"dtmnm\": null, \"addvcd\": \"321003\", \"locality\": \"\"}, {\"stcd\": \"GYHCKD000000001\", \"stnm\": \"古运河岔口东\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"WQ\", \"dtmnm\": null, \"addvcd\": \"321084\", \"locality\": \"生态\"}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"ZQ\", \"dtmnm\": null, \"addvcd\": \"321002\", \"locality\": \"\"}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"ZQ\", \"dtmnm\": null, \"addvcd\": \"321003\", \"locality\": \"\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"ZZ\", \"dtmnm\": null, \"addvcd\": \"321003\", \"locality\": \"\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"ZQ\", \"dtmnm\": null, \"addvcd\": null, \"locality\": \"\"}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"ZQ\", \"dtmnm\": null, \"addvcd\": \"321003\", \"locality\": \"\"}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"ZZ\", \"dtmnm\": null, \"addvcd\": \"321003\", \"locality\": \"\"}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"ZZ\", \"dtmnm\": null, \"addvcd\": \"321002\", \"locality\": \"\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.3,
+        "comparison_detail": "Expected SQL returned no comparable values",
+        "match_type": "stdout_no_expected_values",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.79,
+      "duration_sec": 42.8,
+      "llm_round_trips": 3,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 2,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询宝应水位站的所属河流、水系、流域、测站类别。",
+      "expected_sql": "SELECT stnm AS '测站名称', rvnm AS '河流', hnnm AS '水系', bsnm AS '流域', sttp AS '测站类别'\nFROM sl323.st_stbprp_b\nWHERE stnm = '宝应';",
+      "final_answer": "查询到了多条\"宝应\"相关记录。其中 `sttp='ZZ'` 的是水位站，名称为\"宝应\"，站码 `51005000`，信息最完整。下面整理结果。\n\n---\n\n**宝应水位站信息如下：**\n\n| 字段 | 值 |\n|------|-----|\n| **测站名称** | 宝应 |\n| **测站编码** | 51005000 |\n| **所属河流** | 里运河 |\n| **水系** | 下游区 |\n| **流域** | 淮河 |\n| **测站类别** | ZZ（水位站） |\n| **高程基准** | 废黄河口 |\n| **地理位置** | 苏-宝应县城镇（经度 119.298561，纬度 33.237444） |\n| **行政区划码** | 321023 |\n\n**补充说明：**\n- 测站类别 `ZZ` 表示**水位站**（区别于 `ZQ`=水文站、`DD`=闸站、`DP`=泵站等）\n- 该站位于**里运河**上，属于**下游区水系**，归属于**淮河流域**\n- 水位数据采用**废黄河口**高程基准",
+      "actual_sqls": [
+        "SELECT stcd, stnm, rvnm, hnnm, bsnm, sttp, addvcd, dtmnm, stlc, lgtd, lttd\nFROM st_stbprp_b\nWHERE stnm LIKE '%宝应%'\nLIMIT 10"
+      ],
+      "tool_trace": [
+        "read_file",
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "[{\"stcd\": \"32100012000357\", \"stnm\": \"宝应湖心\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"sttp\": \"WQ\", \"addvcd\": \"321084\", \"dtmnm\": null, \"stlc\": null, \"lgtd\": \"119.317500\", \"lttd\": \"33.136900\"}, {\"stcd\": \"32102311000351_1\", \"stnm\": \"宝应船闸\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"sttp\": \"WQ\", \"addvcd\": \"321084\", \"dtmnm\": null, \"stlc\": null, \"lgtd\": \"119.329185\", \"lttd\": \"33.226501\"}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"bsnm\": \"淮河\", \"sttp\": \"ZZ\", \"addvcd\": \"321023\", \"dtmnm\": \"废黄河口\", \"stlc\": \"苏-宝应县城镇\", \"lgtd\": \"119.298561\", \"lttd\": \"33.237444\"}, {\"stcd\": \"51005010\", \"stnm\": \"宝应抽水站（水文）\", \"rvnm\": \"潼河\", \"hnnm\": \"下游区\", \"bsnm\": \"淮河\", \"sttp\": \"DP\", \"addvcd\": \"321023\", \"dtmnm\": null, \"stlc\": null, \"lgtd\": \"119.409167\", \"lttd\": \"33.053056\"}, {\"stcd\": \"58148\", \"stnm\": \"宝应\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"sttp\": \"PP\", \"addvcd\": \"321023\", \"dtmnm\": null, \"stlc\": null, \"lgtd\": \"119.344400\", \"lttd\": \"33.270600\"}, {\"stcd\": \"A321000_0005\", \"stnm\": \"大运河船闸（宝应船闸）\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"sttp\": \"WQ\", \"addvcd\": \"321084\", \"dtmnm\": null, \"stlc\": null, \"lgtd\": \"119.524500\", \"lttd\": \"33.369800\"}, {\"stcd\": \"M3441\", \"stnm\": \"宝应山阳镇\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"sttp\": \"PP\", \"addvcd\": \"321023\", \"dtmnm\": null, \"stlc\": null, \"lgtd\": \"119.224400\", \"lttd\": \"33.236700\"}, {\"stcd\": \"M3442\", \"stnm\": \"宝应射阳湖镇\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"sttp\": \"PP\", \"addvcd\": \"321023\", \"dtmnm\": null, \"stlc\": null, \"lgtd\": \"119.609700\", \"lttd\": \"33.304200\"}, {\"stcd\": \"M5401\", \"stnm\": \"宝应望直港镇\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"sttp\": \"PP\", \"addvcd\": \"321023\", \"dtmnm\": null, \"stlc\": null, \"lgtd\": \"119.374200\", \"lttd\": \"33.256100\"}, {\"stcd\": \"M5402\", \"stnm\": \"宝应泾河镇\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"sttp\": \"PP\", \"addvcd\": \"321023\", \"dtmnm\": null, \"stlc\": null, \"lgtd\": \"119.248900\", \"lttd\": \"33.336900\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 1.0,
+        "comparison_detail": "stdout matched 6/6 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 1.0,
+      "duration_sec": 58.8,
+      "llm_round_trips": 4,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 3,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询测站总数。",
+      "expected_sql": "SELECT COUNT(*) AS '测站总数'\nFROM sl323.st_stbprp_b;",
+      "final_answer": "测站总数为 **506** 个。",
+      "actual_sqls": [
+        "SELECT COUNT(*) AS total_stations FROM sl323.st_stbprp_b"
+      ],
+      "tool_trace": [
+        "water-db_get_table_schema",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "[{\"total_stations\": 506}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 1.0,
+        "comparison_detail": "stdout matched 1/1 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 1.0,
+      "duration_sec": 9.3,
+      "llm_round_trips": 3,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 4,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询水位站宝应最近30天水位数据。",
+      "expected_sql": "SELECT r.tm AS '时间', r.z AS '水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)\n  AND r.z IS NOT NULL\nORDER BY r.tm;",
+      "final_answer": "## 宝应水位站 — 最近30天水位数据\n\n**测站信息**\n- 站名：宝应\n- 站码：51005000\n- 类型：水位站 (ZZ)\n- 所属河道：里运河（人工运河）\n- 高程基准：废黄河口\n\n**数据范围**：2026-05-12 至 2026-06-11（共31条记录）\n> ⚠️ 注意：本库数据存在滞后，最新数据截至 2026-06-11，非当前实时数据。\n\n**统计概览**\n\n| 指标 | 数值 (m) |\n|------|----------|\n| 最高水位 | 6.929（6月28日） |\n| 最低水位 | 1.159（6月5日） |\n| 平均水位 | 4.384 |\n| 数据记录数 | 31 |\n\n**水位变化特点**\n- 水位波动剧烈，极差达 **5.770m**（最高 6.929m vs 最低 1.159m）\n- 5月下旬出现多次大幅震荡，单日水位变化幅度较大\n- 6月初水位整体偏高（6.4~6.6m），之后回落明显\n\n![宝应水位趋势图](/mnt/user-data/outputs/宝应水位趋势图.png)\n\n**阈值说明**\n- ⚠️ 该站警戒水位（WRZ）、保证水位（GRZ）数据缺失，无法判断超警戒状态。\n\n**数据局限性**\n- 本库里运河宝应段仅宝应1个水位站，单站数据代表性有限。\n- 水位数据波动幅度异常大（1.1~6.9m），可能存在数据质量问题，建议结合其他来源交叉验证。",
+      "actual_sqls": [
+        "SELECT r.tm, r.z, r.q, r.wptn,\n       b.stnm, b.rvnm, b.hnnm, b.dtmnm\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%宝应%'\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)\nORDER BY r.tm",
+        "SELECT b.stcd, b.stnm, b.rvnm, b.hnnm, b.sttp, b.dtmnm, b.addvcd\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%宝应%'",
+        "SELECT MIN(tm) as earliest, MAX(tm) as latest, COUNT(*) as total_records\nFROM st_river_r\nWHERE stcd = '51005000'",
+        "SELECT r.tm, r.z, r.q, r.wptn\nFROM st_river_r r\nWHERE r.stcd = '51005000'\n  AND r.tm >= DATE_SUB('2026-06-11', INTERVAL 30 DAY)\nORDER BY r.tm",
+        "SELECT \n  MIN(r.z) as min_z,\n  MAX(r.z) as max_z,\n  ROUND(AVG(r.z), 3) as avg_z,\n  COUNT(*) as record_count\nFROM st_river_r r\nWHERE r.stcd = '51005000'\n  AND r.tm >= DATE_SUB('2026-06-11', INTERVAL 30 DAY)",
+        "SELECT WRZ, GRZ, OBHTZ\nFROM st_rvfcch_b\nWHERE STCD = '51005000'"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "bash",
+        "present_files"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "Query returned 0 rows.\nSQL: SELECT r.tm, r.z, r.q, r.wptn,\n       b.stnm, b.rvnm, b.hnnm, b.dtmnm\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%宝应%'\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY\nHint: check `get_date_range(table)` for time coverage, or `get_table_schema(table)` for column names.",
+        "[{\"stcd\": \"32100012000357\", \"stnm\": \"宝应湖心\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"WQ\", \"dtmnm\": null, \"addvcd\": \"321084\"}, {\"stcd\": \"32102311000351_1\", \"stnm\": \"宝应船闸\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"WQ\", \"dtmnm\": null, \"addvcd\": \"321084\"}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"sttp\": \"ZZ\", \"dtmnm\": \"废黄河口\", \"addvcd\": \"321023\"}, {\"stcd\": \"51005010\", \"stnm\": \"宝应抽水站（水文）\", \"rvnm\": \"潼河\", \"hnnm\": \"下游区\", \"sttp\": \"DP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"58148\", \"stnm\": \"宝应\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"A321000_0005\", \"stnm\": \"大运河船闸（宝应船闸）\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"WQ\", \"dtmnm\": null, \"addvcd\": \"321084\"}, {\"stcd\": \"M3441\", \"stnm\": \"宝应山阳镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M3442\", \"stnm\": \"宝应射阳湖镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M5401\", \"stnm\": \"宝应望直港镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M5402\", \"stnm\": \"宝应泾河镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M5403\", \"stnm\": \"宝应黄塍镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M5404\", \"stnm\": \"宝应曹甸镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M5405\", \"stnm\": \"宝应柳堡镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M5406\", \"stnm\": \"宝应范水镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M5407\", \"stnm\": \"宝应夏集镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M5408\", \"stnm\": \"宝应广洋湖镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M5409\", \"stnm\": \"宝应西安丰镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M6501\", \"stnm\": \"宝应鲁垛镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M6502\", \"stnm\": \"宝应小官庄镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M6503\", \"stnm\": \"宝应安宜三里\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M6504\", \"stnm\": \"宝应柳堡广场\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}, {\"stcd\": \"M6505\", \"stnm\": \"宝应黄塍新丰\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null, \"addvcd\": \"321023\"}]",
+        "[{\"earliest\": \"2023-04-11 11:00:00\", \"latest\": \"2026-06-11 00:00:00\", \"total_records\": 24108}]",
+        "[{\"tm\": \"2026-05-12 00:00:00\", \"z\": \"5.446\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-13 00:00:00\", \"z\": \"6.116\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-14 00:00:00\", \"z\": \"5.842\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-15 00:00:00\", \"z\": \"6.275\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-16 00:00:00\", \"z\": \"5.034\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-17 00:00:00\", \"z\": \"5.294\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-18 00:00:00\", \"z\": \"6.345\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-19 00:00:00\", \"z\": \"1.171\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-20 00:00:00\", \"z\": \"6.359\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-21 00:00:00\", \"z\": \"2.010\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-22 00:00:00\", \"z\": \"4.434\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-23 00:00:00\", \"z\": \"2.834\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-24 00:00:00\", \"z\": \"4.990\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-25 00:00:00\", \"z\": \"6.928\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-26 00:00:00\", \"z\": \"4.059\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-27 00:00:00\", \"z\": \"1.373\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-28 00:00:00\", \"z\": \"6.929\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-29 00:00:00\", \"z\": \"1.953\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-30 00:00:00\", \"z\": \"4.985\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-05-31 00:00:00\", \"z\": \"3.874\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-01 00:00:00\", \"z\": \"6.614\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-02 00:00:00\", \"z\": \"6.482\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-03 00:00:00\", \"z\": \"4.103\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-04 00:00:00\", \"z\": \"5.495\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-05 00:00:00\", \"z\": \"1.159\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-06 00:00:00\", \"z\": \"5.320\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-07 00:00:00\", \"z\": \"1.179\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-08 00:00:00\", \"z\": \"3.118\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-09 00:00:00\", \"z\": \"2.018\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-10 00:00:00\", \"z\": \"5.576\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-11 00:00:00\", \"z\": \"2.588\", \"q\": null, \"wptn\": null}]",
+        "[{\"min_z\": \"1.159\", \"max_z\": \"6.929\", \"avg_z\": \"4.384\", \"record_count\": 31}]",
+        "[{\"WRZ\": null, \"GRZ\": null, \"OBHTZ\": null}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.3,
+        "comparison_detail": "Expected SQL returned no comparable values",
+        "match_type": "stdout_no_expected_values",
+        "trace_sanity": 0.5
+      },
+      "total_score": 0.74,
+      "duration_sec": 112.4,
+      "llm_round_trips": 10,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 5,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询古运河(河流名称)水位站的数量。",
+      "expected_sql": "SELECT COUNT(*) AS '水位站数量'\nFROM sl323.st_stbprp_b\nWHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ';",
+      "final_answer": "古运河共有 **3** 个水位站。",
+      "actual_sqls": [
+        "SELECT COUNT(DISTINCT stcd) AS station_count\nFROM sl323.st_stbprp_b\nWHERE rvnm = '古运河';"
+      ],
+      "tool_trace": [
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "[{\"station_count\": 3}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.3,
+        "comparison_detail": "Expected SQL returned no comparable values",
+        "match_type": "stdout_no_expected_values",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.79,
+      "duration_sec": 12.2,
+      "llm_round_trips": 3,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 6,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询建站最早和最晚的测站名称及其建站时间。",
+      "expected_sql": "SELECT stnm AS '测站名称', esstym AS '建站时间'\nFROM sl323.st_stbprp_b\nWHERE esstym = (SELECT MIN(esstym) FROM sl323.st_stbprp_b)\nUNION ALL\nSELECT stnm AS '测站名称', esstym AS '建站时间'\nFROM sl323.st_stbprp_b\nWHERE esstym = (SELECT MAX(esstym) FROM sl323.st_stbprp_b);",
+      "final_answer": "查询结果如下：\n\n**建站最早的测站：**\n- **宝应**（站号：51005000），建站时间：1912年9月\n\n**建站最晚的测站：**\n- **山头水库**（站号：510E4273）和 **魏井水库**（站号：510E4271），建站时间：2016年6月（并列最晚）\n\n从数据来看，最早建站的测站可以追溯到1912年，而最晚的测站建于2016年，跨度超过100年。",
+      "actual_sqls": [
+        "SELECT stcd, stnm, esstym\nFROM sl323.st_stbprp_b\nWHERE esstym IS NOT NULL AND esstym != ''\nORDER BY esstym ASC\nLIMIT 5",
+        "SELECT stcd, stnm, esstym\nFROM sl323.st_stbprp_b\nWHERE esstym IS NOT NULL AND esstym != ''\nORDER BY esstym DESC\nLIMIT 5"
+      ],
+      "tool_trace": [
+        "water-db_get_table_schema",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "[{\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"esstym\": \"191209\"}, {\"stcd\": \"51003800\", \"stnm\": \"六闸(三)\", \"esstym\": \"191302\"}, {\"stcd\": \"51005200\", \"stnm\": \"高邮(大)\", \"esstym\": \"191302\"}, {\"stcd\": \"51004150\", \"stnm\": \"三江营\", \"esstym\": \"191508\"}, {\"stcd\": \"60115000\", \"stnm\": \"大通(二)\", \"esstym\": \"192210\"}]",
+        "[{\"stcd\": \"510E4273\", \"stnm\": \"山头水库\", \"esstym\": \"201606\"}, {\"stcd\": \"510E4271\", \"stnm\": \"魏井水库\", \"esstym\": \"201606\"}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"esstym\": \"200101\"}, {\"stcd\": \"51008600\", \"stnm\": \"陆庄（扬州）\", \"esstym\": \"197905\"}, {\"stcd\": \"627B9680\", \"stnm\": \"赵庄水库\", \"esstym\": \"197802\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 1.0,
+        "comparison_detail": "stdout matched 5/5 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 1.0,
+      "duration_sec": 12.6,
+      "llm_round_trips": 3,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 7,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询水位站数量最多、最少的河流。",
+      "expected_sql": "SELECT b.rvnm AS '河流名称', COUNT(b.stcd) AS '水位站数量'\nFROM sl323.st_stbprp_b b\nWHERE b.sttp = 'ZZ' AND b.rvnm IS NOT NULL AND b.rvnm != ''\nGROUP BY b.rvnm\nHAVING COUNT(b.stcd) = (SELECT MIN(stcd_count) FROM (SELECT COUNT(stcd) AS stcd_count FROM sl323.st_stbprp_b WHERE sttp = 'ZZ' AND rvnm IS NOT NULL AND rvnm != '' GROUP BY rvnm) AS min_count)\n   OR COUNT(b.stcd) = (SELECT MAX(stcd_count) FROM (SELECT COUNT(stcd) AS stcd_count FROM sl323.st_stbprp_b WHERE sttp = 'ZZ' AND rvnm IS NOT NULL AND rvnm != '' GROUP BY rvnm) AS max_count)\nORDER BY COUNT(b.stcd);",
+      "final_answer": "查询结果如下：\n\n**水位站数量统计（按河流）**\n\n| 排名 | 河流名称 | 水位站数量 |\n|------|----------|------------|\n| 最多 | **胥浦河** | **21 个** |\n| 第2 | 龙河 | 9 个 |\n| 第3 | 公道引水河 | 8 个 |\n| ... | ... | ... |\n| 最少 | **东风冲心河、友谊河、仪扬河、方巷小运河、月塘水库、石桥河、立新水库、邗江港** | **各 1 个** |\n\n- **水位站最多的河流**：**胥浦河**，共有 **21 个**水位站。\n- **水位站最少的河流**：有 **8 条河流**并列最少，各仅有 **1 个**水位站，分别是东风冲心河、友谊河、仪扬河、方巷小运河、月塘水库、石桥河、立新水库、邗江港。\n\n共统计到 **17 条河流**，总计 **57 个**水位站。",
+      "actual_sqls": [
+        "SELECT DISTINCT sttp FROM st_stbprp_b LIMIT 30",
+        "SELECT rvnm, COUNT(DISTINCT stcd) AS station_count\nFROM st_stbprp_b\nWHERE sttp = 'RR' AND rvnm IS NOT NULL AND rvnm != ''\nGROUP BY rvnm\nORDER BY station_count DESC"
+      ],
+      "tool_trace": [
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "[{\"sttp\": \"AQ\"}, {\"sttp\": \"BB\"}, {\"sttp\": \"DD\"}, {\"sttp\": \"DP\"}, {\"sttp\": \"PM\"}, {\"sttp\": \"PP\"}, {\"sttp\": \"RR\"}, {\"sttp\": \"TT\"}, {\"sttp\": \"WQ\"}, {\"sttp\": \"ZQ\"}, {\"sttp\": \"ZZ\"}]",
+        "[{\"rvnm\": \"胥浦河\", \"station_count\": 21}, {\"rvnm\": \"龙河\", \"station_count\": 9}, {\"rvnm\": \"公道引水河\", \"station_count\": 8}, {\"rvnm\": \"槐泗河\", \"station_count\": 4}, {\"rvnm\": \"王冲涧\", \"station_count\": 4}, {\"rvnm\": \"秦楠河\", \"station_count\": 4}, {\"rvnm\": \"乌塔沟\", \"station_count\": 2}, {\"rvnm\": \"友谊河\", \"station_count\": 2}, {\"rvnm\": \"向阳河\", \"station_count\": 2}, {\"rvnm\": \"滁河\", \"station_count\": 2}, {\"rvnm\": \"东风冲心河\", \"station_count\": 1}, {\"rvnm\": \"友谊河、仪扬河\", \"station_count\": 1}, {\"rvnm\": \"方巷小运河\", \"station_count\": 1}, {\"rvnm\": \"月塘水库\", \"station_count\": 1}, {\"rvnm\": \"石桥河\", \"station_count\": 1}, {\"rvnm\": \"立新水库\", \"station_count\": 1}, {\"rvnm\": \"邗江港\", \"station_count\": 1}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.0,
+        "comparison_detail": "stdout matched 0/6 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.7,
+      "duration_sec": 17.8,
+      "llm_round_trips": 4,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 8,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询古运河历史最高/低水位。",
+      "expected_sql": "SELECT b.stnm AS '测站名称',\n       MAX(r.z) AS '历史最高水位(m)',\n       MIN(r.z) AS '历史最低水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%') AND r.z IS NOT NULL\nGROUP BY b.stnm;",
+      "final_answer": "以下是古运河各测站的历史水位极值汇总（数据范围：2023年4月—2026年6月11日）：\n\n## 古运河历史最高/低水位\n\n| 测站 | 最高水位 (m) | 最高时间 | 最低水位 (m) | 最低时间 | 平均水位 (m) | 记录数 |\n|------|-------------|---------|-------------|---------|-------------|--------|\n| 古运河水位站（春江路） | **9.460** | 2026-06-11 | 2.635 | 2023-04-26 | 4.717 | 292,935 |\n| 古运河水文站（扬子江南路古运河大桥） | 8.929 | 2026-06-11 | 3.960 | 2023-05-08 | 4.673 | 266,457 |\n| 古运河水位站（新城河口） | 8.852 | 2026-06-11 | 3.880 | 2023-04-26 | 4.691 | 297,069 |\n| 古运河水文站（扬子津体育公园） | 8.722 | 2026-06-11 | 3.660 | 2023-04-26 | 4.700 | 300,185 |\n| 古运河水文站（钞关泵站） | 8.485 | 2026-06-11 | 3.818 | 2023-04-26 | 4.709 | 289,826 |\n| 古运河水文站(大运河博物馆) | 8.269 | 2026-06-11 | 3.860 | 2023-12-22 | 4.710 | 228,238 |\n| 古运河水位站(三湾公园) | 6.281 | 2026-06-11 | **2.576** | 2024-06-25 | 4.693 | 154,742 |\n\n### 关键发现\n\n- **历史最高水位**：**9.460m**，出现在 **春江路站**，时间为 2026年6月11日。\n- **历史最低水位**：**2.576m**，出现在 **三湾公园站**，时间为 2024年6月25日。\n- 各站最高水位均集中在 **2026年6月11日**，说明当日古运河全线出现高水位过程。\n- 最低水位多出现在 **2023年4月下旬**，为枯水期低水位。\n- 古运河全线平均水位约 **4.67~4.72m**，各站差异较小。\n\n> ⚠️ **数据说明**：古运河共11个相关测站，其中4个（扬州闸闸上游、扬州闸闸下游、黄金坝泵站、古运河岔口东）在河道水情表中无水位记录。以上结果基于7个有数据的测站。各站高程基准字段为空，未记录基准信息。",
+      "actual_sqls": [
+        "SELECT DISTINCT b.stcd, b.stnm, b.rvnm, b.hnnm, b.dtmnm\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%'\nLIMIT 50",
+        "SELECT b.stcd, b.stnm,\n       MIN(r.z) AS min_z, MAX(r.z) AS max_z,\n       MIN(r.tm) AS min_z_time, MAX(r.tm) AS max_z_time,\n       COUNT(r.z) AS data_count\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.z IS NOT NULL\nGROUP BY b.stcd, b.stnm\nORDER BY max_z DESC",
+        "SELECT b.stcd, b.stnm,\n       MIN(r.z) AS min_z, MAX(r.z) AS max_z,\n       MIN(r.tm) AS min_z_time, MAX(r.tm) AS max_z_time,\n       COUNT(r.z) AS data_count\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stcd IN ('51004110', '51004111', '510D4440', 'GYHCKD000000001')\n  AND r.z IS NOT NULL\nGROUP BY b.stcd, b.stnm",
+        "SELECT b.stcd, b.stnm,\n       MIN(r.z) AS min_z, MAX(r.z) AS max_z,\n       MIN(r.tm) AS min_z_time, MAX(r.tm) AS max_z_time,\n       ROUND(AVG(r.z), 3) AS avg_z,\n       COUNT(r.z) AS data_count,\n       MIN(r.tm) AS first_record, MAX(r.tm) AS last_record\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.z IS NOT NULL\nGROUP BY b.stcd, b.stnm\nORDER BY max_z DESC"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"stcd\": \"51004110\", \"stnm\": \"扬州闸闸上游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null}, {\"stcd\": \"51004111\", \"stnm\": \"扬州闸闸下游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null}, {\"stcd\": \"510D4440\", \"stnm\": \"黄金坝泵站（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null}, {\"stcd\": \"GYHCKD000000001\", \"stnm\": \"古运河岔口东\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}]",
+        "[{\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"min_z\": \"2.635\", \"max_z\": \"9.460\", \"min_z_time\": \"2023-04-26 11:25:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"data_count\": 292935}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"min_z\": \"3.960\", \"max_z\": \"8.929\", \"min_z_time\": \"2023-05-08 19:10:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"data_count\": 266457}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"min_z\": \"3.880\", \"max_z\": \"8.852\", \"min_z_time\": \"2023-04-26 11:25:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"data_count\": 297069}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"min_z\": \"3.660\", \"max_z\": \"8.722\", \"min_z_time\": \"2023-04-26 11:25:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"data_count\": 300185}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"min_z\": \"3.818\", \"max_z\": \"8.485\", \"min_z_time\": \"2023-04-26 11:25:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"data_count\": 289826}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"min_z\": \"3.860\", \"max_z\": \"8.269\", \"min_z_time\": \"2023-12-22 11:25:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"data_count\": 228238}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"min_z\": \"2.576\", \"max_z\": \"6.281\", \"min_z_time\": \"2024-06-25 11:30:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"data_count\": 154742}]",
+        "Query returned 0 rows.\nSQL: SELECT b.stcd, b.stnm,\n       MIN(r.z) AS min_z, MAX(r.z) AS max_z,\n       MIN(r.tm) AS min_z_time, MAX(r.tm) AS max_z_time,\n       COUNT(r.z) AS data_count\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.s\nHint: check `get_date_range(table)` for time coverage, or `get_table_schema(table)` for column names.",
+        "[{\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"min_z\": \"2.635\", \"max_z\": \"9.460\", \"min_z_time\": \"2023-04-26 11:25:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"avg_z\": \"4.717\", \"data_count\": 292935, \"first_record\": \"2023-04-26 11:25:00\", \"last_record\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"min_z\": \"3.960\", \"max_z\": \"8.929\", \"min_z_time\": \"2023-05-08 19:10:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"avg_z\": \"4.673\", \"data_count\": 266457, \"first_record\": \"2023-05-08 19:10:00\", \"last_record\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"min_z\": \"3.880\", \"max_z\": \"8.852\", \"min_z_time\": \"2023-04-26 11:25:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"avg_z\": \"4.691\", \"data_count\": 297069, \"first_record\": \"2023-04-26 11:25:00\", \"last_record\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"min_z\": \"3.660\", \"max_z\": \"8.722\", \"min_z_time\": \"2023-04-26 11:25:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"avg_z\": \"4.700\", \"data_count\": 300185, \"first_record\": \"2023-04-26 11:25:00\", \"last_record\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"min_z\": \"3.818\", \"max_z\": \"8.485\", \"min_z_time\": \"2023-04-26 11:25:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"avg_z\": \"4.709\", \"data_count\": 289826, \"first_record\": \"2023-04-26 11:25:00\", \"last_record\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"min_z\": \"3.860\", \"max_z\": \"8.269\", \"min_z_time\": \"2023-12-22 11:25:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"avg_z\": \"4.710\", \"data_count\": 228238, \"first_record\": \"2023-12-22 11:25:00\", \"last_record\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"min_z\": \"2.576\", \"max_z\": \"6.281\", \"min_z_time\": \"2024-06-25 11:30:00\", \"max_z_time\": \"2026-06-11 00:00:00\", \"avg_z\": \"4.693\", \"data_count\": 154742, \"first_record\": \"2024-06-25 11:30:00\", \"last_record\": \"2026-06-11 00:00:00\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 1.0,
+        "comparison_detail": "stdout matched 21/21 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 1.0,
+      "duration_sec": 114.9,
+      "llm_round_trips": 7,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 9,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询里运河（河流）最近两个月的水位数据。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '水位(m)', r.tm AS '时间'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.rvnm = '里运河'\n  AND r.tm >= DATE_SUB(NOW(), INTERVAL 2 MONTH)\n  AND r.z IS NOT NULL\nORDER BY r.tm DESC;",
+      "final_answer": "## 里运河水位数据查询结果\n\n**水体类型标注：** 里运河为**人工运河**，属于下游区水系。\n\n**查询时间范围：** 2026-05-29 ~ 2026-06-11（共14天有效数据记录）\n\n**高程基准：** 废黄河口（4站统一基准，可直接对比）\n\n### 各站统计概览\n\n| 测站 | 站码 | 记录数 | 平均水位(m) | 最高水位(m) | 最低水位(m) |\n|------|------|--------|------------|------------|------------|\n| 宝应 | 51005000 | 14 | 3.890 | 6.614 | 1.159 |\n| 泾河 | 51004900 | 14 | 4.282 | 6.829 | 1.358 |\n| 邵伯(大) | 51005250 | 14 | 4.170 | 6.850 | 1.242 |\n| 高邮(大) | 51005200 | 14 | 5.471 | 7.020 | 2.066 |\n\n### 关键发现\n\n1. **水位波动较大**：4站水位日均值在 2.95m ~ 6.13m 之间波动，日际变化显著，最高出现在 6月3日（日均 6.13m），最低出现在 6月5日（日均 2.95m）。\n2. **高邮(大)站水位最高**：平均水位 5.471m，最高达 7.020m（6月4日），为4站中水位最高的测站。\n3. **宝应站水位最低**：平均水位 3.890m，整体水位相对较低。\n4. **水位极值**：全区间最高水位 7.020m（高邮站，6月4日），最低水位 1.159m（宝应站，6月5日）。\n\n### 水位趋势图\n\n![里运河水位趋势图](/mnt/user-data/outputs/里运河水位趋势.png)\n\n### 数据说明\n\n- ⚠️ **数据局限性**：本库里运河共4个测站（宝应、泾河、邵伯(大)、高邮(大)），代表性中等。数据覆盖期为2026年5月29日至6月11日，距当前日期（7月29日）有一定间隔，近期数据可能尚未入库。\n- ⚠️ **阈值数据**：本库防洪指标表中该区域测站警戒水位、保证水位数据缺失，无法进行超警戒判断。\n- 统计口径：4站水位直接算术平均（等权），流量数据（q）全部为空，仅水位数据可用。",
+      "actual_sqls": [
+        "SELECT r.stcd, b.stnm, b.rvnm, b.hnnm, r.tm, r.z, r.q, r.wptn\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%里运河%' OR b.rvnm LIKE '%里运河%')\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 2 MONTH)\nORDER BY b.stnm, r.tm\nLIMIT 500",
+        "SELECT b.stcd, b.stnm, b.dtmnm, \n       COUNT(*) as record_cnt,\n       MIN(DATE(r.tm)) as first_date,\n       MAX(DATE(r.tm)) as last_date,\n       ROUND(AVG(r.z), 3) as avg_z,\n       ROUND(MAX(r.z), 3) as max_z,\n       ROUND(MIN(r.z), 3) as min_z\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%里运河%' OR b.rvnm LIKE '%里运河%')\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 2 MONTH)\nGROUP BY b.stcd, b.stnm, b.dtmnm\nORDER BY b.stnm",
+        "SELECT COUNT(DISTINCT b.stcd) as station_count\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%里运河%' OR b.rvnm LIKE '%里运河%')\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 2 MONTH)",
+        "SELECT DATE(r.tm) as dt,\n       ROUND(AVG(r.z), 3) as avg_z,\n       ROUND(MAX(r.z), 3) as max_z,\n       ROUND(MIN(r.z), 3) as min_z\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%里运河%' OR b.rvnm LIKE '%里运河%')\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 2 MONTH)\nGROUP BY DATE(r.tm)\nORDER BY dt"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "bash",
+        "present_files"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-05-29 00:00:00\", \"z\": \"1.953\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-05-30 00:00:00\", \"z\": \"4.985\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-05-31 00:00:00\", \"z\": \"3.874\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-01 00:00:00\", \"z\": \"6.614\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-02 00:00:00\", \"z\": \"6.482\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-03 00:00:00\", \"z\": \"4.103\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-04 00:00:00\", \"z\": \"5.495\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-05 00:00:00\", \"z\": \"1.159\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-06 00:00:00\", \"z\": \"5.320\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-07 00:00:00\", \"z\": \"1.179\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-08 00:00:00\", \"z\": \"3.118\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-09 00:00:00\", \"z\": \"2.018\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-10 00:00:00\", \"z\": \"5.576\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"2.588\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-05-29 00:00:00\", \"z\": \"1.504\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-05-30 00:00:00\", \"z\": \"3.069\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-05-31 00:00:00\", \"z\": \"5.319\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-01 00:00:00\", \"z\": \"1.358\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-02 00:00:00\", \"z\": \"5.472\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-03 00:00:00\", \"z\": \"6.829\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-04 00:00:00\", \"z\": \"4.938\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-05 00:00:00\", \"z\": \"2.136\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-06 00:00:00\", \"z\": \"3.334\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-07 00:00:00\", \"z\": \"5.392\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-08 00:00:00\", \"z\": \"6.827\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-09 00:00:00\", \"z\": \"6.029\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-10 00:00:00\", \"z\": \"1.766\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.971\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005250\", \"stnm\": \"邵伯(大)\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-05-29 00:00:00\", \"z\": \"5.438\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005250\", \"stnm\": \"邵伯(大)\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-05-30 00:00:00\", \"z\": \"4.070\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005250\", \"stnm\": \"邵伯(大)\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-05-31 00:00:00\", \"z\": \"3.554\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005250\", \"stnm\": \"邵伯(大)\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-01 00:00:00\", \"z\": \"3.088\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005250\", \"stnm\": \"邵伯(大)\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-02 00:00:00\", \"z\": \"4.147\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005250\", \"stnm\": \"邵伯(大)\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-03 00:00:00\", \"z\": \"6.850\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005250\", \"stnm\": \"邵伯(大)\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-04 00:00:00\", \"z\": \"5.428\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005250\", \"stnm\": \"邵伯(大)\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-05 00:00:00\", \"z\": \"2.975\", \"q\": null, \"wptn\": null}, {\"stcd\": \"51005250\", \"stnm\": \"邵伯(大)\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"tm\": \"2026-06-06 00:00:00\", \"z\": \"5.505\", \"q\": null, \"wptn\": null}, {\"stcd\": \"5100",
+        "[{\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"dtmnm\": \"废黄河口\", \"record_cnt\": 14, \"first_date\": \"2026-05-29\", \"last_date\": \"2026-06-11\", \"avg_z\": \"3.890\", \"max_z\": \"6.614\", \"min_z\": \"1.159\"}, {\"stcd\": \"51004900\", \"stnm\": \"泾河\", \"dtmnm\": \"废黄河口\", \"record_cnt\": 14, \"first_date\": \"2026-05-29\", \"last_date\": \"2026-06-11\", \"avg_z\": \"4.282\", \"max_z\": \"6.829\", \"min_z\": \"1.358\"}, {\"stcd\": \"51005250\", \"stnm\": \"邵伯(大)\", \"dtmnm\": \"废黄河口\", \"record_cnt\": 14, \"first_date\": \"2026-05-29\", \"last_date\": \"2026-06-11\", \"avg_z\": \"4.170\", \"max_z\": \"6.850\", \"min_z\": \"1.242\"}, {\"stcd\": \"51005200\", \"stnm\": \"高邮(大)\", \"dtmnm\": \"废黄河口\", \"record_cnt\": 14, \"first_date\": \"2026-05-29\", \"last_date\": \"2026-06-11\", \"avg_z\": \"5.471\", \"max_z\": \"7.020\", \"min_z\": \"2.066\"}]",
+        "[{\"station_count\": 4}]",
+        "[{\"dt\": \"2026-05-29\", \"avg_z\": \"3.346\", \"max_z\": \"5.438\", \"min_z\": \"1.504\"}, {\"dt\": \"2026-05-30\", \"avg_z\": \"4.740\", \"max_z\": \"6.836\", \"min_z\": \"3.069\"}, {\"dt\": \"2026-05-31\", \"avg_z\": \"4.843\", \"max_z\": \"6.623\", \"min_z\": \"3.554\"}, {\"dt\": \"2026-06-01\", \"avg_z\": \"3.282\", \"max_z\": \"6.614\", \"min_z\": \"1.358\"}, {\"dt\": \"2026-06-02\", \"avg_z\": \"4.971\", \"max_z\": \"6.482\", \"min_z\": \"3.781\"}, {\"dt\": \"2026-06-03\", \"avg_z\": \"6.129\", \"max_z\": \"6.850\", \"min_z\": \"4.103\"}, {\"dt\": \"2026-06-04\", \"avg_z\": \"5.720\", \"max_z\": \"7.020\", \"min_z\": \"4.938\"}, {\"dt\": \"2026-06-05\", \"avg_z\": \"2.953\", \"max_z\": \"5.542\", \"min_z\": \"1.159\"}, {\"dt\": \"2026-06-06\", \"avg_z\": \"4.949\", \"max_z\": \"5.636\", \"min_z\": \"3.334\"}, {\"dt\": \"2026-06-07\", \"avg_z\": \"3.349\", \"max_z\": \"5.582\", \"min_z\": \"1.179\"}, {\"dt\": \"2026-06-08\", \"avg_z\": \"4.033\", \"max_z\": \"6.827\", \"min_z\": \"2.652\"}, {\"dt\": \"2026-06-09\", \"avg_z\": \"4.937\", \"max_z\": \"6.472\", \"min_z\": \"2.018\"}, {\"dt\": \"2026-06-10\", \"avg_z\": \"4.082\", \"max_z\": \"6.416\", \"min_z\": \"1.766\"}, {\"dt\": \"2026-06-11\", \"avg_z\": \"5.012\", \"max_z\": \"5.971\", \"min_z\": \"2.588\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.913,
+        "comparison_detail": "stdout matched 63/69 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.974,
+      "duration_sec": 129.1,
+      "llm_round_trips": 8,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 10,
+      "skill": "water-situation",
+      "level": "L2",
+      "question": "查询各水位站最新的水位值。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '最新水位(m)', r.tm AS '更新时间'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r GROUP BY stcd) latest\n  ON r.stcd = latest.stcd AND r.tm = latest.maxTm\nWHERE b.sttp = 'ZZ'\nORDER BY r.z DESC;",
+      "final_answer": "查询到 50 个水位站的最新数据。以下是各水位站最新水位值汇总（数据截至 **2026-06-11**）：\n\n| 序号 | 站名 | 站码 | 水位(m) | 所属河道/水系 | 高程基准 |\n|------|------|------|---------|--------------|----------|\n| 1 | 七里沟（北）水文站（福祥路南） | HT0021003002000011 | 6.55 | — | — |\n| 2 | 七里沟（南）水位水文站（韩庄） | HT0021003003000025 | 7.07 | — | — |\n| 3 | 七里河水位站（东花园路） | HT0031002005000027 | 5.12 | — | — |\n| 4 | 三垛 | 51006950 | 4.76 | 北澄子河/下游区 | 废黄河口 |\n| 5 | 中心河水位站（站南路） | HT0031003009000010 | 5.44 | — | — |\n| 6 | 乌塔沟水文站(横沟闸站) | HT0021071150000039 | 6.97 | — | — |\n| 7 | 二道河水文站（文昌中路） | HT002100200200001X | 6.03 | — | — |\n| 8 | 仪扬河水位站（润扬南路） | HT0021003103000011 | 5.27 | — | — |\n| 9 | 保障湖水位站（汉陵苑） | HT0031003052000017 | 3.80 | — | — |\n| 10 | 六闸(三) | 51003800 | 6.06 | 邵伯湖/下游区 | 废黄河口 |\n| 11 | 古运河水位站(三湾公园) | HT0031071050000029 | 5.22 | — | — |\n| 12 | 古运河水位站（新城河口） | HT0021071050000023 | 5.21 | — | — |\n| 13 | 古运河水位站（春江路） | HT0031003103000021 | 3.60 | — | — |\n| 14 | 古运河水文站(大运河博物馆) | HT0021071050000038 | 5.83 | — | — |\n| 15 | 古运河水文站（扬子江南路古运河大桥） | HT0021071050000019 | 6.05 | — | — |\n| 16 | 古运河水文站（扬子津体育公园） | HT0021071151000019 | 5.90 | — | — |\n| 17 | 古运河水文站（钞关泵站） | HT0021002001000010 | 6.28 | — | — |\n| 18 | 叶桥大沟水位站（叶桥路东） | HT0021003010000013 | 6.42 | — | — |\n| 19 | 向阳河水位站(建华路) | HT0031003103000036 | 3.19 | — | — |\n| 20 | 向阳河水位站（华声路） | HT0031003103000017 | 5.69 | — | — |\n| 21 | 周庄河水位站（华阳东路） | HT0031071150000015 | 5.25 | — | — |\n| 22 | 四望亭河(邗江北路)水位站 | HT0031003011000018 | 4.32 | — | — |\n| 23 | 土坝桥水位站 | HT0031081104000033 | 3.41 | — | — |\n| 24 | 大樟沟水位站 | HT0031081103000015 | 5.88 | — | — |\n| 25 | 宝带河水文站（杨庄河口） | HT0021003005000019 | 6.18 | — | — |\n| 26 | **宝应** | 51005000 | **2.59** | **里运河/下游区** | 废黄河口 |\n| 27 | 射阳镇 | 51008700 | 4.04 | 射阳湖/下游区 | 废黄河口 |\n| 28 | 岗板头 | 51003600 | 4.42 | 高邮湖/入江水道 | 废黄河 |\n| 29 | 新城河(文昌路桥点) | HT0031003001000018 | 3.38 | — | — |\n| 30 | 新城河水文站（兴城西路北） | HT0021003001000012 | 5.28 | — | — |\n| 31 | 施桥港水位站（临江路） | HT0031071151000014 | 2.72 | — | — |\n| 32 | 施桥翻水站 | HT003107115000002X | 5.64 | — | — |\n| 33 | 春江河水位站（金春路） | HT0031071151000033 | 5.47 | — | — |\n| 34 | 樊川(斜) | 51006750 | 2.22 | 斜丰河/里下河 | 废黄河口 |\n| 35 | 沙施河水位站（老沙河） | HT0031002004000013 | 2.75 | — | — |\n| 36 | 泾河 | 51004900 | 5.97 | 里运河/下游区 | 废黄河口 |\n| 37 | 玉带河水位站（史可法西路） | HT0031003006000013 | 3.31 | — | — |\n| 38 | 瘦西湖水位站 | HT0021003052000011 | 5.55 | — | — |\n| 39 | 童套河水位站 | HT0031003001000022 | 4.63 | — | — |\n| 40 | 赵家支沟水文站（赵家河路） | HT0021003003000010 | 5.69 | — | — |\n| 41 | 邗江河水文站(普照闸) | HT0021071150000043 | 7.26 | — | — |\n| 42 | 邗沟水文站（史可法路东） | HT0021003053000010 | 7.85 | — | — |\n| 43 | 邵伯(大) | 51005250 | 5.63 | 里运河/下游区 | 废黄河口 |\n| 44 | 陆庄（扬州） | 51008600 | 3.51 | 下引河/下游区 | 废黄河口 |\n| 45 | 高邮(大) | 51005200 | 5.86 | 里运河/下游区 | 废黄河口 |\n| 46 | 高邮(高) | 51003650 | 3.81 | 高邮湖/下游区 | 废黄河口 |\n| 47 | 高邮（北） | 51006900 | 2.63 | 北澄子河/里下河 | — |\n| 48 | 龙河水位站 | HT0031081104000014 | 4.71 | — | — |\n| 49 | 龙涧河水位站 | HT003108110300002X | 4.45 | — | — |\n\n**统计概览：**\n- **共 49 个水位站**，最新数据时间均为 **2026-06-11**\n- **水位最高**：邗沟水文站（史可法路东） **7.85m**\n- **水位最低**：樊川(斜) **2.22m**\n- **水位均值**：约 5.13m\n\n**重点河道水位站：**\n- **里运河**：宝应 2.59m、泾河 5.97m、邵伯(大) 5.63m、高邮(大) 5.86m（基准：废黄河口）\n- **古运河**：三湾公园 5.22m、新城河口 5.21m、春江路 3.60m、大运河博物馆 5.83m\n- **高邮湖**：岗板头 4.42m、高邮(高) 3.81m\n\n⚠️ **数据说明**：部分站点的高程基准信息未记录（dtmnm 为空），跨站对比水位绝对值时需谨慎。数据最新更新时间为 2026-06-11。",
+      "actual_sqls": [
+        "SELECT r.stcd, r.tm, ROUND(r.z, 2) AS z, b.stnm, b.rvnm, b.hnnm, b.dtmnm\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE r.tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)\n  AND r.tm = (\n    SELECT MAX(r2.tm)\n    FROM st_river_r r2\n    WHERE r2.stcd = r.stcd\n      AND r2.tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)\n  )\n  AND r.z IS NOT NULL\nORDER BY b.stnm\nLIMIT 200"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"stcd\": \"HT0021003002000011\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"6.55\", \"stnm\": \"七里沟（北）水文站（福祥路南）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021003003000025\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"7.07\", \"stnm\": \"七里沟（南）水位水文站（韩庄）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031002005000027\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.12\", \"stnm\": \"七里河水位站（东花园路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"51006950\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"4.76\", \"stnm\": \"三垛\", \"rvnm\": \"北澄子河\", \"hnnm\": \"下游区\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"HT0031003009000010\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.44\", \"stnm\": \"中心河水位站（站南路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071150000039\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"6.97\", \"stnm\": \"乌塔沟水文站(横沟闸站)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT002100200200001X\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"6.03\", \"stnm\": \"二道河水文站（文昌中路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021003103000011\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.27\", \"stnm\": \"仪扬河水位站（润扬南路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031003052000017\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"3.80\", \"stnm\": \"保障湖水位站（汉陵苑）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"51003800\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"6.06\", \"stnm\": \"六闸(三)\", \"rvnm\": \"邵伯湖\", \"hnnm\": \"下游区\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"HT0031071050000029\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.22\", \"stnm\": \"古运河水位站(三湾公园)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000023\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.21\", \"stnm\": \"古运河水位站（新城河口）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031003103000021\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"3.60\", \"stnm\": \"古运河水位站（春江路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000038\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.83\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000019\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"6.05\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071151000019\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.90\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021002001000010\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"6.28\", \"stnm\": \"古运河水文站（钞关泵站）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021003010000013\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"6.42\", \"stnm\": \"叶桥大沟水位站（叶桥路东）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031003103000036\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"3.19\", \"stnm\": \"向阳河水位站(建华路)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031003103000017\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.69\", \"stnm\": \"向阳河水位站（华声路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031071150000015\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.25\", \"stnm\": \"周庄河水位站（华阳东路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031003011000018\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"4.32\", \"stnm\": \"四望亭河(邗江北路)水位站\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031081104000033\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"3.41\", \"stnm\": \"土坝桥水位站\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031081103000015\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.88\", \"stnm\": \"大樟沟水位站\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021003005000019\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"6.18\", \"stnm\": \"宝带河水文站（杨庄河口）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"51005000\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"2.59\", \"stnm\": \"宝应\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"51008700\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"4.04\", \"stnm\": \"射阳镇\", \"rvnm\": \"射阳湖\", \"hnnm\": \"下游区\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"51003600\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"4.42\", \"stnm\": \"岗板头\", \"rvnm\": \"高邮湖\", \"hnnm\": \"入江水道\", \"dtmnm\": \"废黄河\"}, {\"stcd\": \"HT0031003001000018\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"3.38\", \"stnm\": \"新城河(文昌路桥点)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021003001000012\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.28\", \"stnm\": \"新城河水文站（兴城西路北）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031071151000014\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"2.72\", \"stnm\": \"施桥港水位站（临江路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT003107115000002X\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.64\", \"stnm\": \"施桥翻水站\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031071151000033\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.47\", \"stnm\": \"春江河水位站（金春路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"51006750\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"2.22\", \"stnm\": \"樊川(斜)\", \"rvnm\": \"斜丰河\", \"hnnm\": \"里下河\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"HT0031002004000013\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"2.75\", \"stnm\": \"沙施河水位站（老沙河）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"51004900\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.97\", \"stnm\": \"泾河\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"HT0031003006000013\", \"tm\""
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.363,
+        "comparison_detail": "stdout matched 37/102 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.809,
+      "duration_sec": 122.4,
+      "llm_round_trips": 4,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 11,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "2024年古运河平均水位。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', AVG(r.z) AS '年平均水位'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%')\n  AND r.tm BETWEEN '2024-01-01' AND '2024-12-31'\n  AND r.z IS NOT NULL\nGROUP BY b.stnm;",
+      "final_answer": "查询完成。以下是2024年古运河水位统计结果：\n\n## 2024年古运河平均水位\n\n**古运河全线平均水位：4.682m**（全量数据等权算术平均）\n\n### 各测站详细数据\n\n| 测站名称 | 平均水位 (m) | 最高水位 (m) | 最低水位 (m) | 数据条数 |\n|----------|-------------|-------------|-------------|---------|\n| 古运河水位站(三湾公园) | 4.705 | 5.296 | 4.306 | 45,720 |\n| 古运河水文站(大运河博物馆) | 4.696 | 5.540 | 4.120 | 100,111 |\n| 古运河水文站（钞关泵站） | 4.688 | 5.557 | 4.301 | 97,967 |\n| 古运河水文站（扬子江南路古运河大桥） | 4.682 | 5.326 | 4.157 | 78,349 |\n| 古运河水位站（春江路） | 4.681 | 5.290 | 3.940 | 100,683 |\n| 古运河水文站（扬子津体育公园） | 4.671 | 5.310 | 4.200 | 102,019 |\n| 古运河水位站（新城河口） | 4.664 | 5.520 | 4.210 | 101,316 |\n\n### 说明\n- **水体类型**：古运河（人工运河）\n- **统计口径**：7个有水位数据的测站，全量记录等权算术平均\n- **高程基准**：测站基准信息未记录（dtmnm 为空）\n- **数据覆盖**：另有4个古运河相关测站（扬州闸闸上游、扬州闸闸下游、黄金坝泵站、古运河岔口东）在2024年无水位数据\n- **水位范围**：全线最低 3.940m（春江路），最高 5.557m（钞关泵站）",
+      "actual_sqls": [
+        "SELECT DISTINCT b.stcd, b.stnm, b.rvnm, b.dtmnm\nFROM st_stbprp_b b\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\nLIMIT 50",
+        "SELECT b.stnm, COUNT(r.z) as data_count,\n       ROUND(AVG(r.z), 3) as avg_water_level,\n       ROUND(MAX(r.z), 3) as max_water_level,\n       ROUND(MIN(r.z), 3) as min_water_level\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2024-01-01' AND r.tm < '2025-01-01'\n  AND r.z IS NOT NULL\nGROUP BY b.stcd, b.stnm\nORDER BY avg_water_level DESC",
+        "SELECT ROUND(AVG(r.z), 3) as overall_avg\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2024-01-01' AND r.tm < '2025-01-01'\n  AND r.z IS NOT NULL"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"stcd\": \"51004110\", \"stnm\": \"扬州闸闸上游（水文）\", \"rvnm\": \"古运河\", \"dtmnm\": null}, {\"stcd\": \"51004111\", \"stnm\": \"扬州闸闸下游（水文）\", \"rvnm\": \"古运河\", \"dtmnm\": null}, {\"stcd\": \"510D4440\", \"stnm\": \"黄金坝泵站（水文）\", \"rvnm\": \"古运河\", \"dtmnm\": null}, {\"stcd\": \"GYHCKD000000001\", \"stnm\": \"古运河岔口东\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"rvnm\": null, \"dtmnm\": null}]",
+        "[{\"stnm\": \"古运河水位站(三湾公园)\", \"data_count\": 45720, \"avg_water_level\": \"4.705\", \"max_water_level\": \"5.296\", \"min_water_level\": \"4.306\"}, {\"stnm\": \"古运河水文站(大运河博物馆)\", \"data_count\": 100111, \"avg_water_level\": \"4.696\", \"max_water_level\": \"5.540\", \"min_water_level\": \"4.120\"}, {\"stnm\": \"古运河水文站（钞关泵站）\", \"data_count\": 97967, \"avg_water_level\": \"4.688\", \"max_water_level\": \"5.557\", \"min_water_level\": \"4.301\"}, {\"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"data_count\": 78349, \"avg_water_level\": \"4.682\", \"max_water_level\": \"5.326\", \"min_water_level\": \"4.157\"}, {\"stnm\": \"古运河水位站（春江路）\", \"data_count\": 100683, \"avg_water_level\": \"4.681\", \"max_water_level\": \"5.290\", \"min_water_level\": \"3.940\"}, {\"stnm\": \"古运河水文站（扬子津体育公园）\", \"data_count\": 102019, \"avg_water_level\": \"4.671\", \"max_water_level\": \"5.310\", \"min_water_level\": \"4.200\"}, {\"stnm\": \"古运河水位站（新城河口）\", \"data_count\": 101316, \"avg_water_level\": \"4.664\", \"max_water_level\": \"5.520\", \"min_water_level\": \"4.210\"}]",
+        "[{\"overall_avg\": \"4.682\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.5,
+        "comparison_detail": "stdout matched 7/14 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.85,
+      "duration_sec": 74.7,
+      "llm_round_trips": 6,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 12,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "古运河2024年2、3月份水位对比。",
+      "expected_sql": "SELECT b.stnm AS '测站名称',\n       DATE_FORMAT(r.tm, '%Y-%m') AS '月份',\n       AVG(r.z) AS '月平均水位',\n       MAX(r.z) AS '月最高水位',\n       MIN(r.z) AS '月最低水位'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%')\n  AND DATE_FORMAT(r.tm, '%Y-%m') IN ('2024-02', '2024-03')\n  AND r.z IS NOT NULL\nGROUP BY b.stnm, DATE_FORMAT(r.tm, '%Y-%m')\nORDER BY b.stnm, DATE_FORMAT(r.tm, '%Y-%m');",
+      "final_answer": "",
+      "actual_sqls": [
+        "SELECT DISTINCT b.stcd, b.stnm, b.rvnm, b.hnnm, b.dtmnm, b.sttp\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2024-02-01' AND r.tm < '2024-04-01'\nLIMIT 50",
+        "SELECT \n    b.stcd,\n    b.stnm,\n    MONTH(r.tm) AS `month`,\n    COUNT(*) AS data_count,\n    ROUND(AVG(r.z), 3) AS avg_level,\n    ROUND(MAX(r.z), 3) AS max_level,\n    ROUND(MIN(r.z), 3) AS min_level\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2024-02-01' AND r.tm < '2024-04-01'\n  AND r.z IS NOT NULL\nGROUP BY b.stcd, b.stnm, MONTH(r.tm)\nORDER BY b.stcd, `month`",
+        "SELECT \n    DATE(r.tm) AS `date`,\n    ROUND(AVG(r.z), 3) AS avg_level\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2024-02-01' AND r.tm < '2024-04-01'\n  AND r.z IS NOT NULL\nGROUP BY DATE(r.tm)\nORDER BY `date`"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "write_file",
+        "write_file",
+        "write_file",
+        "bash",
+        "write_file",
+        "read_file",
+        "write_file"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "[{\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\"}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZZ\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\"}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\"}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZZ\"}]",
+        "[{\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"month\": 2, \"data_count\": 8151, \"avg_level\": \"4.735\", \"max_level\": \"4.879\", \"min_level\": \"4.570\"}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"month\": 3, \"data_count\": 8630, \"avg_level\": \"4.660\", \"max_level\": \"4.885\", \"min_level\": \"4.301\"}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"month\": 2, \"data_count\": 6746, \"avg_level\": \"4.717\", \"max_level\": \"4.854\", \"min_level\": \"4.600\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"month\": 2, \"data_count\": 8175, \"avg_level\": \"4.704\", \"max_level\": \"4.830\", \"min_level\": \"4.550\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"month\": 3, \"data_count\": 8620, \"avg_level\": \"4.623\", \"max_level\": \"4.850\", \"min_level\": \"4.270\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"month\": 2, \"data_count\": 8132, \"avg_level\": \"4.733\", \"max_level\": \"4.870\", \"min_level\": \"4.450\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"month\": 3, \"data_count\": 8615, \"avg_level\": \"4.652\", \"max_level\": \"4.890\", \"min_level\": \"4.310\"}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"month\": 2, \"data_count\": 8267, \"avg_level\": \"4.710\", \"max_level\": \"4.840\", \"min_level\": \"4.550\"}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"month\": 3, \"data_count\": 8733, \"avg_level\": \"4.618\", \"max_level\": \"4.860\", \"min_level\": \"4.260\"}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"month\": 2, \"data_count\": 8202, \"avg_level\": \"4.727\", \"max_level\": \"4.860\", \"min_level\": \"4.570\"}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"month\": 3, \"data_count\": 8568, \"avg_level\": \"4.633\", \"max_level\": \"4.880\", \"min_level\": \"4.230\"}]",
+        "[{\"date\": \"2024-02-01\", \"avg_level\": \"4.787\"}, {\"date\": \"2024-02-02\", \"avg_level\": \"4.696\"}, {\"date\": \"2024-02-03\", \"avg_level\": \"4.769\"}, {\"date\": \"2024-02-04\", \"avg_level\": \"4.715\"}, {\"date\": \"2024-02-05\", \"avg_level\": \"4.698\"}, {\"date\": \"2024-02-06\", \"avg_level\": \"4.653\"}, {\"date\": \"2024-02-07\", \"avg_level\": \"4.739\"}, {\"date\": \"2024-02-08\", \"avg_level\": \"4.770\"}, {\"date\": \"2024-02-09\", \"avg_level\": \"4.712\"}, {\"date\": \"2024-02-10\", \"avg_level\": \"4.679\"}, {\"date\": \"2024-02-11\", \"avg_level\": \"4.752\"}, {\"date\": \"2024-02-12\", \"avg_level\": \"4.771\"}, {\"date\": \"2024-02-13\", \"avg_level\": \"4.758\"}, {\"date\": \"2024-02-14\", \"avg_level\": \"4.717\"}, {\"date\": \"2024-02-15\", \"avg_level\": \"4.732\"}, {\"date\": \"2024-02-16\", \"avg_level\": \"4.742\"}, {\"date\": \"2024-02-17\", \"avg_level\": \"4.710\"}, {\"date\": \"2024-02-18\", \"avg_level\": \"4.700\"}, {\"date\": \"2024-02-19\", \"avg_level\": \"4.679\"}, {\"date\": \"2024-02-20\", \"avg_level\": \"4.775\"}, {\"date\": \"2024-02-21\", \"avg_level\": \"4.783\"}, {\"date\": \"2024-02-22\", \"avg_level\": \"4.693\"}, {\"date\": \"2024-02-23\", \"avg_level\": \"4.671\"}, {\"date\": \"2024-02-24\", \"avg_level\": \"4.728\"}, {\"date\": \"2024-02-25\", \"avg_level\": \"4.680\"}, {\"date\": \"2024-02-26\", \"avg_level\": \"4.665\"}, {\"date\": \"2024-02-27\", \"avg_level\": \"4.724\"}, {\"date\": \"2024-02-28\", \"avg_level\": \"4.667\"}, {\"date\": \"2024-02-29\", \"avg_level\": \"4.739\"}, {\"date\": \"2024-03-01\", \"avg_level\": \"4.725\"}, {\"date\": \"2024-03-02\", \"avg_level\": \"4.759\"}, {\"date\": \"2024-03-03\", \"avg_level\": \"4.705\"}, {\"date\": \"2024-03-04\", \"avg_level\": \"4.715\"}, {\"date\": \"2024-03-05\", \"avg_level\": \"4.726\"}, {\"date\": \"2024-03-06\", \"avg_level\": \"4.719\"}, {\"date\": \"2024-03-07\", \"avg_level\": \"4.694\"}, {\"date\": \"2024-03-08\", \"avg_level\": \"4.681\"}, {\"date\": \"2024-03-09\", \"avg_level\": \"4.656\"}, {\"date\": \"2024-03-10\", \"avg_level\": \"4.657\"}, {\"date\": \"2024-03-11\", \"avg_level\": \"4.684\"}, {\"date\": \"2024-03-12\", \"avg_level\": \"4.703\"}, {\"date\": \"2024-03-13\", \"avg_level\": \"4.697\"}, {\"date\": \"2024-03-14\", \"avg_level\": \"4.662\"}, {\"date\": \"2024-03-15\", \"avg_level\": \"4.684\"}, {\"date\": \"2024-03-16\", \"avg_level\": \"4.703\"}, {\"date\": \"2024-03-17\", \"avg_level\": \"4.696\"}, {\"date\": \"2024-03-18\", \"avg_level\": \"4.603\"}, {\"date\": \"2024-03-19\", \"avg_level\": \"4.333\"}, {\"date\": \"2024-03-20\", \"avg_level\": \"4.316\"}, {\"date\": \"2024-03-21\", \"avg_level\": \"4.381\"}, {\"date\": \"2024-03-22\", \"avg_level\": \"4.548\"}, {\"date\": \"2024-03-23\", \"avg_level\": \"4.546\"}, {\"date\": \"2024-03-24\", \"avg_level\": \"4.557\"}, {\"date\": \"2024-03-25\", \"avg_level\": \"4.704\"}, {\"date\": \"2024-03-26\", \"avg_level\": \"4.639\"}, {\"date\": \"2024-03-27\", \"avg_level\": \"4.653\"}, {\"date\": \"2024-03-28\", \"avg_level\": \"4.692\"}, {\"date\": \"2024-03-29\", \"avg_level\": \"4.678\"}, {\"date\": \"2024-03-30\", \"avg_level\": \"4.644\"}, {\"date\": \"2024-03-31\", \"avg_level\": \"4.621\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 0.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.0,
+        "trace_sanity": 0.5
+      },
+      "total_score": 0.45,
+      "duration_sec": 292.4,
+      "llm_round_trips": 11,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 13,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "请比较2023年和2024年古运河的平均水位。",
+      "expected_sql": "SELECT YEAR(r.tm) AS '年份', AVG(r.z) AS '年平均水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%')\n  AND YEAR(r.tm) IN (2023, 2024)\n  AND r.z IS NOT NULL\nGROUP BY YEAR(r.tm)\nORDER BY YEAR(r.tm);",
+      "final_answer": "",
+      "actual_sqls": [
+        "SELECT DISTINCT r.stcd, b.stnm, b.rvnm, b.dtmnm\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2023-01-01' AND r.tm < '2025-01-01'\nLIMIT 20",
+        "SELECT \n    r.stcd,\n    b.stnm,\n    YEAR(r.tm) AS year,\n    COUNT(r.z) AS data_count,\n    ROUND(AVG(r.z), 3) AS avg_level,\n    ROUND(MAX(r.z), 3) AS max_level,\n    ROUND(MIN(r.z), 3) AS min_level\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2023-01-01' AND r.tm < '2025-01-01'\n  AND r.z IS NOT NULL\nGROUP BY r.stcd, b.stnm, YEAR(r.tm)\nORDER BY year, r.stcd"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "bash",
+        "bash",
+        "bash",
+        "bash",
+        "write_file",
+        "bash",
+        "present_files"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"rvnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"rvnm\": null, \"dtmnm\": null}]",
+        "[{\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"year\": 2023, \"data_count\": 66057, \"avg_level\": \"4.800\", \"max_level\": \"6.943\", \"min_level\": \"3.818\"}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"year\": 2023, \"data_count\": 67150, \"avg_level\": \"4.637\", \"max_level\": \"4.934\", \"min_level\": \"3.960\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"year\": 2023, \"data_count\": 69552, \"avg_level\": \"4.775\", \"max_level\": \"6.960\", \"min_level\": \"3.880\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"year\": 2023, \"data_count\": 2714, \"avg_level\": \"4.730\", \"max_level\": \"4.820\", \"min_level\": \"4.650\"}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"year\": 2023, \"data_count\": 70494, \"avg_level\": \"4.761\", \"max_level\": \"6.884\", \"min_level\": \"3.660\"}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"year\": 2023, \"data_count\": 65289, \"avg_level\": \"4.800\", \"max_level\": \"9.460\", \"min_level\": \"3.510\"}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"year\": 2024, \"data_count\": 97967, \"avg_level\": \"4.688\", \"max_level\": \"5.557\", \"min_level\": \"4.301\"}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"year\": 2024, \"data_count\": 78349, \"avg_level\": \"4.682\", \"max_level\": \"5.326\", \"min_level\": \"4.157\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"year\": 2024, \"data_count\": 101316, \"avg_level\": \"4.664\", \"max_level\": \"5.520\", \"min_level\": \"4.210\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"year\": 2024, \"data_count\": 100111, \"avg_level\": \"4.696\", \"max_level\": \"5.540\", \"min_level\": \"4.120\"}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"year\": 2024, \"data_count\": 102019, \"avg_level\": \"4.671\", \"max_level\": \"5.310\", \"min_level\": \"4.200\"}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"year\": 2024, \"data_count\": 100683, \"avg_level\": \"4.681\", \"max_level\": \"5.290\", \"min_level\": \"3.940\"}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"year\": 2024, \"data_count\": 45720, \"avg_level\": \"4.705\", \"max_level\": \"5.296\", \"min_level\": \"4.306\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 0.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.0,
+        "trace_sanity": 0.5
+      },
+      "total_score": 0.45,
+      "duration_sec": 264.1,
+      "llm_round_trips": 11,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 14,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "古运河2024年2月水位分布情况。",
+      "expected_sql": "SELECT b.stnm AS '测站名称',\n       AVG(r.z) AS '平均水位',\n       MAX(r.z) AS '最高水位',\n       MIN(r.z) AS '最低水位',\n       MAX(r.z) - MIN(r.z) AS '水位变幅'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%')\n  AND r.tm >= '2024-02-01' AND r.tm < '2024-03-01'\n  AND r.z IS NOT NULL\nGROUP BY b.stnm;",
+      "final_answer": "",
+      "actual_sqls": [
+        "SELECT DISTINCT b.stcd, b.stnm, b.rvnm, b.hnnm, b.dtmnm, b.lgtd, b.lttd\nFROM st_stbprp_b b\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\nLIMIT 50",
+        "SELECT b.stcd, b.stnm, COUNT(*) as record_cnt,\n       ROUND(AVG(r.z), 2) as avg_z,\n       ROUND(MAX(r.z), 2) as max_z,\n       ROUND(MIN(r.z), 2) as min_z,\n       MIN(r.tm) as first_tm,\n       MAX(r.tm) as last_tm\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2024-02-01' AND r.tm < '2024-03-01'\n  AND r.z IS NOT NULL\nGROUP BY b.stcd, b.stnm\nORDER BY b.lttd DESC",
+        "SELECT b.stcd, b.stnm, COUNT(*) as record_cnt,\n       ROUND(AVG(r.z), 2) as avg_z,\n       ROUND(MAX(r.z), 2) as max_z,\n       ROUND(MIN(r.z), 2) as min_z\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2024-02-01' AND r.tm < '2024-03-01'\nGROUP BY b.stcd, b.stnm\nORDER BY b.lttd DESC",
+        "SELECT DATE(r.tm) as dt, b.stcd, b.stnm, ROUND(AVG(r.z), 2) as daily_avg_z\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2024-02-01' AND r.tm < '2024-03-01'\n  AND r.z IS NOT NULL\nGROUP BY DATE(r.tm), b.stcd, b.stnm\nORDER BY b.lttd DESC, dt"
+      ],
+      "tool_trace": [
+        "read_file",
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "bash",
+        "bash",
+        "bash",
+        "write_file",
+        "read_file"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"stcd\": \"51004110\", \"stnm\": \"扬州闸闸上游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null, \"lgtd\": \"119.468100\", \"lttd\": \"32.422700\"}, {\"stcd\": \"51004111\", \"stnm\": \"扬州闸闸下游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null, \"lgtd\": \"119.464000\", \"lttd\": \"32.421500\"}, {\"stcd\": \"510D4440\", \"stnm\": \"黄金坝泵站（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null, \"lgtd\": \"119.443842\", \"lttd\": \"32.418582\"}, {\"stcd\": \"GYHCKD000000001\", \"stnm\": \"古运河岔口东\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"lgtd\": \"119.420800\", \"lttd\": \"32.327400\"}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"lgtd\": \"119.433350\", \"lttd\": \"32.384723\"}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"lgtd\": \"119.418500\", \"lttd\": \"32.327600\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"lgtd\": \"119.418666\", \"lttd\": \"32.368193\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"lgtd\": \"119.419368\", \"lttd\": \"32.364936\"}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"lgtd\": \"119.407451\", \"lttd\": \"32.315870\"}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"lgtd\": \"119.388100\", \"lttd\": \"32.264500\"}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"lgtd\": \"119.425623\", \"lttd\": \"32.354731\"}]",
+        "[{\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"record_cnt\": 8151, \"avg_z\": \"4.74\", \"max_z\": \"4.88\", \"min_z\": \"4.57\", \"first_tm\": \"2024-02-01 00:05:00\", \"last_tm\": \"2024-02-29 23:55:00\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"record_cnt\": 8175, \"avg_z\": \"4.70\", \"max_z\": \"4.83\", \"min_z\": \"4.55\", \"first_tm\": \"2024-02-01 00:00:00\", \"last_tm\": \"2024-02-29 23:55:00\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"record_cnt\": 8132, \"avg_z\": \"4.73\", \"max_z\": \"4.87\", \"min_z\": \"4.45\", \"first_tm\": \"2024-02-01 00:00:00\", \"last_tm\": \"2024-02-29 23:55:00\"}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"record_cnt\": 6746, \"avg_z\": \"4.72\", \"max_z\": \"4.85\", \"min_z\": \"4.60\", \"first_tm\": \"2024-02-01 00:00:00\", \"last_tm\": \"2024-02-24 19:35:00\"}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"record_cnt\": 8267, \"avg_z\": \"4.71\", \"max_z\": \"4.84\", \"min_z\": \"4.55\", \"first_tm\": \"2024-02-01 00:00:00\", \"last_tm\": \"2024-02-29 23:55:00\"}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"record_cnt\": 8202, \"avg_z\": \"4.73\", \"max_z\": \"4.86\", \"min_z\": \"4.57\", \"first_tm\": \"2024-02-01 00:00:00\", \"last_tm\": \"2024-02-29 23:55:00\"}]",
+        "[{\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"record_cnt\": 8151, \"avg_z\": \"4.74\", \"max_z\": \"4.88\", \"min_z\": \"4.57\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"record_cnt\": 8175, \"avg_z\": \"4.70\", \"max_z\": \"4.83\", \"min_z\": \"4.55\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"record_cnt\": 8132, \"avg_z\": \"4.73\", \"max_z\": \"4.87\", \"min_z\": \"4.45\"}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"record_cnt\": 6746, \"avg_z\": \"4.72\", \"max_z\": \"4.85\", \"min_z\": \"4.60\"}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"record_cnt\": 8267, \"avg_z\": \"4.71\", \"max_z\": \"4.84\", \"min_z\": \"4.55\"}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"record_cnt\": 8202, \"avg_z\": \"4.73\", \"max_z\": \"4.86\", \"min_z\": \"4.57\"}]",
+        "[{\"dt\": \"2024-02-01\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.80\"}, {\"dt\": \"2024-02-02\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.72\"}, {\"dt\": \"2024-02-03\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.79\"}, {\"dt\": \"2024-02-04\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.73\"}, {\"dt\": \"2024-02-05\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.71\"}, {\"dt\": \"2024-02-06\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.67\"}, {\"dt\": \"2024-02-07\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.75\"}, {\"dt\": \"2024-02-08\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.78\"}, {\"dt\": \"2024-02-09\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.73\"}, {\"dt\": \"2024-02-10\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.70\"}, {\"dt\": \"2024-02-11\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.77\"}, {\"dt\": \"2024-02-12\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.78\"}, {\"dt\": \"2024-02-13\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.77\"}, {\"dt\": \"2024-02-14\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.73\"}, {\"dt\": \"2024-02-15\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.75\"}, {\"dt\": \"2024-02-16\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.76\"}, {\"dt\": \"2024-02-17\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.73\"}, {\"dt\": \"2024-02-18\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.72\"}, {\"dt\": \"2024-02-19\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.71\"}, {\"dt\": \"2024-02-20\", \"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"daily_avg_z\": \"4.80\"}, {\"dt\": \"2024-02-21\"\n\n[Full water-db_query_water output saved to /mnt/user-data/outputs/.tool-results/water-db_query_water-5b2ce777ac17.txt (16991 chars, ~4247 tokens). Use read_file with start_line and end_line to access specific sections. 13991 chars omitted from this preview.]\n\nily_avg_z\": \"4.68\"}, {\"dt\": \"2024-02-20\", \"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"daily_avg_z\": \"4.78\"}, {\"dt\": \"2024-02-21\", \"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"daily_avg_z\": \"4.79\"}, {\"dt\": \"2024-02-22\", \"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"daily_avg_z\": \"4.70\"}, {\"dt\": \"2024-02-23\", \"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"daily_avg_z\": \"4.67\"}, {\"dt\": \"2024-02-24\", \"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"daily_avg_z\": \"4.74\"}, {\"dt\": \"2024-02-25\", \"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"daily_avg_z\": \"4.68\"}, {\"dt\": \"2024-02-26\", \"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"daily_avg_z\": \"4.67\"}, {\"dt\": \"2024-02-27\", \"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"daily_avg_z\": \"4.74\"}, {\"dt\": \"2024-02-28\", \"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"daily_avg_z\": \"4.68\"}, {\"dt\": \"2024-02-29\", \"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"daily_avg_z\": \"4.75\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 0.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.0,
+        "trace_sanity": 0.5
+      },
+      "total_score": 0.45,
+      "duration_sec": 286.4,
+      "llm_round_trips": 11,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 15,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "查询水位站白马闸的实时水位是多少。",
+      "expected_sql": "SELECT r.tm AS '时间', r.z AS '水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm = '白马闸' AND r.z IS NOT NULL\nORDER BY r.tm DESC\nLIMIT 1;",
+      "final_answer": "查询结果如下：\n\n**白马闸（站码：00000005，水位站）**\n\n- **最新水位记录时间：** 2024-10-27 16:50\n- **水位：** 4.93 米\n- **流量：** 51.70 m³/s\n\n⚠️ **注意：** 该站最新一条水位数据停留在 2024年10月27日。此后（2024年10月至2025年3月）的记录仅有流量数据，水位字段为空，说明近期水位监测数据缺失。",
+      "actual_sqls": [
+        "SELECT r.stcd, r.tm, r.z, r.q, r.wptn, b.stnm, b.rvnm, b.dtmnm\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%白马闸%'\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)\nORDER BY r.tm DESC\nLIMIT 10",
+        "SELECT b.stcd, b.stnm, b.rvnm, b.sttp, b.dtmnm\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%白马闸%'\nLIMIT 20",
+        "SELECT r.tm, r.z, r.q, r.wptn\nFROM st_river_r r\nWHERE r.stcd = '00000005'\nORDER BY r.tm DESC\nLIMIT 10",
+        "SELECT r.tm, r.z, r.q, r.wptn\nFROM st_river_r r\nWHERE r.stcd = '00000005' AND r.z IS NOT NULL\nORDER BY r.tm DESC\nLIMIT 10"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_query_water",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "Query returned 0 rows.\nSQL: SELECT r.stcd, r.tm, r.z, r.q, r.wptn, b.stnm, b.rvnm, b.dtmnm\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%白马闸%'\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)\nORDE\nHint: check `get_date_range(table)` for time coverage, or `get_table_schema(table)` for column names.",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"stcd\": \"00000005\", \"stnm\": \"白马闸\", \"rvnm\": null, \"sttp\": \"ZZ\", \"dtmnm\": null}]",
+        "[{\"tm\": \"2025-03-27 12:15:00\", \"z\": null, \"q\": \"50.900\", \"wptn\": null}, {\"tm\": \"2025-03-27 12:10:00\", \"z\": null, \"q\": \"50.900\", \"wptn\": null}, {\"tm\": \"2025-03-27 12:00:00\", \"z\": null, \"q\": \"50.900\", \"wptn\": null}, {\"tm\": \"2025-03-27 11:55:00\", \"z\": null, \"q\": \"50.900\", \"wptn\": null}, {\"tm\": \"2025-03-27 11:50:00\", \"z\": null, \"q\": \"50.900\", \"wptn\": null}, {\"tm\": \"2025-03-27 11:45:00\", \"z\": null, \"q\": \"50.900\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:50:00\", \"z\": \"4.930\", \"q\": \"51.700\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:45:00\", \"z\": \"4.930\", \"q\": \"51.600\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:40:00\", \"z\": \"4.930\", \"q\": \"51.600\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:35:00\", \"z\": \"4.930\", \"q\": \"51.600\", \"wptn\": null}]",
+        "[{\"tm\": \"2024-10-27 16:50:00\", \"z\": \"4.930\", \"q\": \"51.700\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:45:00\", \"z\": \"4.930\", \"q\": \"51.600\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:40:00\", \"z\": \"4.930\", \"q\": \"51.600\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:35:00\", \"z\": \"4.930\", \"q\": \"51.600\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:30:00\", \"z\": \"4.930\", \"q\": \"51.600\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:25:00\", \"z\": \"4.930\", \"q\": \"51.600\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:20:00\", \"z\": \"4.930\", \"q\": \"51.600\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:15:00\", \"z\": \"4.930\", \"q\": \"51.600\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:10:00\", \"z\": \"4.930\", \"q\": \"51.600\", \"wptn\": null}, {\"tm\": \"2024-10-27 16:05:00\", \"z\": \"4.930\", \"q\": \"51.600\", \"wptn\": null}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 1.0,
+        "comparison_detail": "stdout matched 2/2 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 1.0,
+      "duration_sec": 42.0,
+      "llm_round_trips": 7,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 16,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "查询各类型测站的数量。",
+      "expected_sql": "SELECT sttp AS '测站类型', COUNT(*) AS '数量'\nFROM sl323.st_stbprp_b\nGROUP BY sttp\nORDER BY COUNT(*) DESC;",
+      "final_answer": "以下是各类型测站的数量统计：\n\n| 测站类型代码 | 数量 |\n|-------------|------|\n| PP | 102 |\n| DD | 92 |\n| WQ | 79 |\n| DP | 75 |\n| RR | 65 |\n| ZZ | 48 |\n| AQ | 21 |\n| ZQ | 19 |\n| PM | 2 |\n| TT | 2 |\n| BB | 1 |\n\n共 **11** 种测站类型，总计 **506** 个测站。其中 PP 类型最多（102个），其次是 DD（92个）、WQ（79个）和 DP（75个）。",
+      "actual_sqls": [
+        "SELECT sttp, COUNT(*) AS cnt FROM sl323.st_stbprp_b GROUP BY sttp ORDER BY cnt DESC"
+      ],
+      "tool_trace": [
+        "water-db_get_table_schema",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "[{\"sttp\": \"PP\", \"cnt\": 102}, {\"sttp\": \"DD\", \"cnt\": 92}, {\"sttp\": \"WQ\", \"cnt\": 79}, {\"sttp\": \"DP\", \"cnt\": 75}, {\"sttp\": \"RR\", \"cnt\": 65}, {\"sttp\": \"ZZ\", \"cnt\": 48}, {\"sttp\": \"AQ\", \"cnt\": 21}, {\"sttp\": \"ZQ\", \"cnt\": 19}, {\"sttp\": \"PM\", \"cnt\": 2}, {\"sttp\": \"TT\", \"cnt\": 2}, {\"sttp\": \"BB\", \"cnt\": 1}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 1.0,
+        "comparison_detail": "stdout matched 19/19 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 1.0,
+      "duration_sec": 15.4,
+      "llm_round_trips": 3,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 17,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "查询全部测站的名称（分页展示前20条）。",
+      "expected_sql": "SELECT stcd AS '测站编码', stnm AS '测站名称', sttp AS '类型', rvnm AS '河流'\nFROM sl323.st_stbprp_b\nLIMIT 20;",
+      "final_answer": "数据库中共有 **506** 个测站，以下是前 20 条（按测站编码排序）：\n\n| 序号 | 测站编码 | 测站名称 | 测站类型 | 行政区划代码 |\n|:---:|:---:|:---|:---:|:---:|\n| 1 | 00000001 | 滨湖涵涝站 | ZZ | 321003 |\n| 2 | 00000002 | 引潮河闸 | ZZ | 321003 |\n| 3 | 00000003 | 西银沟泵站 | ZZ | 321003 |\n| 4 | 00000004 | 桥头套闸 | ZZ | 321003 |\n| 5 | 00000005 | 白马闸 | ZZ | 321003 |\n| 6 | 00000007 | 大官桥漫水闸 | ZZ | 321003 |\n| 7 | 00000008 | 黄珏套闸 | ZZ | 321003 |\n| 8 | 00000009 | 团结闸 | ZZ | 321003 |\n| 9 | 00000011 | 蒋口门闸 | ZZ | 321003 |\n| 10 | 05140001000101 | 武汤大桥 | WQ | 321084 |\n| 11 | 1778384898 | 连兴港天文潮 | ZZ | — |\n| 12 | 22051901 | 青龙港闸 | ZZ | 321003 |\n| 13 | 22060701 | 乌塔沟 | ZZ | 321003 |\n| 14 | 32100011000402 | 生资码头 | WQ | 321084 |\n| 15 | 32100011000407 | 大寨河中桥 | WQ | 321084 |\n| 16 | 32100011000601 | 施桥船闸 | WQ | 321084 |\n| 17 | 32100012000357 | 宝应湖心 | WQ | 321084 |\n| 18 | 32102311000351_1 | 宝应船闸 | WQ | 321084 |\n| 19 | 32102311000756 | 县界 | WQ | 321084 |\n| 20 | 32102311000851 | 八浅 | WQ | 321084 |\n\n**说明：**\n- 测站类型：`ZZ` = 综合站，`WQ` = 水质站\n- 当前展示第 1~20 条，共 506 条记录。如需查看后续分页，请告知页码。",
+      "actual_sqls": [
+        "SELECT stcd AS 测站编码, stnm AS 测站名称, rvnm AS 所属河流, sttp AS 测站类型, addvcd AS 行政区划代码\nFROM st_stbprp_b\nORDER BY stcd\nLIMIT 20;",
+        "SELECT COUNT(*) AS 总测站数 FROM st_stbprp_b;"
+      ],
+      "tool_trace": [
+        "water-db_get_table_schema",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "[{\"测站编码\": \"00000001\", \"测站名称\": \"滨湖涵涝站\", \"所属河流\": null, \"测站类型\": \"ZZ\", \"行政区划代码\": \"321003\"}, {\"测站编码\": \"00000002\", \"测站名称\": \"引潮河闸\", \"所属河流\": null, \"测站类型\": \"ZZ\", \"行政区划代码\": \"321003\"}, {\"测站编码\": \"00000003\", \"测站名称\": \"西银沟泵站\", \"所属河流\": null, \"测站类型\": \"ZZ\", \"行政区划代码\": \"321003\"}, {\"测站编码\": \"00000004\", \"测站名称\": \"桥头套闸\", \"所属河流\": null, \"测站类型\": \"ZZ\", \"行政区划代码\": \"321003\"}, {\"测站编码\": \"00000005\", \"测站名称\": \"白马闸\", \"所属河流\": null, \"测站类型\": \"ZZ\", \"行政区划代码\": \"321003\"}, {\"测站编码\": \"00000007\", \"测站名称\": \"大官桥漫水闸\", \"所属河流\": null, \"测站类型\": \"ZZ\", \"行政区划代码\": \"321003\"}, {\"测站编码\": \"00000008\", \"测站名称\": \"黄珏套闸\", \"所属河流\": null, \"测站类型\": \"ZZ\", \"行政区划代码\": \"321003\"}, {\"测站编码\": \"00000009\", \"测站名称\": \"团结闸\", \"所属河流\": null, \"测站类型\": \"ZZ\", \"行政区划代码\": \"321003\"}, {\"测站编码\": \"00000011\", \"测站名称\": \"蒋口门闸\", \"所属河流\": null, \"测站类型\": \"ZZ\", \"行政区划代码\": \"321003\"}, {\"测站编码\": \"05140001000101\", \"测站名称\": \"武汤大桥\", \"所属河流\": null, \"测站类型\": \"WQ\", \"行政区划代码\": \"321084\"}, {\"测站编码\": \"1778384898\", \"测站名称\": \"连兴港天文潮\", \"所属河流\": null, \"测站类型\": \"ZZ\", \"行政区划代码\": null}, {\"测站编码\": \"22051901\", \"测站名称\": \"青龙港闸\", \"所属河流\": null, \"测站类型\": \"ZZ\", \"行政区划代码\": \"321003\"}, {\"测站编码\": \"22060701\", \"测站名称\": \"乌塔沟\", \"所属河流\": null, \"测站类型\": \"ZZ\", \"行政区划代码\": \"321003\"}, {\"测站编码\": \"32100011000402\", \"测站名称\": \"生资码头\", \"所属河流\": null, \"测站类型\": \"WQ\", \"行政区划代码\": \"321084\"}, {\"测站编码\": \"32100011000407\", \"测站名称\": \"大寨河中桥\", \"所属河流\": null, \"测站类型\": \"WQ\", \"行政区划代码\": \"321084\"}, {\"测站编码\": \"32100011000601\", \"测站名称\": \"施桥船闸\", \"所属河流\": null, \"测站类型\": \"WQ\", \"行政区划代码\": \"321084\"}, {\"测站编码\": \"32100012000357\", \"测站名称\": \"宝应湖心\", \"所属河流\": null, \"测站类型\": \"WQ\", \"行政区划代码\": \"321084\"}, {\"测站编码\": \"32102311000351_1\", \"测站名称\": \"宝应船闸\", \"所属河流\": null, \"测站类型\": \"WQ\", \"行政区划代码\": \"321084\"}, {\"测站编码\": \"32102311000756\", \"测站名称\": \"县界\", \"所属河流\": null, \"测站类型\": \"WQ\", \"行政区划代码\": \"321084\"}, {\"测站编码\": \"32102311000851\", \"测站名称\": \"八浅\", \"所属河流\": null, \"测站类型\": \"WQ\", \"行政区划代码\": \"321084\"}]",
+        "[{\"总测站数\": 506}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 1.0,
+        "comparison_detail": "stdout matched 42/42 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 1.0,
+      "duration_sec": 27.3,
+      "llm_round_trips": 4,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 18,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "古运河水情（模糊查询，用户只输入\"古运河\"三个字）。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '水位(m)', r.q AS '流量(m³/s)', r.tm AS '更新时间'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%')\n  AND r.tm = (SELECT MAX(r2.tm) FROM sl323.st_river_r r2 WHERE r2.stcd = r.stcd)\n  AND r.z IS NOT NULL\nORDER BY r.tm DESC;",
+      "final_answer": "数据已齐全。古运河共11个测站，其中7个有水位数据（最近数据截止至2026-06-11）。以下是查询结果：\n\n---\n\n## 古运河水情概况\n\n**水体类型：** 人工运河（大运河水系）\n\n**数据说明：** 最新数据截至 **2026年6月11日**，共7个站点有水位记录。\n\n### 各站最新水位（2026-06-11）\n\n| 测站名称 | 最新水位 (m) | 流量 (m³/s) |\n|---------|------------|----------|\n| 古运河水文站（钞关泵站） | 6.28 | — |\n| 古运河水文站（扬子江南路古运河大桥） | 6.05 | 151.61 |\n| 古运河水文站(大运河博物馆) | 5.83 | 29.40 |\n| 古运河水文站（扬子津体育公园） | 5.90 | -8.76 |\n| 古运河水位站(三湾公园) | 5.22 | — |\n| 古运河水位站（新城河口） | 5.21 | — |\n| 古运河水位站（春江路） | 3.60 | — |\n\n### 近90天水位统计（2026-04-30 ~ 06-11）\n\n| 测站名称 | 平均水位 (m) | 最高水位 (m) | 最低水位 (m) |\n|---------|------------|------------|------------|\n| 扬子江南路古运河大桥 | 6.53 | 8.93 | 4.56 |\n| 钞关泵站 | 6.48 | 8.49 | 4.53 |\n| 新城河口 | 6.47 | 8.85 | 4.63 |\n| 扬子津体育公园 | 6.40 | 8.72 | 4.57 |\n| 大运河博物馆 | 6.27 | 8.27 | 4.54 |\n| 春江路 | 4.59 | 6.70 | 2.64 |\n| 三湾公园 | 4.55 | 6.27 | 2.73 |\n\n### 总体概况\n\n- **全线水位范围：** 3.60 ~ 6.28 m（最新），整体呈北高南低趋势\n- **近90天最高水位：** 8.93 m（扬子江南路古运河大桥站）\n- **近90天平均水位：** 全线约 5.85 m\n- **水位变化幅度：** 最大站点波动约 4.37 m（扬子江南路古运河大桥站），反映汛期水位波动较大\n\n⚠️ **数据局限性：**\n- 高程基准未记录，水位绝对值仅供参考\n- 扬州闸上下游、黄金坝泵站等4个站点近期无水位数据\n- 警戒水位数据缺失，无法判断超警戒状态\n- 数据更新截至6月11日，可能存在滞后",
+      "actual_sqls": [
+        "SELECT DISTINCT b.stcd, b.stnm, b.rvnm, b.hnnm, b.dtmnm, b.sttp, b.addvcd\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%'\nLIMIT 50",
+        "SELECT r.stcd, b.stnm, r.tm, r.z, r.q, r.wptn\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)\n  AND r.z IS NOT NULL\n  AND r.tm = (\n    SELECT MAX(r2.tm) FROM st_river_r r2\n    WHERE r2.stcd = r.stcd\n      AND r2.tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)\n      AND r2.z IS NOT NULL\n  )\nORDER BY r.tm DESC\nLIMIT 20",
+        "SELECT r.stcd, b.stnm, MAX(r.tm) as latest_tm, MAX(r.z) as latest_z\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE r.stcd IN ('51004110', '51004111', '510D4440', 'GYHCKD000000001')\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)\nGROUP BY r.stcd, b.stnm",
+        "SELECT b.stcd, b.stnm,\n  MIN(r.z) as min_z, MAX(r.z) as max_z, AVG(r.z) as avg_z,\n  MIN(r.tm) as first_tm, MAX(r.tm) as last_tm,\n  COUNT(r.z) as data_cnt\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)\n  AND r.z IS NOT NULL\nGROUP BY b.stcd, b.stnm\nORDER BY avg_z DESC",
+        "SELECT b.stcd, b.stnm,\n  ROUND(MIN(r.z), 2) as min_z, ROUND(MAX(r.z), 2) as max_z, ROUND(AVG(r.z), 2) as avg_z,\n  MIN(r.tm) as first_tm, MAX(r.tm) as last_tm,\n  COUNT(r.z) as data_cnt\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)\n  AND r.z IS NOT NULL\nGROUP BY b.stcd, b.stnm\nORDER BY avg_z DESC"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"stcd\": \"51004110\", \"stnm\": \"扬州闸闸上游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null, \"sttp\": \"DD\", \"addvcd\": \"321002\"}, {\"stcd\": \"51004111\", \"stnm\": \"扬州闸闸下游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null, \"sttp\": \"DD\", \"addvcd\": \"321002\"}, {\"stcd\": \"510D4440\", \"stnm\": \"黄金坝泵站（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null, \"sttp\": \"DP\", \"addvcd\": \"321003\"}, {\"stcd\": \"GYHCKD000000001\", \"stnm\": \"古运河岔口东\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"WQ\", \"addvcd\": \"321084\"}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\", \"addvcd\": \"321002\"}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\", \"addvcd\": \"321003\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZZ\", \"addvcd\": \"321003\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\", \"addvcd\": null}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\", \"addvcd\": \"321003\"}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZZ\", \"addvcd\": \"321003\"}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZZ\", \"addvcd\": \"321002\"}]",
+        "[{\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.215\", \"q\": null, \"wptn\": null}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"3.602\", \"q\": null, \"wptn\": null}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.901\", \"q\": \"-8.757\", \"wptn\": null}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.827\", \"q\": \"29.397\", \"wptn\": null}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"5.208\", \"q\": null, \"wptn\": null}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"6.046\", \"q\": \"151.606\", \"wptn\": null}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"tm\": \"2026-06-11 00:00:00\", \"z\": \"6.276\", \"q\": null, \"wptn\": null}]",
+        "Query returned 0 rows.\nSQL: SELECT r.stcd, b.stnm, MAX(r.tm) as latest_tm, MAX(r.z) as latest_z\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE r.stcd IN ('51004110', '51004111', '510D4440', 'GYHCKD000000001')\n  AN\nHint: check `get_date_range(table)` for time coverage, or `get_table_schema(table)` for column names.",
+        "Query returned 0 rows.\nSQL: SELECT b.stcd, b.stnm,\n  MIN(r.z) as min_z, MAX(r.z) as max_z, AVG(r.z) as avg_z,\n  MIN(r.tm) as first_tm, MAX(r.tm) as last_tm,\n  COUNT(r.z) as data_cnt\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd\nHint: check `get_date_range(table)` for time coverage, or `get_table_schema(table)` for column names.",
+        "[{\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"min_z\": \"4.56\", \"max_z\": \"8.93\", \"avg_z\": \"6.53\", \"first_tm\": \"2026-04-30 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\", \"data_cnt\": 43}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"min_z\": \"4.53\", \"max_z\": \"8.49\", \"avg_z\": \"6.48\", \"first_tm\": \"2026-04-30 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\", \"data_cnt\": 43}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"min_z\": \"4.63\", \"max_z\": \"8.85\", \"avg_z\": \"6.47\", \"first_tm\": \"2026-04-30 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\", \"data_cnt\": 43}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"min_z\": \"4.57\", \"max_z\": \"8.72\", \"avg_z\": \"6.40\", \"first_tm\": \"2026-04-30 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\", \"data_cnt\": 43}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"min_z\": \"4.54\", \"max_z\": \"8.27\", \"avg_z\": \"6.27\", \"first_tm\": \"2026-04-30 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\", \"data_cnt\": 43}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"min_z\": \"2.64\", \"max_z\": \"6.70\", \"avg_z\": \"4.59\", \"first_tm\": \"2026-04-30 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\", \"data_cnt\": 43}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"min_z\": \"2.73\", \"max_z\": \"6.27\", \"avg_z\": \"4.55\", \"first_tm\": \"2026-04-30 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\", \"data_cnt\": 43}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.5,
+        "comparison_detail": "expected SQL broken: (2013, 'Lost connection to MySQL server during query (timed out)')",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.85,
+      "duration_sec": 159.8,
+      "llm_round_trips": 7,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 19,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "查询2025年古运河水位站点的数量。",
+      "expected_sql": "SELECT COUNT(DISTINCT r.stcd) AS '水位站点数量'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.sttp = 'ZZ' AND (b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%')\n  AND r.tm >= '2025-01-01' AND r.tm < '2026-01-01';",
+      "final_answer": "2025年古运河共有 **7 个水位站点**，其中：\n\n| 站点编码 | 站点名称 | 站点类型 |\n|---|---|---|\n| HT0021002001000010 | 古运河水文站（钞关泵站） | ZQ（水文站） |\n| HT0021071050000019 | 古运河水文站（扬子江南路古运河大桥） | ZQ（水文站） |\n| HT0021071050000023 | 古运河水位站（新城河口） | ZZ（水位站） |\n| HT0021071050000038 | 古运河水文站(大运河博物馆) | ZQ（水文站） |\n| HT0021071151000019 | 古运河水文站（扬子津体育公园） | ZQ（水文站） |\n| HT0031003103000021 | 古运河水位站（春江路） | ZZ（水位站） |\n| HT0031071050000029 | 古运河水位站(三湾公园) | ZZ（水位站） |\n\n共 **3 个水位站（ZZ）** 和 **4 个水文站（ZQ）**，合计 7 个站点有2025年的水位监测数据。这些站点的 `rvnm`（河名）字段均为 NULL，站点名称均通过 `stnm` 字段包含\"古运河\"标识。",
+      "actual_sqls": [
+        "SELECT COUNT(DISTINCT r.stcd) AS station_count\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2025-01-01' AND r.tm < '2026-01-01'",
+        "SELECT DISTINCT r.stcd, b.stnm, b.rvnm, b.sttp, b.hnnm\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2025-01-01' AND r.tm < '2026-01-01'\nLIMIT 20"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "[{\"station_count\": 7}]",
+        "[{\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"rvnm\": null, \"sttp\": \"ZQ\", \"hnnm\": null}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"rvnm\": null, \"sttp\": \"ZQ\", \"hnnm\": null}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"rvnm\": null, \"sttp\": \"ZZ\", \"hnnm\": null}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"rvnm\": null, \"sttp\": \"ZQ\", \"hnnm\": null}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"rvnm\": null, \"sttp\": \"ZQ\", \"hnnm\": null}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"rvnm\": null, \"sttp\": \"ZZ\", \"hnnm\": null}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"rvnm\": null, \"sttp\": \"ZZ\", \"hnnm\": null}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.3,
+        "comparison_detail": "Expected SQL returned no comparable values",
+        "match_type": "stdout_no_expected_values",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.79,
+      "duration_sec": 68.7,
+      "llm_round_trips": 5,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 20,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "扬州水利枢纽3月份平均水位。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', AVG(r.z) AS '3月平均水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%扬州水利枢纽%'\n  AND r.tm >= '2025-03-01' AND r.tm < '2025-04-01'\n  AND r.z IS NOT NULL\nGROUP BY b.stnm;",
+      "final_answer": "",
+      "actual_sqls": [
+        "SELECT stcd, stnm, rvnm, hnnm, sttp, dtmnm FROM st_stbprp_b WHERE stnm LIKE '%扬州水利枢纽%' OR rvnm LIKE '%扬州水利枢纽%' OR stnm LIKE '%扬州%'",
+        "SELECT stcd, COUNT(*) as cnt, MIN(tm) as min_tm, MAX(tm) as max_tm FROM st_river_r WHERE stcd IN ('HP0071002004000012', 'HP0101002004000063', 'HT0021002004000018') GROUP BY stcd",
+        "SELECT stcd, COUNT(*) as cnt, MIN(tm) as min_tm, MAX(tm) as max_tm FROM st_gate_r WHERE stcd IN ('HP0071002004000012', 'HP0101002004000063') GROUP BY stcd",
+        "SELECT stcd, COUNT(*) as cnt, MIN(tm) as min_tm, MAX(tm) as max_tm FROM st_pump_r WHERE stcd IN ('HP0071002004000012', 'HP0101002004000063') GROUP BY stcd"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "ask_clarification"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"stcd\": \"51004110\", \"stnm\": \"扬州闸闸上游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"sttp\": \"DD\", \"dtmnm\": null}, {\"stcd\": \"51004111\", \"stnm\": \"扬州闸闸下游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"sttp\": \"DD\", \"dtmnm\": null}, {\"stcd\": \"51008600\", \"stnm\": \"陆庄（扬州）\", \"rvnm\": \"下引河\", \"hnnm\": \"下游区\", \"sttp\": \"ZZ\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"510B6420\", \"stnm\": \"红星水库（扬州）\", \"rvnm\": \"向阳河\", \"hnnm\": \"入江水道\", \"sttp\": \"RR\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"510B6520\", \"stnm\": \"长塘水库(扬州）\", \"rvnm\": \"王冲涧\", \"hnnm\": \"入江水道\", \"sttp\": \"RR\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"510B6540\", \"stnm\": \"金坝水库（扬州）\", \"rvnm\": \"王冲涧\", \"hnnm\": \"入江水道\", \"sttp\": \"RR\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"510B6620\", \"stnm\": \"向阳水库（扬州）\", \"rvnm\": \"王冲涧\", \"hnnm\": \"入江水道\", \"sttp\": \"RR\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"58245\", \"stnm\": \"扬州\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"629B9320\", \"stnm\": \"戴洼水库(扬州）\", \"rvnm\": \"滁河\", \"hnnm\": \"大运河\", \"sttp\": \"RR\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"HP0071002004000012\", \"stnm\": \"扬州水利枢纽\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"DD\", \"dtmnm\": null}, {\"stcd\": \"HP0101002004000063\", \"stnm\": \"扬州水利枢纽\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"DP\", \"dtmnm\": null}, {\"stcd\": \"HT0021002004000018\", \"stnm\": \"扬州闸水文站\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"ZQ\", \"dtmnm\": null}, {\"stcd\": \"M3384\", \"stnm\": \"扬州梅岭街道\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"M3385\", \"stnm\": \"扬州头桥镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"M3386\", \"stnm\": \"扬州沙头霍桥\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"M3387\", \"stnm\": \"扬州湾头镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"M3395\", \"stnm\": \"扬州沙头镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"M6583\", \"stnm\": \"扬州汤汪乡\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"M6584\", \"stnm\": \"扬州李典镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"M6585\", \"stnm\": \"扬州杭集镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"M6586\", \"stnm\": \"扬州泰安镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"M6589\", \"stnm\": \"扬州朴席镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"M6590\", \"stnm\": \"扬州城北乡\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"M6591\", \"stnm\": \"扬州八里镇\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}, {\"stcd\": \"M6592\", \"stnm\": \"扬州曲江街道\", \"rvnm\": null, \"hnnm\": null, \"sttp\": \"PP\", \"dtmnm\": null}]",
+        "[{\"stcd\": \"HT0021002004000018\", \"cnt\": 249911, \"min_tm\": \"2023-05-15 18:20:00\", \"max_tm\": \"2026-03-31 18:55:00\"}]",
+        "[{\"stcd\": \"HP0071002004000012\", \"cnt\": 7156, \"min_tm\": \"2025-05-19 00:05:00\", \"max_tm\": \"2026-04-01 00:00:00\"}]",
+        "[{\"stcd\": \"HP0101002004000063\", \"cnt\": 305673, \"min_tm\": \"2023-04-24 10:55:00\", \"max_tm\": \"2026-06-11 00:00:00\"}]",
+        "Schema of `st_gate_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  gtname  char(18)  NOT NULL  PRI  \n  exkey  char(1)  NULL    \n  eqptp  char(2)  NULL    \n  eqpno  char(2)  NULL    \n  gtopnum  decimal(3,0)  NULL    \n  gtophgt  decimal(8,2)  NULL    \n  gto  decimal(9,3)  NULL    \n  msqmt  char(1)  NULL    \n  ua  decimal(11,1)  NULL    \n  ub  decimal(11,1)  NULL    \n  uc  decimal(11,1)  NULL    \n  ia  decimal(11,1)  NULL    \n  ib  decimal(11,1)  NULL    \n  ic  decimal(11,1)  NULL    \n  ps  decimal(11,1)  NULL    \n  qd  decimal(11,1)  NULL    \n  fr  decimal(11,1)  NULL    \n  pf  decimal(11,1)  NULL    \n  uab  decimal(11,1)  NULL    \n  ubc  decimal(11,1)  NULL    \n  uca  decimal(11,1)  NULL    \n  open_state  char(1)  NULL    \n  close_state  char(1)  NULL    ",
+        "Schema of `st_pump_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  ppupz  decimal(7,3)  NULL    \n  ppdwz  decimal(7,3)  NULL    \n  omcn  decimal(3,0)  NULL    \n  ompwr  decimal(5,0)  NULL    \n  pmpq  decimal(7,3)  NULL    \n  ppwchrcd  char(1)  NULL    \n  ppupwptn  char(1)  NULL    \n  ppdwwptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  pdchcd  char(1)  NULL    \n  pumpname  char(18)  NULL    "
+      ],
+      "scores": {
+        "has_valid_response": 0.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.0,
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.5,
+      "duration_sec": 83.2,
+      "llm_round_trips": 7,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 21,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "查询里运河2025年各测站的平均水位。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', AVG(r.z) AS '年平均水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.rvnm = '里运河' AND YEAR(r.tm) = 2025\n  AND r.z IS NOT NULL\nGROUP BY b.stnm\nORDER BY AVG(r.z) DESC;",
+      "final_answer": "查询成功，共找到4个里运河测站。下面是查询结果：\n\n## 里运河（人工运河）2025年各测站平均水位\n\n| 测站名称 | 站码 | 平均水位(m) | 最高水位(m) | 最低水位(m) | 数据量(条) | 高程基准 |\n|---------|------|-----------|-----------|-----------|----------|---------|\n| 邵伯(大) | 51005250 | **6.94** | 7.79 | 5.83 | 8,515 | 废黄河口 |\n| 高邮(大) | 51005200 | **6.89** | 7.66 | 5.93 | 8,515 | 废黄河口 |\n| 宝应 | 51005000 | **6.67** | 7.31 | 5.99 | 8,513 | 废黄河口 |\n| 泾河 | 51004900 | **6.60** | 7.37 | 5.77 | 8,497 | 废黄河口 |\n\n### 关键发现\n\n- **4个测站数据完整**：各站2025年均有约8,500条记录（覆盖全年），数据完整率极高\n- **水位空间分布**：从北向南呈递增趋势 — 泾河(6.60m) → 宝应(6.67m) → 高邮(6.89m) → 邵伯(6.94m)，符合里运河由北向南的地势特征\n- **统一高程基准**：所有测站均使用\"废黄河口\"基准，可直接横向对比\n- **水位波动范围**：各站水位年波动幅度约 1.0~1.8m，邵伯站波动最大(1.96m)，宝应站波动最小(1.32m)\n\n> **数据局限性说明**：本库里运河共4个测站，覆盖主要河段，代表性较高。统计口径为各站独立计算算术平均值，未做加权处理。",
+      "actual_sqls": [
+        "SELECT \n    r.stcd,\n    b.stnm AS station_name,\n    b.rvnm AS river_name,\n    b.dtmnm AS elevation_datum,\n    COUNT(r.z) AS data_count,\n    ROUND(AVG(r.z), 2) AS avg_water_level,\n    ROUND(MAX(r.z), 2) AS max_water_level,\n    ROUND(MIN(r.z), 2) AS min_water_level,\n    MIN(r.tm) AS first_record,\n    MAX(r.tm) AS last_record\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%里运河%' OR b.rvnm LIKE '%里运河%')\n    AND r.tm >= '2025-01-01' \n    AND r.tm < '2026-01-01'\n    AND r.z IS NOT NULL\nGROUP BY r.stcd, b.stnm, b.rvnm, b.dtmnm\nORDER BY avg_water_level DESC\nLIMIT 50;"
+      ],
+      "tool_trace": [
+        "read_file",
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"stcd\": \"51005250\", \"station_name\": \"邵伯(大)\", \"river_name\": \"里运河\", \"elevation_datum\": \"废黄河口\", \"data_count\": 8515, \"avg_water_level\": \"6.94\", \"max_water_level\": \"7.79\", \"min_water_level\": \"5.83\", \"first_record\": \"2025-01-01 00:00:00\", \"last_record\": \"2025-12-31 23:00:00\"}, {\"stcd\": \"51005200\", \"station_name\": \"高邮(大)\", \"river_name\": \"里运河\", \"elevation_datum\": \"废黄河口\", \"data_count\": 8515, \"avg_water_level\": \"6.89\", \"max_water_level\": \"7.66\", \"min_water_level\": \"5.93\", \"first_record\": \"2025-01-01 00:00:00\", \"last_record\": \"2025-12-31 23:00:00\"}, {\"stcd\": \"51005000\", \"station_name\": \"宝应\", \"river_name\": \"里运河\", \"elevation_datum\": \"废黄河口\", \"data_count\": 8513, \"avg_water_level\": \"6.67\", \"max_water_level\": \"7.31\", \"min_water_level\": \"5.99\", \"first_record\": \"2025-01-01 00:00:00\", \"last_record\": \"2025-12-31 23:00:00\"}, {\"stcd\": \"51004900\", \"station_name\": \"泾河\", \"river_name\": \"里运河\", \"elevation_datum\": \"废黄河口\", \"data_count\": 8497, \"avg_water_level\": \"6.60\", \"max_water_level\": \"7.37\", \"min_water_level\": \"5.77\", \"first_record\": \"2025-01-01 00:00:00\", \"last_record\": \"2025-12-31 23:00:00\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.5,
+        "comparison_detail": "stdout matched 4/8 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.85,
+      "duration_sec": 38.6,
+      "llm_round_trips": 4,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 22,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "查询水位站宝应这个月的水位数据（同义词测试：本月 = 当月）。",
+      "expected_sql": "SELECT r.tm AS '时间', r.z AS '水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'\n  AND DATE_FORMAT(r.tm, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')\n  AND r.z IS NOT NULL\nORDER BY r.tm;",
+      "final_answer": "查询确认完毕。以下是查询结果：\n\n---\n\n## 宝应水位站 — 本月水位查询结果\n\n**测站信息：**\n| 项目 | 内容 |\n|------|------|\n| 站名 | 宝应 |\n| 站码 | 51005000 |\n| 站型 | ZZ（水位站） |\n| 所属河道 | 里运河（人工运河） |\n| 水系 | 下游区 |\n| 高程基准 | 废黄河口 |\n\n**查询结果：**\n\n⚠️ **2026年7月（当月）暂无水位数据。** 该站最新数据截止至 **2026-06-11 00:00:00**，7月份数据尚未录入。\n\n**最近可用数据（2026年6月1日—6月11日）：**\n\n| 日期 | 水位 (m) |\n|------|----------|\n| 06-01 | 6.614 |\n| 06-02 | 6.482 |\n| 06-03 | 4.103 |\n| 06-04 | 5.495 |\n| 06-05 | 1.159 |\n| 06-06 | 5.320 |\n| 06-07 | 1.179 |\n| 06-08 | 3.118 |\n| 06-09 | 2.018 |\n| 06-10 | 5.576 |\n| 06-11 | 2.588 |\n\n**6月统计（仅11天数据）：**\n- 平均水位：3.968 m\n- 最高水位：6.614 m（6月1日）\n- 最低水位：1.159 m（6月5日）\n\n⚠️ **数据质量提示：** 6月仅11条记录且水位波动剧烈（1.159~6.614 m），数据可能不完整或存在异常，仅供参考。建议关注后续数据更新。",
+      "actual_sqls": [
+        "SELECT b.stcd, b.stnm, b.sttp, b.rvnm, b.hnnm, b.dtmnm, b.dtzel\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%宝应%'\nLIMIT 10",
+        "SELECT b.stcd, b.stnm, b.sttp, b.rvnm, b.hnnm, b.dtmnm, b.dtzel\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%宝应%'\nLIMIT 10",
+        "SELECT b.stcd, b.stnm, b.sttp, b.rvnm, b.hnnm, b.dtmnm\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%宝应%'\nLIMIT 10",
+        "SELECT r.tm, r.z, r.q, r.wptn\nFROM st_river_r r\nWHERE r.stcd = '51005000'\n  AND r.tm >= '2026-07-01' AND r.tm < '2026-08-01'\nORDER BY r.tm\nLIMIT 200",
+        "SELECT MIN(r.tm) as min_tm, MAX(r.tm) as max_tm, COUNT(*) as cnt\nFROM st_river_r r\nWHERE r.stcd = '51005000'",
+        "SELECT r.tm, r.z, r.q, r.wptn\nFROM st_river_r r\nWHERE r.stcd = '51005000'\n  AND r.tm >= '2026-06-01' AND r.tm < '2026-07-01'\nORDER BY r.tm\nLIMIT 200",
+        "SELECT\n  COUNT(*) as total_records,\n  MIN(r.tm) as min_tm,\n  MAX(r.tm) as max_tm,\n  ROUND(AVG(r.z), 3) as avg_water_level,\n  ROUND(MAX(r.z), 3) as max_water_level,\n  ROUND(MIN(r.z), 3) as min_water_level\nFROM st_river_r r\nWHERE r.stcd = '51005000'\n  AND r.tm >= '2026-06-01' AND r.tm < '2026-07-01'"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_get_table_schema",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "Error: MySQL error: (1054, \"Unknown column 'b.dtzel' in 'field list'\")\nSQL: SELECT b.stcd, b.stnm, b.sttp, b.rvnm, b.hnnm, b.dtmnm, b.dtzel\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%宝应%'\nLIMIT 10",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "Error: MySQL error: (1054, \"Unknown column 'b.dtzel' in 'field list'\")\nSQL: SELECT b.stcd, b.stnm, b.sttp, b.rvnm, b.hnnm, b.dtmnm, b.dtzel\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%宝应%'\nLIMIT 10",
+        "[{\"stcd\": \"32100012000357\", \"stnm\": \"宝应湖心\", \"sttp\": \"WQ\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"32102311000351_1\", \"stnm\": \"宝应船闸\", \"sttp\": \"WQ\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"sttp\": \"ZZ\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"dtmnm\": \"废黄河口\"}, {\"stcd\": \"51005010\", \"stnm\": \"宝应抽水站（水文）\", \"sttp\": \"DP\", \"rvnm\": \"潼河\", \"hnnm\": \"下游区\", \"dtmnm\": null}, {\"stcd\": \"58148\", \"stnm\": \"宝应\", \"sttp\": \"PP\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"A321000_0005\", \"stnm\": \"大运河船闸（宝应船闸）\", \"sttp\": \"WQ\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"M3441\", \"stnm\": \"宝应山阳镇\", \"sttp\": \"PP\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"M3442\", \"stnm\": \"宝应射阳湖镇\", \"sttp\": \"PP\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"M5401\", \"stnm\": \"宝应望直港镇\", \"sttp\": \"PP\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"M5402\", \"stnm\": \"宝应泾河镇\", \"sttp\": \"PP\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}]",
+        "Query returned 0 rows.\nSQL: SELECT r.tm, r.z, r.q, r.wptn\nFROM st_river_r r\nWHERE r.stcd = '51005000'\n  AND r.tm >= '2026-07-01' AND r.tm < '2026-08-01'\nORDER BY r.tm\nLIMIT 200\nHint: check `get_date_range(table)` for time coverage, or `get_table_schema(table)` for column names.",
+        "[{\"min_tm\": \"2023-04-11 11:00:00\", \"max_tm\": \"2026-06-11 00:00:00\", \"cnt\": 24108}]",
+        "[{\"tm\": \"2026-06-01 00:00:00\", \"z\": \"6.614\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-02 00:00:00\", \"z\": \"6.482\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-03 00:00:00\", \"z\": \"4.103\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-04 00:00:00\", \"z\": \"5.495\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-05 00:00:00\", \"z\": \"1.159\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-06 00:00:00\", \"z\": \"5.320\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-07 00:00:00\", \"z\": \"1.179\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-08 00:00:00\", \"z\": \"3.118\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-09 00:00:00\", \"z\": \"2.018\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-10 00:00:00\", \"z\": \"5.576\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-11 00:00:00\", \"z\": \"2.588\", \"q\": null, \"wptn\": null}]",
+        "[{\"total_records\": 11, \"min_tm\": \"2026-06-01 00:00:00\", \"max_tm\": \"2026-06-11 00:00:00\", \"avg_water_level\": \"3.968\", \"max_water_level\": \"6.614\", \"min_water_level\": \"1.159\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.3,
+        "comparison_detail": "Expected SQL returned no comparable values",
+        "match_type": "stdout_no_expected_values",
+        "trace_sanity": 0.5
+      },
+      "total_score": 0.74,
+      "duration_sec": 101.0,
+      "llm_round_trips": 10,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 23,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "查询水位站宝应本月内水位数据变化趋势。",
+      "expected_sql": "SELECT DATE(r.tm) AS '日期', AVG(r.z) AS '日平均水位(m)', MAX(r.z) AS '日最高水位(m)', MIN(r.z) AS '日最低水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE b.stnm LIKE '%宝应%' AND b.sttp = 'ZZ'\n  AND DATE_FORMAT(r.tm, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')\n  AND r.z IS NOT NULL\nGROUP BY DATE(r.tm)\nORDER BY DATE(r.tm);",
+      "final_answer": "",
+      "actual_sqls": [
+        "SELECT b.stcd, b.stnm, b.sttp, b.rvnm, b.hnnm, b.bsnm, b.dtmnm, b.dtmel\nFROM st_stbprp_b b\nWHERE b.stnm LIKE '%宝应%'\nLIMIT 10",
+        "SELECT r.tm, r.z, r.q, r.wptn\nFROM st_river_r r\nWHERE r.stcd = '51005000'\n  AND r.tm >= '2026-07-01' AND r.tm < '2026-08-01'\nORDER BY r.tm\nLIMIT 1000",
+        "SELECT STCD, WRZ, GRZ, OBHTZ\nFROM st_rvfcch_b\nWHERE STCD = '51005000'\nLIMIT 10",
+        "SELECT MIN(tm) as min_tm, MAX(tm) as max_tm, COUNT(*) as cnt\nFROM st_river_r\nWHERE stcd = '51005000'",
+        "SELECT r.tm, r.z, r.q, r.wptn\nFROM st_river_r r\nWHERE r.stcd = '51005000'\n  AND r.tm >= '2026-06-01' AND r.tm < '2026-07-01'\nORDER BY r.tm\nLIMIT 1000",
+        "SELECT DATE(r.tm) as dt, \n       ROUND(AVG(r.z), 3) as avg_z,\n       ROUND(MAX(r.z), 3) as max_z,\n       ROUND(MIN(r.z), 3) as min_z,\n       COUNT(*) as records\nFROM st_river_r r\nWHERE r.stcd = '51005000'\n  AND r.tm >= '2026-06-01' AND r.tm < '2026-07-01'\nGROUP BY DATE(r.tm)\nORDER BY dt",
+        "SELECT DATE(r.tm) as dt, COUNT(*) as cnt_per_day\nFROM st_river_r r\nWHERE r.stcd = '51005000'\n  AND r.tm >= '2026-05-01' AND r.tm < '2026-06-15'\nGROUP BY DATE(r.tm)\nORDER BY dt\nLIMIT 50",
+        "SELECT r.tm, ROUND(r.z, 3) as z\nFROM st_river_r r\nWHERE r.stcd = '51005000'\n  AND r.tm >= '2026-05-01' AND r.tm < '2026-06-01'\nORDER BY r.tm"
+      ],
+      "tool_trace": [
+        "read_file",
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "bash",
+        "bash"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"stcd\": \"32100012000357\", \"stnm\": \"宝应湖心\", \"sttp\": \"WQ\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"dtmnm\": null, \"dtmel\": null}, {\"stcd\": \"32102311000351_1\", \"stnm\": \"宝应船闸\", \"sttp\": \"WQ\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"dtmnm\": null, \"dtmel\": null}, {\"stcd\": \"51005000\", \"stnm\": \"宝应\", \"sttp\": \"ZZ\", \"rvnm\": \"里运河\", \"hnnm\": \"下游区\", \"bsnm\": \"淮河\", \"dtmnm\": \"废黄河口\", \"dtmel\": \"0.000\"}, {\"stcd\": \"51005010\", \"stnm\": \"宝应抽水站（水文）\", \"sttp\": \"DP\", \"rvnm\": \"潼河\", \"hnnm\": \"下游区\", \"bsnm\": \"淮河\", \"dtmnm\": null, \"dtmel\": null}, {\"stcd\": \"58148\", \"stnm\": \"宝应\", \"sttp\": \"PP\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"dtmnm\": null, \"dtmel\": null}, {\"stcd\": \"A321000_0005\", \"stnm\": \"大运河船闸（宝应船闸）\", \"sttp\": \"WQ\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"dtmnm\": null, \"dtmel\": null}, {\"stcd\": \"M3441\", \"stnm\": \"宝应山阳镇\", \"sttp\": \"PP\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"dtmnm\": null, \"dtmel\": null}, {\"stcd\": \"M3442\", \"stnm\": \"宝应射阳湖镇\", \"sttp\": \"PP\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"dtmnm\": null, \"dtmel\": null}, {\"stcd\": \"M5401\", \"stnm\": \"宝应望直港镇\", \"sttp\": \"PP\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"dtmnm\": null, \"dtmel\": null}, {\"stcd\": \"M5402\", \"stnm\": \"宝应泾河镇\", \"sttp\": \"PP\", \"rvnm\": null, \"hnnm\": null, \"bsnm\": null, \"dtmnm\": null, \"dtmel\": null}]",
+        "Query returned 0 rows.\nSQL: SELECT r.tm, r.z, r.q, r.wptn\nFROM st_river_r r\nWHERE r.stcd = '51005000'\n  AND r.tm >= '2026-07-01' AND r.tm < '2026-08-01'\nORDER BY r.tm\nLIMIT 1000\nHint: check `get_date_range(table)` for time coverage, or `get_table_schema(table)` for column names.",
+        "[{\"STCD\": \"51005000\", \"WRZ\": null, \"GRZ\": null, \"OBHTZ\": null}]",
+        "[{\"min_tm\": \"2023-04-11 11:00:00\", \"max_tm\": \"2026-06-11 00:00:00\", \"cnt\": 24108}]",
+        "[{\"tm\": \"2026-06-01 00:00:00\", \"z\": \"6.614\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-02 00:00:00\", \"z\": \"6.482\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-03 00:00:00\", \"z\": \"4.103\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-04 00:00:00\", \"z\": \"5.495\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-05 00:00:00\", \"z\": \"1.159\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-06 00:00:00\", \"z\": \"5.320\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-07 00:00:00\", \"z\": \"1.179\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-08 00:00:00\", \"z\": \"3.118\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-09 00:00:00\", \"z\": \"2.018\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-10 00:00:00\", \"z\": \"5.576\", \"q\": null, \"wptn\": null}, {\"tm\": \"2026-06-11 00:00:00\", \"z\": \"2.588\", \"q\": null, \"wptn\": null}]",
+        "[{\"dt\": \"2026-06-01\", \"avg_z\": \"6.614\", \"max_z\": \"6.614\", \"min_z\": \"6.614\", \"records\": 1}, {\"dt\": \"2026-06-02\", \"avg_z\": \"6.482\", \"max_z\": \"6.482\", \"min_z\": \"6.482\", \"records\": 1}, {\"dt\": \"2026-06-03\", \"avg_z\": \"4.103\", \"max_z\": \"4.103\", \"min_z\": \"4.103\", \"records\": 1}, {\"dt\": \"2026-06-04\", \"avg_z\": \"5.495\", \"max_z\": \"5.495\", \"min_z\": \"5.495\", \"records\": 1}, {\"dt\": \"2026-06-05\", \"avg_z\": \"1.159\", \"max_z\": \"1.159\", \"min_z\": \"1.159\", \"records\": 1}, {\"dt\": \"2026-06-06\", \"avg_z\": \"5.320\", \"max_z\": \"5.320\", \"min_z\": \"5.320\", \"records\": 1}, {\"dt\": \"2026-06-07\", \"avg_z\": \"1.179\", \"max_z\": \"1.179\", \"min_z\": \"1.179\", \"records\": 1}, {\"dt\": \"2026-06-08\", \"avg_z\": \"3.118\", \"max_z\": \"3.118\", \"min_z\": \"3.118\", \"records\": 1}, {\"dt\": \"2026-06-09\", \"avg_z\": \"2.018\", \"max_z\": \"2.018\", \"min_z\": \"2.018\", \"records\": 1}, {\"dt\": \"2026-06-10\", \"avg_z\": \"5.576\", \"max_z\": \"5.576\", \"min_z\": \"5.576\", \"records\": 1}, {\"dt\": \"2026-06-11\", \"avg_z\": \"2.588\", \"max_z\": \"2.588\", \"min_z\": \"2.588\", \"records\": 1}]",
+        "[{\"dt\": \"2026-05-01\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-02\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-03\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-04\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-05\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-06\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-07\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-08\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-09\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-10\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-11\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-12\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-13\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-14\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-15\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-16\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-17\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-18\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-19\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-20\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-21\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-22\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-23\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-24\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-25\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-26\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-27\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-28\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-29\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-30\", \"cnt_per_day\": 1}, {\"dt\": \"2026-05-31\", \"cnt_per_day\": 1}, {\"dt\": \"2026-06-01\", \"cnt_per_day\": 1}, {\"dt\": \"2026-06-02\", \"cnt_per_day\": 1}, {\"dt\": \"2026-06-03\", \"cnt_per_day\": 1}, {\"dt\": \"2026-06-04\", \"cnt_per_day\": 1}, {\"dt\": \"2026-06-05\", \"cnt_per_day\": 1}, {\"dt\": \"2026-06-06\", \"cnt_per_day\": 1}, {\"dt\": \"2026-06-07\", \"cnt_per_day\": 1}, {\"dt\": \"2026-06-08\", \"cnt_per_day\": 1}, {\"dt\": \"2026-06-09\", \"cnt_per_day\": 1}, {\"dt\": \"2026-06-10\", \"cnt_per_day\": 1}, {\"dt\": \"2026-06-11\", \"cnt_per_day\": 1}]",
+        "[{\"tm\": \"2026-05-01 00:00:00\", \"z\": \"1.323\"}, {\"tm\": \"2026-05-02 00:00:00\", \"z\": \"3.741\"}, {\"tm\": \"2026-05-03 00:00:00\", \"z\": \"5.463\"}, {\"tm\": \"2026-05-04 00:00:00\", \"z\": \"2.022\"}, {\"tm\": \"2026-05-05 00:00:00\", \"z\": \"6.158\"}, {\"tm\": \"2026-05-06 00:00:00\", \"z\": \"7.037\"}, {\"tm\": \"2026-05-07 00:00:00\", \"z\": \"5.846\"}, {\"tm\": \"2026-05-08 00:00:00\", \"z\": \"5.082\"}, {\"tm\": \"2026-05-09 00:00:00\", \"z\": \"6.792\"}, {\"tm\": \"2026-05-10 00:00:00\", \"z\": \"7.296\"}, {\"tm\": \"2026-05-11 00:00:00\", \"z\": \"3.141\"}, {\"tm\": \"2026-05-12 00:00:00\", \"z\": \"5.446\"}, {\"tm\": \"2026-05-13 00:00:00\", \"z\": \"6.116\"}, {\"tm\": \"2026-05-14 00:00:00\", \"z\": \"5.842\"}, {\"tm\": \"2026-05-15 00:00:00\", \"z\": \"6.275\"}, {\"tm\": \"2026-05-16 00:00:00\", \"z\": \"5.034\"}, {\"tm\": \"2026-05-17 00:00:00\", \"z\": \"5.294\"}, {\"tm\": \"2026-05-18 00:00:00\", \"z\": \"6.345\"}, {\"tm\": \"2026-05-19 00:00:00\", \"z\": \"1.171\"}, {\"tm\": \"2026-05-20 00:00:00\", \"z\": \"6.359\"}, {\"tm\": \"2026-05-21 00:00:00\", \"z\": \"2.010\"}, {\"tm\": \"2026-05-22 00:00:00\", \"z\": \"4.434\"}, {\"tm\": \"2026-05-23 00:00:00\", \"z\": \"2.834\"}, {\"tm\": \"2026-05-24 00:00:00\", \"z\": \"4.990\"}, {\"tm\": \"2026-05-25 00:00:00\", \"z\": \"6.928\"}, {\"tm\": \"2026-05-26 00:00:00\", \"z\": \"4.059\"}, {\"tm\": \"2026-05-27 00:00:00\", \"z\": \"1.373\"}, {\"tm\": \"2026-05-28 00:00:00\", \"z\": \"6.929\"}, {\"tm\": \"2026-05-29 00:00:00\", \"z\": \"1.953\"}, {\"tm\": \"2026-05-30 00:00:00\", \"z\": \"4.985\"}, {\"tm\": \"2026-05-31 00:00:00\", \"z\": \"3.874\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 0.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.0,
+        "trace_sanity": 0.5
+      },
+      "total_score": 0.45,
+      "duration_sec": 100.2,
+      "llm_round_trips": 11,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 24,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "古运河8月的水位数据与扬州闸6月的水位数据对比，各自的平均水位、最高水位和最低水位分别是多少？",
+      "expected_sql": "SELECT b.stnm AS '测站名称',\n       CASE WHEN b.stnm LIKE '%古运河%' THEN '2024年8月' ELSE '2024年6月' END AS '时段',\n       AVG(r.z) AS '平均水位(m)', MAX(r.z) AS '最高水位(m)', MIN(r.z) AS '最低水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE ((b.stnm LIKE '%古运河%' AND r.tm >= '2024-08-01' AND r.tm < '2024-09-01')\n    OR (b.stnm LIKE '%扬州闸%' AND r.tm >= '2024-06-01' AND r.tm < '2024-07-01'))\n  AND r.z IS NOT NULL\nGROUP BY b.stnm,\n         CASE WHEN b.stnm LIKE '%古运河%' THEN '2024年8月' ELSE '2024年6月' END\nORDER BY b.stnm;",
+      "final_answer": "",
+      "actual_sqls": [
+        "SELECT stcd, stnm, rvnm, hnnm, dtmnm, sttp FROM st_stbprp_b WHERE (stnm LIKE '%古运河%' OR rvnm LIKE '%古运河%') LIMIT 20",
+        "SELECT stcd, stnm, rvnm, hnnm, dtmnm, sttp FROM st_stbprp_b WHERE (stnm LIKE '%扬州闸%' OR rvnm LIKE '%扬州闸%') LIMIT 20",
+        "SELECT r.stcd, b.stnm, MIN(r.tm) as min_tm, MAX(r.tm) as max_tm, COUNT(*) as cnt FROM st_river_r r JOIN st_stbprp_b b ON r.stcd = b.stcd WHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%') GROUP BY r.stcd, b.stnm ORDER BY r.stcd",
+        "SELECT r.stcd, b.stnm, MIN(r.tm) as min_tm, MAX(r.tm) as max_tm, COUNT(*) as cnt FROM st_river_r r JOIN st_stbprp_b b ON r.stcd = b.stcd WHERE b.stnm LIKE '%扬州闸%' GROUP BY r.stcd, b.stnm ORDER BY r.stcd"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "ask_clarification"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"stcd\": \"51004110\", \"stnm\": \"扬州闸闸上游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null, \"sttp\": \"DD\"}, {\"stcd\": \"51004111\", \"stnm\": \"扬州闸闸下游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null, \"sttp\": \"DD\"}, {\"stcd\": \"510D4440\", \"stnm\": \"黄金坝泵站（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null, \"sttp\": \"DP\"}, {\"stcd\": \"GYHCKD000000001\", \"stnm\": \"古运河岔口东\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"WQ\"}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\"}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZZ\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\"}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\"}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZZ\"}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZZ\"}]",
+        "[{\"stcd\": \"51004110\", \"stnm\": \"扬州闸闸上游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null, \"sttp\": \"DD\"}, {\"stcd\": \"51004111\", \"stnm\": \"扬州闸闸下游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null, \"sttp\": \"DD\"}, {\"stcd\": \"HT0021002004000018\", \"stnm\": \"扬州闸水文站\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null, \"sttp\": \"ZQ\"}]",
+        "[{\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"min_tm\": \"2023-04-26 11:25:00\", \"max_tm\": \"2026-06-11 00:00:00\", \"cnt\": 289826}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"min_tm\": \"2023-05-08 19:10:00\", \"max_tm\": \"2026-06-11 00:00:00\", \"cnt\": 266457}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"min_tm\": \"2023-04-26 11:25:00\", \"max_tm\": \"2026-06-11 00:00:00\", \"cnt\": 297069}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"min_tm\": \"2023-12-22 11:25:00\", \"max_tm\": \"2026-06-11 00:00:00\", \"cnt\": 228238}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"min_tm\": \"2023-04-26 11:25:00\", \"max_tm\": \"2026-06-11 00:00:00\", \"cnt\": 300185}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"min_tm\": \"2023-04-26 11:25:00\", \"max_tm\": \"2026-06-11 00:00:00\", \"cnt\": 292935}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"min_tm\": \"2024-06-25 11:30:00\", \"max_tm\": \"2026-06-11 00:00:00\", \"cnt\": 154742}]",
+        "[{\"stcd\": \"HT0021002004000018\", \"stnm\": \"扬州闸水文站\", \"min_tm\": \"2023-05-15 18:20:00\", \"max_tm\": \"2026-03-31 18:55:00\", \"cnt\": 249911}]"
+      ],
+      "scores": {
+        "has_valid_response": 0.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.0,
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.5,
+      "duration_sec": 44.4,
+      "llm_round_trips": 5,
+      "error": "",
+      "completed": true
+    },
+    {
+      "index": 25,
+      "skill": "water-situation",
+      "level": "L3",
+      "question": "查询2024年古运河相关测站的年平均水位。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', AVG(r.z) AS '年平均水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.rvnm LIKE '%古运河%' OR b.stnm LIKE '%古运河%')\n  AND r.tm BETWEEN '2024-01-01' AND '2024-12-31'\n  AND r.z IS NOT NULL\nGROUP BY b.stnm\nORDER BY AVG(r.z) DESC;",
+      "final_answer": "数据已齐全。以下是查询结果：\n\n---\n\n## 2024年古运河相关测站年平均水位\n\n古运河共 **11个测站**，其中 **7个测站** 有2024年水位数据（水系：大运河）。各站年均水位如下：\n\n| 测站名称 | 年均水位 (m) | 最低水位 (m) | 最高水位 (m) | 数据条数 |\n|----------|-------------|-------------|-------------|---------|\n| 古运河水位站(三湾公园) | **4.71** | 4.31 | 5.30 | 45,720 |\n| 古运河水文站(大运河博物馆) | **4.70** | 4.12 | 5.54 | 100,111 |\n| 古运河水文站（钞关泵站） | **4.69** | 4.30 | 5.56 | 97,967 |\n| 古运河水位站（春江路） | **4.68** | 3.94 | 5.29 | 100,683 |\n| 古运河水文站（扬子江南路古运河大桥） | **4.68** | 4.16 | 5.33 | 78,349 |\n| 古运河水文站（扬子津体育公园） | **4.67** | 4.20 | 5.31 | 102,019 |\n| 古运河水位站（新城河口） | **4.66** | 4.21 | 5.52 | 101,316 |\n\n**另有4个测站**（扬州闸闸上游、扬州闸闸下游、黄金坝泵站、古运河岔口东）2024年无水位数据记录。\n\n### 总体概况\n- **7个有数据测站的平均水位范围：4.66 ~ 4.71 m**，整体水位较为平稳\n- 各站水位差异较小，最高与最低年均水位相差仅 **0.05 m**\n- ⚠️ 测站高程基准字段（`dtmnm`）均为空，基准未记录，跨站对比仅供参考\n\n**统计口径**：各站水位数据直接算术平均（等权），保留两位小数。",
+      "actual_sqls": [
+        "SELECT DISTINCT b.stcd, b.stnm, b.rvnm, b.hnnm, b.dtmnm\nFROM st_stbprp_b b\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\nLIMIT 50",
+        "SELECT b.stcd, b.stnm, \n       ROUND(AVG(r.z), 2) AS avg_water_level,\n       ROUND(MIN(r.z), 2) AS min_water_level,\n       ROUND(MAX(r.z), 2) AS max_water_level,\n       COUNT(r.z) AS data_count\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2024-01-01' AND r.tm < '2025-01-01'\n  AND r.z IS NOT NULL\nGROUP BY b.stcd, b.stnm\nORDER BY avg_water_level DESC",
+        "SELECT b.stcd, b.stnm,\n       ROUND(AVG(r.z), 2) AS avg_water_level,\n       COUNT(r.z) AS data_count\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%古运河%' OR b.rvnm LIKE '%古运河%')\n  AND r.tm >= '2024-01-01' AND r.tm < '2025-01-01'\nGROUP BY b.stcd, b.stnm\nORDER BY b.stnm"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "[{\"stcd\": \"51004110\", \"stnm\": \"扬州闸闸上游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null}, {\"stcd\": \"51004111\", \"stnm\": \"扬州闸闸下游（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null}, {\"stcd\": \"510D4440\", \"stnm\": \"黄金坝泵站（水文）\", \"rvnm\": \"古运河\", \"hnnm\": \"大运河\", \"dtmnm\": null}, {\"stcd\": \"GYHCKD000000001\", \"stnm\": \"古运河岔口东\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}, {\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"rvnm\": null, \"hnnm\": null, \"dtmnm\": null}]",
+        "[{\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"avg_water_level\": \"4.71\", \"min_water_level\": \"4.31\", \"max_water_level\": \"5.30\", \"data_count\": 45720}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"avg_water_level\": \"4.70\", \"min_water_level\": \"4.12\", \"max_water_level\": \"5.54\", \"data_count\": 100111}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"avg_water_level\": \"4.69\", \"min_water_level\": \"4.30\", \"max_water_level\": \"5.56\", \"data_count\": 97967}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"avg_water_level\": \"4.68\", \"min_water_level\": \"3.94\", \"max_water_level\": \"5.29\", \"data_count\": 100683}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"avg_water_level\": \"4.68\", \"min_water_level\": \"4.16\", \"max_water_level\": \"5.33\", \"data_count\": 78349}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"avg_water_level\": \"4.67\", \"min_water_level\": \"4.20\", \"max_water_level\": \"5.31\", \"data_count\": 102019}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"avg_water_level\": \"4.66\", \"min_water_level\": \"4.21\", \"max_water_level\": \"5.52\", \"data_count\": 101316}]",
+        "[{\"stcd\": \"HT0031071050000029\", \"stnm\": \"古运河水位站(三湾公园)\", \"avg_water_level\": \"4.71\", \"data_count\": 45720}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"avg_water_level\": \"4.66\", \"data_count\": 101316}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"avg_water_level\": \"4.68\", \"data_count\": 100683}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"avg_water_level\": \"4.70\", \"data_count\": 100111}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"avg_water_level\": \"4.68\", \"data_count\": 78349}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"avg_water_level\": \"4.67\", \"data_count\": 102019}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"avg_water_level\": \"4.69\", \"data_count\": 97967}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.5,
+        "comparison_detail": "stdout matched 7/14 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.85,
+      "duration_sec": 49.2,
+      "llm_round_trips": 5,
+      "error": "",
+      "completed": true
+    }
+  ]
+}

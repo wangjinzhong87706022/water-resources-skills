@@ -1,5 +1,7 @@
 # 水质 Few-Shot 示例
 
+> ⚠️ **时间窗锚 MAX(spt)（监测）/ 任务 tm（预测），禁锚 NOW()**——库数据滞后于挂钟，NOW() 窗口常落空返 0 行。
+
 > 来源: /home/scada/dataagent/domains/sqls.txt 原始 Question-SQL 对
 
 ## 水质监测
@@ -14,11 +16,12 @@ SELECT DATE(spt) AS 日期,
 FROM sl325.wq_pcp_d
 INNER JOIN sl323.st_stbprp_b b ON wq_pcp_d.stcd = b.stcd
 WHERE b.stnm LIKE '%瘦西湖%' AND b.sttp = 'WQ'
-  AND spt >= DATE_SUB(NOW(), INTERVAL 1 MONTH) AND spt <= NOW()
+  -- 锚定表内最新采样时间 MAX(spt)，而非 NOW()（库数据滞后，NOW() 窗口常返 0 行）
+  AND spt > DATE_SUB((SELECT MAX(spt) FROM sl325.wq_pcp_d), INTERVAL 1 MONTH)
 GROUP BY DATE(spt) ORDER BY DATE(spt);
 ```
 
-**注意:** wq_pcp_d 在 sl325 库，时间字段是 **spt** 不是 tm。
+**注意:** wq_pcp_d 在 sl325 库，时间字段是 **spt** 不是 tm。时间窗锚 `MAX(spt)`，禁用 `DATE_SUB(NOW(), ...)`。
 
 ## 水质预测与评级
 
@@ -61,7 +64,9 @@ FROM (
     INNER JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
     WHERE sttp = 'WQ' AND b.stnm LIKE '%瘦西湖%'
       AND type IN (104, 103, 128, 105)
-      AND tm BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)
+      -- 时间窗锚定该任务自身的预报起点（MIN(tm)），取其后 24 小时；禁止锚 NOW()
+      AND tm < DATE_ADD((SELECT MIN(tm) FROM slztk.st_mx_preset_r_shj_auto
+                         WHERE taskid = (SELECT taskid FROM slztk.st_mx_taskid_shj_auto ORDER BY tm DESC LIMIT 1)), INTERVAL 24 HOUR)
       AND taskid = (SELECT taskid FROM slztk.st_mx_taskid_shj_auto ORDER BY tm DESC LIMIT 1)
     GROUP BY tm, stnm
   ) AS sub
@@ -73,3 +78,4 @@ FROM (
 - st_stbprp_b 在 **sl323** 库
 - 跨库查询需带库名前缀
 - type 是 **int** 类型（103/104/105/128）
+- **禁止 `tm BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 24 HOUR)`**：最新任务可能很旧，须锚该 taskid 自身的 tm；若任务只覆盖约 24 小时，也可去掉时间窗仅按 taskid 取全部预报时段并注明任务时间

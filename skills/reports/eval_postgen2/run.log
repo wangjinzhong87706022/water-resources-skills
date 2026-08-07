@@ -1,0 +1,126 @@
+=== running Q4 18:01:18 ===
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 1 | 单题超时: 900s
+============================================================
+
+[  1/1] Q004 [water-situation/L1] 查询水位站宝应最近30天水位数据。
+  ✓ 64.9s | rounds=7 | sqls=4 | score=1.000
+
+============================================================
+完成 1 题 | 平均分 1.000 | 通过率 100.0%
+============================================================
+📄 JSON: skills/reports/eval_postgen2/q4/gateway_eval_all_20260731_180223.json
+📄 Markdown: skills/reports/eval_postgen2/q4/gateway_eval_all_20260731_180223.md
+=== running Q9 18:02:23 ===
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 1 | 单题超时: 900s
+============================================================
+
+[  1/1] Q009 [water-situation/L2] 查询里运河（河流）最近两个月的水位数据。
+  ✓ 339.4s | rounds=10 | sqls=12 | score=0.894
+
+============================================================
+完成 1 题 | 平均分 0.894 | 通过率 100.0%
+============================================================
+📄 JSON: skills/reports/eval_postgen2/q9/gateway_eval_all_20260731_180802.json
+📄 Markdown: skills/reports/eval_postgen2/q9/gateway_eval_all_20260731_180802.md
+=== running Q22 18:08:02 ===
+[db hint] Query returned 0 rows. SQL: SELECT WRZ, GRZ, OBHTZ
+        FROM st_rvfcch_b
+        WHERE STCD = '{stcd}'
+        LIMIT 1
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 1 | 单题超时: 900s
+============================================================
+
+[  1/1] Q022 [water-situation/L3] 查询水位站宝应这个月的水位数据（同义词测试：本月 = 当月）。
+  ✓ 333.7s | rounds=8 | sqls=15 | score=0.993
+
+============================================================
+完成 1 题 | 平均分 0.993 | 通过率 100.0%
+============================================================
+📄 JSON: skills/reports/eval_postgen2/q22/gateway_eval_all_20260731_181336.json
+📄 Markdown: skills/reports/eval_postgen2/q22/gateway_eval_all_20260731_181336.md
+=== running Q23 18:13:36 ===
+[db hint] Query returned 0 rows. SQL: SELECT wptn, 
+        CASE wptn WHEN '4' THEN '涨' WHEN '5' THEN '落' WHEN '6' THEN '平' ELSE wptn END as trend_name,
+        COUNT(*) as cnt
+    FROM sl323.st_river_r
+    WHERE stcd = '{stcd}'
+      AND
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 1 | 单题超时: 900s
+============================================================
+
+[  1/1] Q023 [water-situation/L3] 查询水位站宝应本月内水位数据变化趋势。
+  ✓ 362.8s | rounds=10 | sqls=13 | score=0.950
+
+============================================================
+完成 1 题 | 平均分 0.950 | 通过率 100.0%
+============================================================
+📄 JSON: skills/reports/eval_postgen2/q23/gateway_eval_all_20260731_181939.json
+📄 Markdown: skills/reports/eval_postgen2/q23/gateway_eval_all_20260731_181939.md
+=== running Q46 18:19:39 ===
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 1 | 单题超时: 900s
+============================================================
+
+[  1/1] Q046 [water-quality/L2] 帮我分析一下最近一个月瘦西湖水质变化趋势。
+  ✓ 568.5s | rounds=21 | sqls=6 | score=0.920
+
+============================================================
+完成 1 题 | 平均分 0.920 | 通过率 100.0%
+============================================================
+📄 JSON: skills/reports/eval_postgen2/q46/gateway_eval_all_20260731_182908.json
+📄 Markdown: skills/reports/eval_postgen2/q46/gateway_eval_all_20260731_182908.md
+=== running Q51 18:29:08 ===
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 1 | 单题超时: 900s
+============================================================
+
+[  1/1] Q051 [water-quality/L3] 查询一段时间内所有水质站的水质变化趋势。
+  ✓ 415.2s | rounds=18 | sqls=8 | score=0.803
+
+============================================================
+完成 1 题 | 平均分 0.803 | 通过率 100.0%
+============================================================
+📄 JSON: skills/reports/eval_postgen2/q51/gateway_eval_all_20260731_183603.json
+📄 Markdown: skills/reports/eval_postgen2/q51/gateway_eval_all_20260731_183603.md
+=== running Q94 18:36:03 ===
+[db hint] Query returned 0 rows. SQL: SELECT b.stcd,
+       b.stnm,
+       rv.WRZ,
+       MAX(r.z) AS max_z,
+       ROUND(MAX(r.z) - rv.WRZ, 3) AS exceed_amount,
+       MAX(r.tm) AS max_z_tm,
+       CASE WHEN MAX(r.z) > rv.GRZ THEN '红色预警(
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 1 | 单题超时: 900s
+============================================================
+
+[  1/1] Q094 [water-warning/L3] 查询最近30天内是否有站点曾超警戒水位。
+  ✓ 312.3s | rounds=7 | sqls=7 | score=0.902
+
+============================================================
+完成 1 题 | 平均分 0.902 | 通过率 100.0%
+============================================================
+📄 JSON: skills/reports/eval_postgen2/q94/gateway_eval_all_20260731_184124.json
+📄 Markdown: skills/reports/eval_postgen2/q94/gateway_eval_all_20260731_184124.md
+ALL DONE 18:41:24

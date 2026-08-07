@@ -1,0 +1,22 @@
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 3 | 单题超时: 900s
+============================================================
+
+[  1/3] Q001 [water-situation/L1] 古运河有哪些水位测站？
+[db hint] Query returned 0 rows. SQL: SELECT stcd AS '测站编码', stnm AS '测站名称', sttp AS '测站类型'
+FROM sl323.st_stbprp_b
+WHERE rvnm LIKE '%古运河%' AND sttp = 'ZZ'
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 19.4s | rounds=12 | sqls=9 | score=0.740
+[  2/3] Q002 [water-situation/L1] 查询宝应水位站的所属河流、水系、流域、测站类别。
+  ✓ 182.4s | rounds=27 | sqls=24 | score=0.736
+[  3/3] Q003 [water-situation/L1] 查询测站总数。
+  ✓ 4.6s | rounds=3 | sqls=1 | score=1.000
+
+============================================================
+完成 3 题 | 平均分 0.825 | 通过率 100.0%
+============================================================
+📄 JSON: reports/eval_verify_fix_20260804_194927/gateway_eval_all_20260804_195254.json
+📄 Markdown: reports/eval_verify_fix_20260804_194927/gateway_eval_all_20260804_195254.md

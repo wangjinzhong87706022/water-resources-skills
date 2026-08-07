@@ -1,0 +1,422 @@
+{
+  "meta": {
+    "timestamp": "20260729_131729",
+    "total_cases": 14
+  },
+  "results": [
+    {
+      "index": 85,
+      "skill": "water-warning",
+      "level": "L1",
+      "question": "查询当前超警戒水位的站点。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '当前水位(m)', rv.WRZ AS '警戒水位(m)',\n       rv.GRZ AS '保证水位(m)', r.tm AS '更新时间',\n       CASE\n         WHEN r.z > rv.GRZ THEN '红色预警（超保证）'\n         WHEN r.z > rv.WRZ THEN '黄色预警（超警戒）'\n         ELSE '正常'\n       END AS '预警等级'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r GROUP BY stcd) latest\n  ON r.stcd = latest.stcd AND r.tm = latest.maxTm\nWHERE r.z > rv.WRZ\nORDER BY r.z - rv.WRZ DESC;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询当前超警戒水位（黄色预警）的站点\n# 逻辑：\n# 1. 获取每个站点的最新水位记录 (st_river_r)\n# 2. 关联防洪指标表 (st_rvfcch_b) 获取警戒水位 WRZ\n# 3. 关联测站属性表 (st_stbprp_b) 获取站名、河名\n# 4. 筛选条件：当前水位 z > 警戒水位 WRZ，且 WRZ 不为空\n# 注意：禁止使用 CTE，使用子查询获取最新水位\n\nsql = \"\"\"\nSELECT \n    r.stcd AS '站码',\n    b.stnm AS '站名',\n    b.rvnm AS '河流名称',\n    b.hnnm AS '水系名称',\n    r.z AS '当前水位(m)',\n    rv.WRZ AS '警戒水位(m)',\n    (r.z - rv.WRZ) AS '超警戒(m)',\n    r.tm AS '观测时间'\nFROM sl323.st_river_r r\nJOIN (\n    SELECT stcd, MAX(tm) AS mt \n    FROM sl323.st_river_r \n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.tm = latest.mt\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN sl323.st_stbprp_b b ON r.stcd = b.STCD\nWHERE rv.WRZ IS NOT NULL \n  AND r.z > rv.WRZ\nORDER BY (r.z - rv.WRZ) DESC\n\"\"\"\n\nresult = query(sql)\n\nif result:\n    print(f\"共发现 {len(result)} 个站点超警戒水位：\")\n    print(\"-\" * 80)\n    for row in result:\n        print(f\"站码: {row['站码']}, 站名: {row['站名']}, 河流: {row['河流名称']}\")\n        print(f\"  当前水位: {row['当前水位(m)']:.2f} m, 警戒水位: {row['警戒水位(m)']:.2f} m, 超出: {row['超警戒(m)']:.2f} m\")\n        print(f\"  观测时间: {row['观测时间']}\")\n        print(\"-\" * 80)\nelse:\n    print(\"当前无站点超警戒水位。\")\n```",
+      "actual_sql": "SELECT \n    r.stcd AS '站码',\n    b.stnm AS '站名',\n    b.rvnm AS '河流名称',\n    b.hnnm AS '水系名称',\n    r.z AS '当前水位(m)',\n    rv.WRZ AS '警戒水位(m)',\n    (r.z - rv.WRZ) AS '超警戒(m)',\n    r.tm AS '观测时间'\nFROM sl323.st_river_r r\nJOIN (\n    SELECT stcd, MAX(tm) AS mt \n    FROM sl323.st_river_r \n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.tm = latest.mt\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN sl323.st_stbprp_b b ON r.stcd = b.STCD\nWHERE rv.WRZ IS NOT NULL \n  AND r.z > rv.WRZ\nORDER BY (r.z - rv.WRZ) DESC",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ],
+        "result_correctness": 0.8
+      },
+      "total_score": 0.93,
+      "duration_sec": 27.42,
+      "error": "",
+      "attribution": {
+        "result_correctness": 0.8,
+        "exec_detail": {
+          "actual_rows": 16,
+          "expected_rows": 16,
+          "actual_err": "",
+          "expected_err": ""
+        }
+      }
+    },
+    {
+      "index": 86,
+      "skill": "water-warning",
+      "level": "L1",
+      "question": "查询防洪预警汇总（多少站正常、超警戒、超保证）。",
+      "expected_sql": "SELECT\n  COUNT(*) AS '监测站点总数',\n  SUM(CASE WHEN r.z > rv.WRZ THEN 1 ELSE 0 END) AS '超警戒站点数',\n  SUM(CASE WHEN r.z > rv.GRZ THEN 1 ELSE 0 END) AS '超保证站点数',\n  SUM(CASE WHEN r.z <= rv.WRZ THEN 1 ELSE 0 END) AS '正常站点数'\nFROM sl323.st_river_r r\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r GROUP BY stcd) latest\n  ON r.stcd = latest.stcd AND r.tm = latest.maxTm\nWHERE rv.WRZ IS NOT NULL;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 防洪预警汇总查询\n# 逻辑：\n# 1. 获取每个站点的最新水位记录 (st_river_r)\n# 2. 关联防洪指标 (st_rvfcch_b) 获取警戒水位(WRZ)和保证水位(GRZ)\n# 3. 关联测站信息 (st_stbprp_b) 获取站名\n# 4. 根据水位 z 与 WRZ/GRZ 的关系判断预警级别\n#    - z > GRZ: 红色预警 (超保证)\n#    - z > WRZ AND z <= GRZ: 黄色预警 (超警戒)\n#    - z <= WRZ OR (WRZ IS NULL AND GRZ IS NULL): 正常 (注意：若只有WRZ无GRZ，超WRZ即超保证逻辑需调整，通常GRZ>=WRZ。此处简化处理：若GRZ存在且z>GRZ为红；若WRZ存在且z>WRZ为黄；否则正常。若GRZ缺失但WRZ存在，z>WRZ视为超警戒/保证边界，通常归为黄色或需特殊处理，这里按常规：有GRZ优先判红，无GRZ有WRZ判黄)\n#    - 修正逻辑：\n#      - 如果 GRZ 不为空 且 z > GRZ -> 红色\n#      - 否则如果 WRZ 不为空 且 z > WRZ -> 黄色\n#      - 否则 -> 正常\n\nsql = \"\"\"\nSELECT \n    COUNT(*) as total_stations,\n    SUM(CASE \n        WHEN rv.GRZ IS NOT NULL AND r.z > rv.GRZ THEN 1 \n        ELSE 0 \n    END) as red_alert_count,\n    SUM(CASE \n        WHEN rv.GRZ IS NOT NULL AND r.z > rv.GRZ THEN 0\n        WHEN rv.WRZ IS NOT NULL AND r.z > rv.WRZ THEN 1\n        ELSE 0 \n    END) as yellow_alert_count,\n    SUM(CASE \n        WHEN rv.GRZ IS NOT NULL AND r.z > rv.GRZ THEN 0\n        WHEN rv.WRZ IS NOT NULL AND r.z > rv.WRZ THEN 0\n        ELSE 1 \n    END) as normal_count\nFROM sl323.st_river_r r\nJOIN (\n    SELECT stcd, MAX(tm) as max_tm \n    FROM sl323.st_river_r \n    GROUP BY stcd\n) latest_r ON r.stcd = latest_r.stcd AND r.tm = latest_r.max_tm\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nLEFT JOIN sl323.st_stbprp_b b ON r.stcd = b.STCD\nWHERE b.STTP = 'ZZ' -- 仅查询水位站\n\"\"\"\n\nresult = query(sql)\nif result:\n    row = result[0]\n    print(f\"防洪预警汇总:\")\n    print(f\"总水位站数: {row['total_stations']}\")\n    print(f\"红色预警 (超保证): {row['red_alert_count']}\")\n    print(f\"黄色预警 (超警戒): {row['yellow_alert_count']}\")\n    print(f\"正常: {row['normal_count']}\")\nelse:\n    print(\"查询结果为空，请检查数据库连接或数据是否存在。\")\n```",
+      "actual_sql": "SELECT \n    COUNT(*) as total_stations,\n    SUM(CASE \n        WHEN rv.GRZ IS NOT NULL AND r.z > rv.GRZ THEN 1 \n        ELSE 0 \n    END) as red_alert_count,\n    SUM(CASE \n        WHEN rv.GRZ IS NOT NULL AND r.z > rv.GRZ THEN 0\n        WHEN rv.WRZ IS NOT NULL AND r.z > rv.WRZ THEN 1\n        ELSE 0 \n    END) as yellow_alert_count,\n    SUM(CASE \n        WHEN rv.GRZ IS NOT NULL AND r.z > rv.GRZ THEN 0\n        WHEN rv.WRZ IS NOT NULL AND r.z > rv.WRZ THEN 0\n        ELSE 1 \n    END) as normal_count\nFROM sl323.st_river_r r\nJOIN (\n    SELECT stcd, MAX(tm) as max_tm \n    FROM sl323.st_river_r \n    GROUP BY stcd\n) latest_r ON r.stcd = latest_r.stcd AND r.tm = latest_r.max_tm\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nLEFT JOIN sl323.st_stbprp_b b ON r.stcd = b.STCD\nWHERE b.STTP = 'ZZ' -- 仅查询水位站",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 1.0,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "result_correctness": 0.25
+      },
+      "total_score": 1.0,
+      "duration_sec": 21.3,
+      "error": "",
+      "attribution": {
+        "result_correctness": 0.25,
+        "exec_detail": {
+          "actual_rows": 1,
+          "expected_rows": 1,
+          "actual_err": "",
+          "expected_err": ""
+        }
+      }
+    },
+    {
+      "index": 87,
+      "skill": "water-warning",
+      "level": "L2",
+      "question": "扬州市重点河道水位实时情况（含超警戒判断）。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '实时水位(m)', r.tm AS '更新时间',\n       rv.WRZ AS '警戒水位(m)',\n       CASE WHEN r.z > rv.WRZ THEN '超警戒' ELSE '正常' END AS '状态'\nFROM sl323.st_river_r r\nINNER JOIN (\n  SELECT r.stcd, b.stnm, MAX(tm) AS maxTm\n  FROM sl323.st_river_r r\n  INNER JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\n  WHERE b.stnm IN ('古运河水位站（新城河口）', '新城河水文站（兴城西路北）',\n                    '七里河水位站（东花园路）', '赵家支沟水文站（赵家河路）', '瘦西湖水位站')\n  GROUP BY r.stcd, b.stnm\n) sub ON r.stcd = sub.stcd AND r.tm = sub.maxTm\nINNER JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询扬州市重点河道最新水位及防洪预警状态\n# 逻辑：\n# 1. 获取每个站点最新的水位记录 (st_river_r)\n# 2. 关联站点属性 (st_stbprp_b) 筛选扬州相关站点 (站名或河名包含'扬州'或'里下河'等常见关联词，这里主要用站名模糊匹配)\n# 3. 关联防洪指标 (st_rvfcch_b) 获取警戒水位(WRZ)和保证水位(GRZ)\n# 4. 判断预警等级：\n#    - 无阈值数据: 未知\n#    - z > GRZ: 红色预警 (超保证)\n#    - z > WRZ: 黄色预警 (超警戒)\n#    - 其他: 正常\n\nsql = \"\"\"\nSELECT \n    r.stcd AS '站码',\n    b.stnm AS '站名',\n    b.rvnm AS '所属河道',\n    r.tm AS '观测时间',\n    r.z AS '当前水位(m)',\n    rv.WRZ AS '警戒水位(m)',\n    rv.GRZ AS '保证水位(m)',\n    CASE \n        WHEN rv.WRZ IS NULL AND rv.GRZ IS NULL THEN '无阈值数据'\n        WHEN r.z > rv.GRZ THEN '红色预警(超保证)'\n        WHEN r.z > rv.WRZ THEN '黄色预警(超警戒)'\n        ELSE '正常'\n    END AS '预警状态'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.STCD\nJOIN (\n    SELECT stcd, MAX(tm) AS max_tm \n    FROM sl323.st_river_r \n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.tm = latest.max_tm\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nWHERE \n    (b.stnm LIKE '%扬州%' OR b.rvnm LIKE '%扬州%')\n    AND b.sttp = 'ZZ'\nORDER BY \n    CASE \n        WHEN r.z > rv.GRZ THEN 1\n        WHEN r.z > rv.WRZ THEN 2\n        ELSE 3\n    END,\n    r.z DESC\nLIMIT 50\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "actual_sql": "SELECT \n    r.stcd AS '站码',\n    b.stnm AS '站名',\n    b.rvnm AS '所属河道',\n    r.tm AS '观测时间',\n    r.z AS '当前水位(m)',\n    rv.WRZ AS '警戒水位(m)',\n    rv.GRZ AS '保证水位(m)',\n    CASE \n        WHEN rv.WRZ IS NULL AND rv.GRZ IS NULL THEN '无阈值数据'\n        WHEN r.z > rv.GRZ THEN '红色预警(超保证)'\n        WHEN r.z > rv.WRZ THEN '黄色预警(超警戒)'\n        ELSE '正常'\n    END AS '预警状态'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.STCD\nJOIN (\n    SELECT stcd, MAX(tm) AS max_tm \n    FROM sl323.st_river_r \n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.tm = latest.max_tm\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nWHERE \n    (b.stnm LIKE '%扬州%' OR b.rvnm LIKE '%扬州%')\n    AND b.sttp = 'ZZ'\nORDER BY \n    CASE \n        WHEN r.z > rv.GRZ THEN 1\n        WHEN r.z > rv.WRZ THEN 2\n        ELSE 3\n    END,\n    r.z DESC\nLIMIT 50",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 1.0,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "result_correctness": 0.6
+      },
+      "total_score": 1.0,
+      "duration_sec": 14.45,
+      "error": "",
+      "attribution": {
+        "result_correctness": 0.6,
+        "exec_detail": {
+          "actual_rows": 1,
+          "expected_rows": 0,
+          "actual_err": "",
+          "expected_err": "(1054, \"Unknown column 'b.stnm' in 'field list'\")"
+        }
+      }
+    },
+    {
+      "index": 88,
+      "skill": "water-warning",
+      "level": "L2",
+      "question": "查询水质低于Ⅳ类的站点。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', d.spt AS '采样时间',\n       d.codmn AS 'CODMn', d.dox AS 'DO', d.nh3n AS 'NH3N', d.tp AS 'TP',\n       CASE\n         WHEN d.codmn > 10 OR d.dox < 3 OR d.nh3n > 1.5 OR d.tp > 0.3 THEN '劣于Ⅳ类'\n         ELSE '正常'\n       END AS '预警状态'\nFROM sl325.wq_pcp_d d\nJOIN sl323.st_stbprp_b b ON d.stcd = b.stcd\nWHERE b.sttp = 'WQ'\n  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd)\n  AND (d.codmn > 10 OR d.dox < 3 OR d.nh3n > 1.5 OR d.tp > 0.3);",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询水质低于Ⅳ类（即Ⅴ类或劣Ⅴ类）的站点\n# 单因子评价法：任一指标超标即判定为低于Ⅳ类\n# Ⅳ类阈值：CODMn <= 10, DO >= 3, NH3N <= 1.5, TP <= 0.3\n# 低于Ⅳ类条件：CODMn > 10 OR DO < 3 OR NH3N > 1.5 OR TP > 0.3\n\nsql = \"\"\"\nSELECT \n    r.stcd AS '站码',\n    b.stnm AS '站名',\n    r.spt AS '采样时间',\n    r.codmn AS 'CODMn(mg/L)',\n    r.dox AS 'DO(mg/L)',\n    r.nh3n AS '氨氮(mg/L)',\n    r.tp AS '总磷(mg/L)',\n    CASE \n        WHEN r.codmn > 10 AND r.dox < 3 AND r.nh3n > 1.5 AND r.tp > 0.3 THEN '劣Ⅴ类(多项超标)'\n        WHEN r.codmn > 10 OR r.dox < 3 OR r.nh3n > 1.5 OR r.tp > 0.3 THEN 'Ⅴ类(单项超标)'\n        ELSE 'Ⅳ类及以上'\n    END AS '水质等级',\n    GROUP_CONCAT(DISTINCT \n        CASE \n            WHEN r.codmn > 10 THEN 'CODMn超标'\n            WHEN r.dox < 3 THEN 'DO超标'\n            WHEN r.nh3n > 1.5 THEN '氨氮超标'\n            WHEN r.tp > 0.3 THEN '总磷超标'\n        END\n    ) AS '超标指标'\nFROM sl325.wq_pcp_d r\nLEFT JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE (r.codmn > 10 OR r.dox < 3 OR r.nh3n > 1.5 OR r.tp > 0.3)\n    AND r.codmn IS NOT NULL OR r.dox IS NOT NULL OR r.nh3n IS NOT NULL OR r.tp IS NOT NULL\nGROUP BY r.stcd, b.stnm, r.spt, r.codmn, r.dox, r.nh3n, r.tp\nORDER BY r.spt DESC\nLIMIT 100\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "actual_sql": "SELECT \n    r.stcd AS '站码',\n    b.stnm AS '站名',\n    r.spt AS '采样时间',\n    r.codmn AS 'CODMn(mg/L)',\n    r.dox AS 'DO(mg/L)',\n    r.nh3n AS '氨氮(mg/L)',\n    r.tp AS '总磷(mg/L)',\n    CASE \n        WHEN r.codmn > 10 AND r.dox < 3 AND r.nh3n > 1.5 AND r.tp > 0.3 THEN '劣Ⅴ类(多项超标)'\n        WHEN r.codmn > 10 OR r.dox < 3 OR r.nh3n > 1.5 OR r.tp > 0.3 THEN 'Ⅴ类(单项超标)'\n        ELSE 'Ⅳ类及以上'\n    END AS '水质等级',\n    GROUP_CONCAT(DISTINCT \n        CASE \n            WHEN r.codmn > 10 THEN 'CODMn超标'\n            WHEN r.dox < 3 THEN 'DO超标'\n            WHEN r.nh3n > 1.5 THEN '氨氮超标'\n            WHEN r.tp > 0.3 THEN '总磷超标'\n        END\n    ) AS '超标指标'\nFROM sl325.wq_pcp_d r\nLEFT JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE (r.codmn > 10 OR r.dox < 3 OR r.nh3n > 1.5 OR r.tp > 0.3)\n    AND r.codmn IS NOT NULL OR r.dox IS NOT NULL OR r.nh3n IS NOT NULL OR r.tp IS NOT NULL\nGROUP BY r.stcd, b.stnm, r.spt, r.codmn, r.dox, r.nh3n, r.tp\nORDER BY r.spt DESC\nLIMIT 100",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "result_correctness": 0.6
+      },
+      "total_score": 0.62,
+      "duration_sec": 19.94,
+      "error": "",
+      "attribution": {
+        "result_correctness": 0.6,
+        "exec_detail": {
+          "actual_rows": 100,
+          "expected_rows": 0,
+          "actual_err": "",
+          "expected_err": "(2013, 'Lost connection to MySQL server during query (timed out)')"
+        }
+      }
+    },
+    {
+      "index": 89,
+      "skill": "water-warning",
+      "level": "L2",
+      "question": "扬州市重点河道指定测站当前水位如何。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '当前水位(m)', r.tm AS '更新时间',\n       rv.WRZ AS '警戒水位(m)', rv.GRZ AS '保证水位(m)',\n       CASE\n         WHEN r.z > rv.GRZ THEN '超保证'\n         WHEN r.z > rv.WRZ THEN '超警戒'\n         ELSE '正常'\n       END AS '预警状态'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r GROUP BY stcd) latest\n  ON r.stcd = latest.stcd AND r.tm = latest.maxTm\nWHERE b.stnm IN ('古运河水位站（新城河口）', '新城河水文站（兴城西路北）',\n                  '七里河水位站（东花园路）', '赵家支沟水文站（赵家河路）', '瘦西湖水位站');",
+      "actual_response": "我将查询扬州市重点河道指定测站的当前水位情况。\n\n首先，我需要查询扬州相关的水位站及其最新水位数据，并与防洪指标（警戒水位、保证水位）进行对比。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query, query_multi\n\n# 查询扬州相关水位站的最新水位及防洪指标\nsql = \"\"\"\nSELECT \n    r.stcd AS 站码,\n    b.stnm AS 站名,\n    b.rvnm AS 河道名称,\n    b.hnnm AS 水系名称,\n    r.tm AS 观测时间,\n    r.z AS '当前水位(m)',\n    rv.WRZ AS '警戒水位(m)',\n    rv.GRZ AS '保证水位(m)',\n    CASE \n        WHEN r.z > rv.GRZ THEN '红色预警(超保证)'\n        WHEN r.z > rv.WRZ THEN '黄色预警(超警戒)'\n        ELSE '正常'\n    END AS 预警状态\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN (\n    SELECT stcd, MAX(tm) AS mt \n    FROM sl323.st_river_r \n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.tm = latest.mt\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nWHERE b.sttp = 'ZZ'\n  AND (b.stnm LIKE '%扬州%' OR b.rvnm LIKE '%扬州%' OR b.hnnm LIKE '%扬州%')\nORDER BY r.z DESC\n\"\"\"\n\nresult = query(sql)\n\nif result:\n    print(\"扬州市重点河道指定测站当前水位情况：\")\n    print(\"-\" * 100)\n    print(f\"{'站码':<10} {'站名':<20} {'河道名称':<20} {'水系名称':<15} {'观测时间':<20} {'当前水位(m)':<12} {'警戒水位(m)':<12} {'保证水位(m)':<12} {'预警状态':<15}\")\n    print(\"-\" * 100)\n    \n    for row in result:\n        stcd, stnm, rvnm, hnnm, tm, z, wrz, grz, warning = row\n        print(f\"{str(stcd):<10} {str(stnm):<20} {str(rvnm) if rvnm else 'N/A':<20} {str(hnnm) if hnnm else 'N/A':<15} {str(tm):<20} {str(z):<12} {str(wrz) if wrz else '无':<12} {str(grz) if grz else '无':<12} {str(warning):<15}\")\n    \n    # 统计预警情况\n    warning_count = sum(1 for row in result if row[8] != '正常')\n    red_count = sum(1 for row in result if row[8] == '红色预警(超保证)')\n    yellow_count = sum(1 for row in result if row[8] == '黄色预警(超警戒)')\n    \n    print(\"-\" * 100)\n    print(f\"\\n统计：共查询到 {len(result)} 个水位站\")\n    if warning_count > 0:\n        print(f\"⚠️ 预警站点：{warning_count} 个（红色预警 {red_count} 个，黄色预警 {yellow_count} 个）\")\n    else:\n        print(\"✅ 所有站点水位正常，无预警\")\nelse:\n    print(\"未查询到扬州市相关水位站数据，请检查站点名称或查询条件。\")\n```",
+      "actual_sql": "SELECT \n    r.stcd AS 站码,\n    b.stnm AS 站名,\n    b.rvnm AS 河道名称,\n    b.hnnm AS 水系名称,\n    r.tm AS 观测时间,\n    r.z AS '当前水位(m)',\n    rv.WRZ AS '警戒水位(m)',\n    rv.GRZ AS '保证水位(m)',\n    CASE \n        WHEN r.z > rv.GRZ THEN '红色预警(超保证)'\n        WHEN r.z > rv.WRZ THEN '黄色预警(超警戒)'\n        ELSE '正常'\n    END AS 预警状态\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN (\n    SELECT stcd, MAX(tm) AS mt \n    FROM sl323.st_river_r \n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.tm = latest.mt\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nWHERE b.sttp = 'ZZ'\n  AND (b.stnm LIKE '%扬州%' OR b.rvnm LIKE '%扬州%' OR b.hnnm LIKE '%扬州%')\nORDER BY r.z DESC",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 1.0,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ],
+        "result_correctness": 0.12
+      },
+      "total_score": 1.0,
+      "duration_sec": 19.12,
+      "error": "",
+      "attribution": {
+        "result_correctness": 0.12,
+        "exec_detail": {
+          "actual_rows": 1,
+          "expected_rows": 5,
+          "actual_err": "",
+          "expected_err": ""
+        }
+      }
+    },
+    {
+      "index": 90,
+      "skill": "water-warning",
+      "level": "L3",
+      "question": "24年8月20号左右，扬州古运河、新城河、瘦西湖最高水位及是否超标。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', sub.max_z AS '最高水位(m)', sub.max_time AS '出现时间',\n       rv.WRZ AS '警戒水位(m)',\n       CASE WHEN sub.max_z > rv.WRZ THEN '是' ELSE '否' END AS '是否超警戒'\nFROM sl323.st_stbprp_b b\nINNER JOIN (\n  SELECT stcd, MAX(z) AS max_z, MAX(tm) AS max_time\n  FROM sl323.st_river_r\n  WHERE tm BETWEEN '2024-08-17' AND '2024-08-23'\n  GROUP BY stcd\n) AS sub ON b.stcd = sub.stcd\nINNER JOIN sl323.st_rvfcch_b rv ON b.stcd = rv.STCD\nWHERE b.stnm IN ('古运河水位站（新城河口）', '新城河水文站（兴城西路北）', '瘦西湖水位站')\nORDER BY b.stnm;",
+      "actual_response": "为了回答您关于2024年8月20日左右扬州古运河、新城河、瘦西湖的最高水位及是否超标的问题，我将执行以下步骤：\n\n1.  **识别测站**：在 `sl323.st_stbprp_b` 中查找属于“古运河”、“新城河”、“瘦西湖”的水位站（`sttp='ZZ'`）。\n2.  **获取水位数据**：从 `sl323.st_river_r` 中获取这些站点在2024年8月20日当天（或前后几天，以确保捕捉到峰值）的水位记录。\n3.  **获取防洪指标**：从 `sl323.st_rvfcch_b` 中获取对应站点的警戒水位（WRZ）和保证水位（GRZ）。\n4.  **计算最高水位并判断预警**：\n    *   找出每个站点在指定时间段内的最高水位（`max(z)`）。\n    *   比较最高水位与 WRZ/GRZ：\n        *   `z > GRZ`：红色预警（超保证）\n        *   `WRZ < z <= GRZ`：黄色预警（超警戒）\n        *   `z <= WRZ`：正常\n\n**注意**：\n*   由于 `st_rvfcch_b` 的 `STCD` 是大写，且 `st_river_r` 的 `stcd` 是小写，JOIN 时需注意。\n*   禁止使用 CTE，需使用子查询。\n*   列别名需加引号。\n*   先验证阈值数据是否存在。\n\n### 第一步：查找相关测站\n\n首先，我需要找到古运河、新城河、瘦西湖的相关水位站。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询古运河、新城河、瘦西湖的水位站\nsql_find_stations = \"\"\"\nSELECT \n    stcd, \n    stnm, \n    rvnm, \n    sttp\nFROM sl323.st_stbprp_b\nWHERE sttp = 'ZZ'\n  AND (\n    rvnm LIKE '%古运河%' OR stnm LIKE '%古运河%'\n    OR rvnm LIKE '%新城河%' OR stnm LIKE '%新城河%'\n    OR rvnm LIKE '%瘦西湖%' OR stnm LIKE '%瘦西湖%'\n  )\nORDER BY rvnm, stnm\n\"\"\"\n\nstations = query(sql_find_stations)\nprint(\"Found stations:\")\nfor s in stations:\n    print(s)\n```\n\n### 第二步：获取水位数据和防洪指标\n\n假设第一步找到了站点，我将获取2024年8月20日当天（为了稳妥，可以查询8月19日-8月21日，或者仅8月20日，通常“左右”指当天或前后一天，这里先查8月20日当天，如果数据稀疏再扩展）的最高水位，并关联防洪指标。\n\n**重要提示**：`st_river_r` 中的 `tm` 是时间字段。我需要查询 `tm` 在 '2024-08-20 00:00:00' 和 '2024-08-20 23:59:59' 之间的数据。\n\n```python\n# 假设 stations 不为空，提取 stcd 列表\nif not stations:\n    print(\"No stations found. Please check the river names.\")\nelse:\n    stcds = [s['stcd'] for s in stations]\n    \n    # 构建 IN 子句\n    stcds_str = ','.join([f\"'{s}'\" for s in stcds])\n    \n    # 查询最高水位及对应时间，并关联防洪指标\n    # 注意：st_rvfcch_b.STCD 是大写，st_river_r.stcd 是小写\n    # 为了安全，我们在 SQL 中统一使用小写或大写进行匹配，或者依赖 MySQL 的默认大小写不敏感（取决于配置，但最好显式处理）\n    # 通常 st_river_r.stcd 是小写，st_rvfcch_b.STCD 是大写。\n    # 我们可以将 st_river_r.stcd 转为大写与 st_rvfcch_b.STCD 比较，或者反之。\n    # 这里使用 UPPER(r.stcd) = rv.STCD\n    \n    sql_water_level = f\"\"\"\n    SELECT \n        r.stcd,\n        b.stnm,\n        b.rvnm,\n        MAX(r.z) AS '最高水位(m)',\n        MAX(tm) AS '最高水位时间',\n        rv.WRZ AS '警戒水位(m)',\n        rv.GRZ AS '保证水位(m)',\n        CASE \n            WHEN MAX(r.z) > rv.GRZ THEN '红色预警(超保证)'\n            WHEN MAX(r.z) > rv.WRZ THEN '黄色预警(超警戒)'\n            ELSE '正常'\n        END AS '预警状态'\n    FROM sl323.st_river_r r\n    JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\n    LEFT JOIN sl323.st_rvfcch_b rv ON UPPER(r.stcd) = rv.STCD\n    WHERE r.stcd IN ({stcds_str})\n      AND r.tm >= '2024-08-20 00:00:00'\n      AND r.tm <= '2024-08-20 23:59:59'\n    GROUP BY r.stcd, b.stnm, b.rvnm, rv.WRZ, rv.GRZ\n    ORDER BY b.rvnm, b.stnm\n    \"\"\"\n    \n    results = query(sql_water_level)\n    print(\"\\nWater Level Results for 2024-08-20:\")\n    for r in results:\n        print(r)\n        \n        # 验证阈值是否存在\n        if r['警戒水位(m)'] is None and r['保证水位(m)'] is None:\n            print(f\"⚠️ 站点 {r['stnm']} ({r['stcd']}) 阈值数据缺失\")\n```\n\n如果8月20日当天数据不足，或者用户意指“左右”几天，我可能需要扩展时间范围。但通常“20号左右”在水利查询中常指当天或前后24小时。如果上述查询返回空或数据点很少，我将扩展查询范围至8月19日-8月21日。\n\n此外，如果 `st_river_r` 中没有8月20日的数据（例如数据延迟或断档），我也需要检查前后几天。\n\n让我们先执行第一步，看看有哪些站点。\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 1. 查找站点\nsql_find_stations = \"\"\"\nSELECT \n    stcd, \n    stnm, \n    rvnm, \n    sttp\nFROM sl323.st_stbprp_b\nWHERE sttp = 'ZZ'\n  AND (\n    rvnm LIKE '%古运河%' OR stnm LIKE '%古运河%'\n    OR rvnm LIKE '%新城河%' OR stnm LIKE '%新城河%'\n    OR rvnm LIKE '%瘦西湖%' OR stnm LIKE '%瘦西湖%'\n  )\nORDER BY rvnm, stnm\n\"\"\"\n\nstations = query(sql_find_stations)\nprint(\"Found stations:\")\nfor s in stations:\n    print(s)\n\n# 2. 如果找到站点，查询水位\nif stations:\n    stcds = [s['stcd'] for s in stations]\n    stcds_str = ','.join([f\"'{s}'\" for s in stcds])\n    \n    # 查询8月20日当天的最高水位\n    sql_water_level = f\"\"\"\n    SELECT \n        r.stcd,\n        b.stnm,\n        b.rvnm,\n        MAX(r.z) AS '最高水位(m)',\n        MAX(tm) AS '最高水位时间',\n        rv.WRZ AS '警戒水位(m)',\n        rv.GRZ AS '保证水位(m)',\n        CASE \n            WHEN MAX(r.z) > rv.GRZ THEN '红色预警(超保证)'\n            WHEN MAX(r.z) > rv.WRZ THEN '黄色预警(超警戒)'\n            ELSE '正常'\n        END AS '预警状态'\n    FROM sl323.st_river_r r\n    JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\n    LEFT JOIN sl323.st_rvfcch_b rv ON UPPER(r.stcd) = rv.STCD\n    WHERE r.stcd IN ({stcds_str})\n      AND r.tm >= '2024-08-20 00:00:00'\n      AND r.tm <= '2024-08-20 23:59:59'\n    GROUP BY r.stcd, b.stnm, b.rvnm, rv.WRZ, rv.GRZ\n    ORDER BY b.rvnm, b.stnm\n    \"\"\"\n    \n    results = query(sql_water_level)\n    print(\"\\nWater Level Results for 2024-08-20:\")\n    for r in results:\n        print(r)\n```",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": []
+      },
+      "total_score": 0.93,
+      "duration_sec": 58.94,
+      "error": "",
+      "attribution": {
+        "result_correctness": null,
+        "exec_detail": {
+          "reason": "actual_sql 为空（提取失败），不可测量"
+        }
+      }
+    },
+    {
+      "index": 91,
+      "skill": "water-warning",
+      "level": "L3",
+      "question": "查询所有站点的预警水位配置（有警戒水位的站）。",
+      "expected_sql": "SELECT rv.STCD AS '测站编码', b.stnm AS '测站名称',\n       rv.WRZ AS '警戒水位(m)', rv.GRZ AS '保证水位(m)',\n       rv.MAIN_RV AS '关联河道'\nFROM sl323.st_rvfcch_b rv\nJOIN sl323.st_stbprp_b b ON rv.STCD = b.stcd\nWHERE rv.WRZ IS NOT NULL\nORDER BY rv.WRZ;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query, query_multi\n\n# 查询所有配置了警戒水位（WRZ）或保证水位（GRZ）的站点\n# 关联 st_stbprp_b 获取站名和河名，关联 st_rvfcch_b 获取阈值\nsql = \"\"\"\nSELECT \n    b.stcd AS '站码',\n    b.stnm AS '站名',\n    b.rvnm AS '所属河流',\n    b.hnnm AS '所属水系',\n    rv.WRZ AS '警戒水位(m)',\n    rv.GRZ AS '保证水位(m)'\nFROM sl323.st_rvfcch_b rv\nJOIN sl323.st_stbprp_b b ON rv.STCD = b.stcd\nWHERE rv.WRZ IS NOT NULL OR rv.GRZ IS NOT NULL\nORDER BY b.hnnm, b.rvnm, b.stnm\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "actual_sql": "SELECT \n    b.stcd AS '站码',\n    b.stnm AS '站名',\n    b.rvnm AS '所属河流',\n    b.hnnm AS '所属水系',\n    rv.WRZ AS '警戒水位(m)',\n    rv.GRZ AS '保证水位(m)'\nFROM sl323.st_rvfcch_b rv\nJOIN sl323.st_stbprp_b b ON rv.STCD = b.stcd\nWHERE rv.WRZ IS NOT NULL OR rv.GRZ IS NOT NULL\nORDER BY b.hnnm, b.rvnm, b.stnm",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 1.0,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ],
+        "result_correctness": 0.96
+      },
+      "total_score": 0.83,
+      "duration_sec": 24.35,
+      "error": "",
+      "attribution": {
+        "result_correctness": 0.96,
+        "exec_detail": {
+          "actual_rows": 165,
+          "expected_rows": 165,
+          "actual_err": "",
+          "expected_err": ""
+        }
+      }
+    },
+    {
+      "index": 92,
+      "skill": "water-warning",
+      "level": "L3",
+      "question": "综合查询：当前有多少闸站超警戒水位、哪些泵站正在排水、整体防洪形势。",
+      "expected_sql": "SELECT\n  (SELECT COUNT(*) FROM sl323.st_river_r r\n   JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\n   JOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r GROUP BY stcd) l ON r.stcd = l.stcd AND r.tm = l.maxTm\n   WHERE r.z > rv.WRZ AND rv.WRZ IS NOT NULL) AS '超警戒站点数',\n  (SELECT COUNT(*) FROM sl323.st_pump_r p\n   WHERE p.pdchcd = '2' AND p.omcn > 0\n     AND p.tm = (SELECT MAX(p2.tm) FROM sl323.st_pump_r p2 WHERE p2.stcd = p.stcd)) AS '正在排水泵站数',\n  (SELECT SUM(p.pmpq) FROM sl323.st_pump_r p\n   WHERE p.pdchcd = '2' AND p.omcn > 0\n     AND p.tm = (SELECT MAX(p2.tm) FROM sl323.st_pump_r p2 WHERE p2.stcd = p.stcd)) AS '总排水流量(m³/s)',\n  (SELECT COUNT(*) FROM sl323.st_gate_r g\n   WHERE g.gtophgt > 0\n     AND g.tm = (SELECT MAX(g2.tm) FROM sl323.st_gate_r g2 WHERE g2.stcd = g.stcd)) AS '开启闸门数';",
+      "actual_response": "我将为您执行综合防洪预警查询。这涉及三个部分：\n1. **超警戒水位闸站/测站统计**（防洪预警核心）\n2. **泵站排水状态查询**（需确认数据源，通常闸泵运行状态在 `sl323` 或 `sl324` 库，本 Skill 主要覆盖水位预警，我将尝试查询水位站中类型为“泵站”或相关闸站的实时水位情况，若需详细泵机运行状态需结合 `gate-pump-operation` skill，此处先基于水位数据提供防洪视角的泵站水位情况）\n3. **整体防洪形势评估**\n\n首先，安装必要的库并导入数据库连接模块。\n\n```python\nimport os\nimport sys\nimport pandas as pd\n\n# 设置路径并导入数据库查询模块\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query, query_multi\n\n# 1. 查询当前超警戒水位 (z > WRZ) 的站点\n# 逻辑: 关联 st_river_r (实时水位) 和 st_rvfcch_b (防洪指标) 和 st_stbprp_b (站点属性)\n# 注意: st_rvfcch_b 的 STCD 是大写，st_river_r 的 stcd 是小写，JOIN 时需匹配\n# 预警条件: z > WRZ (黄色/超警戒) 或 z > GRZ (红色/超保证)\nsql_flood_warning = \"\"\"\nSELECT \n    r.stcd,\n    b.stnm AS station_name,\n    b.rvnm AS river_name,\n    b.sttp AS station_type,\n    r.z AS current_water_level,\n    rv.WRZ AS warning_water_level,\n    rv.GRZ AS guarantee_water_level,\n    r.tm AS observation_time,\n    CASE \n        WHEN r.z > rv.GRZ THEN '红色预警(超保证)'\n        WHEN r.z > rv.WRZ THEN '黄色预警(超警戒)'\n        ELSE '正常'\n    END AS warning_level\nFROM sl323.st_river_r r\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE r.z > rv.WRZ \n  AND rv.WRZ IS NOT NULL\nORDER BY r.z - rv.WRZ DESC\n\"\"\"\n\n# 2. 查询所有有防洪指标站点的最新水位状态，用于整体形势评估\n# 这里我们获取所有有 WRZ 定义的站点的最新水位，以便计算超警戒比例\nsql_all_stations_status = \"\"\"\nSELECT \n    r.stcd,\n    b.stnm AS station_name,\n    b.sttp,\n    r.z,\n    rv.WRZ,\n    rv.GRZ,\n    CASE \n        WHEN r.z > rv.GRZ THEN '超保证'\n        WHEN r.z > rv.WRZ THEN '超警戒'\n        ELSE '正常'\n    END AS status\nFROM sl323.st_river_r r\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE rv.WRZ IS NOT NULL\nORDER BY r.tm DESC\n\"\"\"\n\n# 执行查询\ntry:\n    df_warning = query(sql_flood_warning)\n    df_all = query(sql_all_stations_status)\n    \n    # 处理结果\n    if df_warning is not None and not df_warning.empty:\n        # 统计超警戒和超保证的数量\n        warning_counts = df_warning['warning_level'].value_counts()\n        yellow_count = warning_counts.get('黄色预警(超警戒)', 0)\n        red_count = warning_counts.get('红色预警(超保证)', 0)\n        total_warning = len(df_warning)\n    else:\n        yellow_count = 0\n        red_count = 0\n        total_warning = 0\n        df_warning = pd.DataFrame()\n\n    if df_all is not None and not df_all.empty:\n        total_stations = len(df_all)\n        normal_count = len(df_all[df_all['status'] == '正常'])\n        # 重新计算以确保一致性\n        yellow_count_check = len(df_all[df_all['status'] == '超警戒'])\n        red_count_check = len(df_all[df_all['status'] == '超保证'])\n    else:\n        total_stations = 0\n        normal_count = 0\n        yellow_count_check = 0\n        red_count_check = 0\n\nexcept Exception as e:\n    print(f\"Error executing queries: {e}\")\n    df_warning = pd.DataFrame()\n    df_all = pd.DataFrame()\n    yellow_count = 0\n    red_count = 0\n    total_warning = 0\n    total_stations = 0\n```\n\n```python\n# 3. 尝试查询泵站相关水位情况\n# 注意: 本 Skill 主要基于水位数据。如果“泵站正在排水”指的是泵机运行状态，通常需要 sl324 库或特定泵机表。\n# 在此，我们查询 sttp 包含 'P' (Pump) 或名称包含 '泵' 的站点的水位情况，作为防洪视角的补充。\n# 如果用户需要详细的泵机启停状态，建议后续调用 gate-pump-operation skill。\n\nsql_pump_stations = \"\"\"\nSELECT \n    r.stcd,\n    b.stnm AS station_name,\n    r.z AS current_water_level,\n    rv.WRZ,\n    rv.GRZ,\n    CASE \n        WHEN r.z > rv.GRZ THEN '超保证'\n        WHEN r.z > rv.WRZ THEN '超警戒'\n        ELSE '正常'\n    END AS status\nFROM sl323.st_river_r r\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nWHERE (b.stnm LIKE '%泵%' OR b.sttp LIKE '%P%')\n  AND rv.WRZ IS NOT NULL\nORDER BY r.z - rv.WRZ DESC\n\"\"\"\n\ntry:\n    df_pumps = query(sql_pump_stations)\nexcept Exception as e:\n    print(f\"Error querying pump stations: {e}\")\n    df_pumps = pd.DataFrame()\n\n# 输出结果摘要\nprint(\"=== 防洪预警统计 ===\")\nprint(f\"总监测站点(有防洪指标): {total_stations}\")\nprint(f\"超警戒水位站点数: {yellow_count_check}\")\nprint(f\"超保证水位站点数: {red_count_check}\")\nprint(f\"正常站点数: {normal_count}\")\n\nif not df_warning.empty:\n    print(\"\\n=== 超警戒/超保证站点详情 (前10名) ===\")\n    # 展示关键列\n    display_cols = ['station_name', 'river_name', 'station_type', 'current_water_level', 'warning_water_level', 'warning_level', 'observation_time']\n    available_cols = [c for c in display_cols if c in df_warning.columns]\n    print(df_warning[available_cols].head(10).to_string(index=False))\n\nif not df_pumps.empty:\n    print(\"\\n=== 泵站/相关站点水位状态 ===\")\n    pump_display_cols = ['station_name', 'current_water_level', 'warning_water_level', 'status']\n    available_pump_cols = [c for c in pump_display_cols if c in df_pumps.columns]\n    print(df_pumps[available_pump_cols].head(10).to_string(index=False))\nelse:\n    print(\"\\n=== 泵站/相关站点水位状态 ===\")\n    print(\"未找到特定泵站水位数据或无防洪指标定义。\")\n```",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": []
+      },
+      "total_score": 0.93,
+      "duration_sec": 37.61,
+      "error": "",
+      "attribution": {
+        "result_correctness": null,
+        "exec_detail": {
+          "reason": "actual_sql 为空（提取失败），不可测量"
+        }
+      }
+    },
+    {
+      "index": 93,
+      "skill": "water-warning",
+      "level": "L3",
+      "question": "查询当前所有站点的预警状态一览（包含正常站）。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '当前水位(m)',\n       rv.WRZ AS '警戒水位(m)', rv.GRZ AS '保证水位(m)',\n       CASE\n         WHEN rv.WRZ IS NULL THEN '未配置预警'\n         WHEN r.z > rv.GRZ THEN '红色预警'\n         WHEN r.z > rv.WRZ THEN '黄色预警'\n         ELSE '正常'\n       END AS '预警状态',\n       r.tm AS '更新时间'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_river_r GROUP BY stcd) latest\n  ON r.stcd = latest.stcd AND r.tm = latest.maxTm\nORDER BY CASE WHEN r.z > rv.GRZ THEN 1 WHEN r.z > rv.WRZ THEN 2 ELSE 3 END, r.z DESC;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query, query_multi\n\n# 1. 防洪预警查询 (水位站 sttp='ZZ')\n# 逻辑：获取每个水位站的最新水位，关联防洪指标表，判断预警等级\n# 注意：st_rvfcch_b 的 STCD 是大写，st_river_r 的 stcd 是小写\n# 注意：禁止使用 CTE，使用子查询获取最新时间\nsql_flood = \"\"\"\nSELECT \n    r.stcd AS '站码',\n    b.stnm AS '站名',\n    b.rvnm AS '河流名称',\n    r.tm AS '观测时间',\n    r.z AS '当前水位(m)',\n    rv.WRZ AS '警戒水位(m)',\n    rv.GRZ AS '保证水位(m)',\n    CASE \n        WHEN r.z > rv.GRZ THEN '红色预警(超保证)'\n        WHEN r.z > rv.WRZ THEN '黄色预警(超警戒)'\n        ELSE '正常'\n    END AS '防洪预警状态'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd AND b.sttp = 'ZZ'\nJOIN (\n    SELECT stcd, MAX(tm) AS mt \n    FROM sl323.st_river_r \n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.tm = latest.mt\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nORDER BY \n    CASE \n        WHEN r.z > rv.GRZ THEN 1\n        WHEN r.z > rv.WRZ THEN 2\n        ELSE 3\n    END,\n    r.z DESC\n\"\"\"\n\n# 2. 水质预警查询 (水质站 sttp='WQ')\n# 逻辑：获取每个水质站的最新采样数据，根据单因子评价法判断等级\n# Ⅳ类标准: CODMn <= 10, DO >= 3, NH3N <= 1.5, TP <= 0.3\n# 低于Ⅳ类 (即 Ⅴ类或劣Ⅴ类) 触发预警\nsql_quality = \"\"\"\nSELECT \n    r.stcd AS '站码',\n    b.stnm AS '站名',\n    r.spt AS '采样时间',\n    r.codmn AS 'CODMn(mg/L)',\n    r.dox AS 'DO(mg/L)',\n    r.nh3n AS 'NH3N(mg/L)',\n    r.tp AS 'TP(mg/L)',\n    CASE \n        WHEN r.codmn > 10 OR r.dox < 3 OR r.nh3n > 1.5 OR r.tp > 0.3 THEN '水质预警(低于Ⅳ类)'\n        ELSE '正常'\n    END AS '水质预警状态'\nFROM sl325.wq_pcp_d r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd AND b.sttp = 'WQ'\nJOIN (\n    SELECT stcd, MAX(spt) AS mspt \n    FROM sl325.wq_pcp_d \n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.spt = latest.mspt\nORDER BY \n    CASE \n        WHEN r.codmn > 10 OR r.dox < 3 OR r.nh3n > 1.5 OR r.tp > 0.3 THEN 1\n        ELSE 2\n    END\n\"\"\"\n\n# 执行查询\nflood_results = query(sql_flood)\nquality_results = query(sql_quality)\n\n# 格式化输出\nprint(\"=\"*60)\nprint(\"🌊 防洪预警状态一览 (水位站)\")\nprint(\"=\"*60)\nprint(f\"{'站码':<10} {'站名':<15} {'河流':<15} {'观测时间':<12} {'当前水位':<10} {'警戒水位':<10} {'保证水位':<10} {'预警状态'}\")\nprint(\"-\"*100)\n\nwarning_count_flood = 0\nnormal_count_flood = 0\n\nfor row in flood_results:\n    stcd, stnm, rvnm, tm, z, wrz, grz, status = row\n    rvnm_display = rvnm if rvnm else '-'\n    wrz_display = f\"{wrz:.2f}\" if wrz else '-'\n    grz_display = f\"{grz:.2f}\" if grz else '-'\n    z_display = f\"{z:.2f}\" if z else '-'\n    \n    # 标记预警状态\n    status_display = status\n    if '预警' in status:\n        warning_count_flood += 1\n        status_display = f\"⚠️ {status}\"\n    else:\n        normal_count_flood += 1\n        \n    print(f\"{stcd:<10} {stnm:<15} {rvnm_display:<15} {str(tm):<12} {z_display:<10} {wrz_display:<10} {grz_display:<10} {status_display}\")\n\nprint(f\"\\n防洪统计: 正常 {normal_count_flood} 站, 预警 {warning_count_flood} 站\")\n\nprint(\"\\n\" + \"=\"*60)\nprint(\"💧 水质预警状态一览 (水质站)\")\nprint(\"=\"*60)\nprint(f\"{'站码':<10} {'站名':<15} {'采样时间':<12} {'CODMn':<8} {'DO':<8} {'NH3N':<8} {'TP':<8} {'预警状态'}\")\nprint(\"-\"*80)\n\nwarning_count_quality = 0\nnormal_count_quality = 0\n\nfor row in quality_results:\n    stcd, stnm, spt, codmn, dox, nh3n, tp, status = row\n    codmn_display = f\"{codmn:.2f}\" if codmn is not None else '-'\n    dox_display = f\"{dox:.2f}\" if dox is not None else '-'\n    nh3n_display = f\"{nh3n:.2f}\" if nh3n is not None else '-'\n    tp_display = f\"{tp:.2f}\" if tp is not None else '-'\n    \n    # 标记预警状态\n    status_display = status\n    if '预警' in status:\n        warning_count_quality += 1\n        status_display = f\"⚠️ {status}\"\n    else:\n        normal_count_quality += 1\n        \n    print(f\"{stcd:<10} {stnm:<15} {str(spt):<12} {codmn_display:<8} {dox_display:<8} {nh3n_display:<8} {tp_display:<8} {status_display}\")\n\nprint(f\"\\n水质统计: 正常 {normal_count_quality} 站, 预警 {warning_count_quality} 站\")\n\nprint(\"\\n\" + \"=\"*60)\nprint(\"📊 综合预警汇总\")\nprint(\"=\"*60)\ntotal_warnings = warning_count_flood + warning_count_quality\nprint(f\"防洪预警站点: {warning_count_flood}\")\nprint(f\"水质预警站点: {warning_count_quality}\")\nprint(f\"总计预警站点: {total_warnings}\")\nif total_warnings == 0:\n    print(\"✅ 当前所有站点均处于正常状态。\")\nelse:\n    print(\"⚠️ 存在预警站点，请重点关注。\")\n```",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": []
+      },
+      "total_score": 0.93,
+      "duration_sec": 66.77,
+      "error": "",
+      "attribution": {
+        "result_correctness": null,
+        "exec_detail": {
+          "reason": "actual_sql 为空（提取失败），不可测量"
+        }
+      }
+    },
+    {
+      "index": 94,
+      "skill": "water-warning",
+      "level": "L3",
+      "question": "查询最近30天内是否有站点曾超警戒水位。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '水位(m)', rv.WRZ AS '警戒水位(m)',\n       r.tm AS '时间',\n       CASE WHEN r.z > rv.GRZ THEN '超保证' WHEN r.z > rv.WRZ THEN '超警戒' END AS '预警类型'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nWHERE r.tm >= DATE_SUB(NOW(), INTERVAL 30 DAY)\n  AND r.z > rv.WRZ\n  AND rv.WRZ IS NOT NULL\nORDER BY r.z - rv.WRZ DESC;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询最近30天内是否有站点曾超警戒水位\n# 逻辑：\n# 1. 获取每个站点在最近30天内的最新水位记录\n# 2. 关联防洪指标表 st_rvfcch_b 获取警戒水位 WRZ\n# 3. 筛选出当前水位 z > 警戒水位 WRZ 的站点\n# 注意：\n# - st_rvfcch_b.STCD 是大写\n# - 禁止使用 CTE，使用子查询\n# - 列别名需加引号\n\nsql = \"\"\"\nSELECT \n    r.stcd AS 站码,\n    b.stnm AS 站名,\n    b.rvnm AS 河名,\n    r.tm AS 观测时间,\n    r.z AS '当前水位(m)',\n    rv.WRZ AS '警戒水位(m)',\n    ROUND(r.z - rv.WRZ, 2) AS '超警戒(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN (\n    SELECT stcd, MAX(tm) AS mt \n    FROM sl323.st_river_r \n    WHERE tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)\n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.tm = latest.mt\nWHERE r.z > rv.WRZ\n  AND rv.WRZ IS NOT NULL\nORDER BY r.z - rv.WRZ DESC\nLIMIT 50\n\"\"\"\n\nresult = query(sql)\nresult\n```",
+      "actual_sql": "SELECT \n    r.stcd AS 站码,\n    b.stnm AS 站名,\n    b.rvnm AS 河名,\n    r.tm AS 观测时间,\n    r.z AS '当前水位(m)',\n    rv.WRZ AS '警戒水位(m)',\n    ROUND(r.z - rv.WRZ, 2) AS '超警戒(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nJOIN (\n    SELECT stcd, MAX(tm) AS mt \n    FROM sl323.st_river_r \n    WHERE tm >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)\n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.tm = latest.mt\nWHERE r.z > rv.WRZ\n  AND rv.WRZ IS NOT NULL\nORDER BY r.z - rv.WRZ DESC\nLIMIT 50",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 1.0,
+        "response_quality": 1.0,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "result_correctness": 1.0
+      },
+      "total_score": 0.95,
+      "duration_sec": 31.88,
+      "error": "",
+      "attribution": {
+        "result_correctness": 1.0,
+        "exec_detail": {
+          "actual_rows": 0,
+          "expected_rows": 0,
+          "actual_err": "",
+          "expected_err": ""
+        }
+      }
+    },
+    {
+      "index": 95,
+      "skill": "water-warning",
+      "level": "L3",
+      "question": "扬州市重点河道（古运河、新城河、瘦西湖、沿山河等）实时水位情况。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '实时水位(m)', r.tm AS '更新时间',\n       rv.WRZ AS '警戒水位(m)',\n       CASE WHEN rv.WRZ IS NOT NULL AND r.z > rv.WRZ THEN '超警戒' ELSE '正常' END AS '状态'\nFROM sl323.st_river_r r\nINNER JOIN (\n  SELECT r.stcd, b.stnm, MAX(tm) AS maxTm\n  FROM sl323.st_river_r r\n  INNER JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\n  WHERE b.stnm IN ('古运河水位站（新城河口）', '新城河水文站（兴城西路北）',\n                    '七里河水位站（东花园路）', '赵家支沟水文站（赵家河路）', '瘦西湖水位站')\n     OR b.rvnm IN ('沿山河')\n  GROUP BY r.stcd, b.stnm\n) sub ON r.stcd = sub.stcd AND r.tm = sub.maxTm\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query, query_multi\n\n# 定义重点河道名称列表\nriver_names = ['古运河', '新城河', '瘦西湖', '沿山河']\n\n# 构建 SQL 查询\n# 1. 获取每个站点的最新水位记录 (子查询避免 CTE)\n# 2. 关联测站属性表获取站名和河名\n# 3. 关联防洪指标表获取警戒/保证水位\n# 4. 筛选指定河道，并按河道和站名排序\n\nsql = \"\"\"\nSELECT \n    r.stcd AS 站码,\n    b.stnm AS 站名,\n    b.rvnm AS 河道名称,\n    b.hnnm AS 水系名称,\n    r.tm AS 观测时间,\n    r.z AS '当前水位(m)',\n    rv.WRZ AS '警戒水位(m)',\n    rv.GRZ AS '保证水位(m)',\n    CASE \n        WHEN r.z > rv.GRZ THEN '红色预警(超保证)'\n        WHEN r.z > rv.WRZ THEN '黄色预警(超警戒)'\n        ELSE '正常'\n    END AS 预警状态\nFROM sl323.st_river_r r\nJOIN (\n    SELECT stcd, MAX(tm) AS mt \n    FROM sl323.st_river_r \n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.tm = latest.mt\nLEFT JOIN sl323.st_stbprp_b b ON r.stcd = b.STCD\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nWHERE b.rvnm IN ({river_names_str})\nORDER BY b.rvnm, b.stnm\n\"\"\".format(river_names_str=\",\".join([f\"'{name}'\" for name in river_names]))\n\ntry:\n    data = query(sql)\n    print(data)\nexcept Exception as e:\n    print(f\"查询出错: {e}\")\n```",
+      "actual_sql": "SELECT \n    r.stcd AS 站码,\n    b.stnm AS 站名,\n    b.rvnm AS 河道名称,\n    b.hnnm AS 水系名称,\n    r.tm AS 观测时间,\n    r.z AS '当前水位(m)',\n    rv.WRZ AS '警戒水位(m)',\n    rv.GRZ AS '保证水位(m)',\n    CASE \n        WHEN r.z > rv.GRZ THEN '红色预警(超保证)'\n        WHEN r.z > rv.WRZ THEN '黄色预警(超警戒)'\n        ELSE '正常'\n    END AS 预警状态\nFROM sl323.st_river_r r\nJOIN (\n    SELECT stcd, MAX(tm) AS mt \n    FROM sl323.st_river_r \n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.tm = latest.mt\nLEFT JOIN sl323.st_stbprp_b b ON r.stcd = b.STCD\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nWHERE b.rvnm IN ({river_names_str})\nORDER BY b.rvnm, b.stnm",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 1.0,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ],
+        "result_correctness": 0.0
+      },
+      "total_score": 1.0,
+      "duration_sec": 28.81,
+      "error": "",
+      "attribution": {
+        "result_correctness": 0.0,
+        "exec_detail": {
+          "actual_rows": 0,
+          "expected_rows": 0,
+          "actual_err": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the rig",
+          "expected_err": "(1054, \"Unknown column 'b.stnm' in 'field list'\")"
+        }
+      }
+    },
+    {
+      "index": 96,
+      "skill": "water-warning",
+      "level": "L3",
+      "question": "查询所有水质站的最新水质综合评级，标注低于Ⅲ类的站点。",
+      "expected_sql": "SELECT b.stnm AS '测站', d.spt AS '采样时间',\n       d.codmn AS 'CODMn', d.dox AS 'DO', d.nh3n AS 'NH3N', d.tp AS 'TP',\n       CASE\n         WHEN d.codmn > 15 OR d.dox < 2 OR d.nh3n > 2 OR d.tp > 0.4 THEN '劣Ⅴ类'\n         WHEN d.codmn > 10 OR d.dox < 3 OR d.nh3n > 1.5 OR d.tp > 0.3 THEN 'Ⅴ类'\n         WHEN d.codmn > 6 OR d.dox < 5 OR d.nh3n > 1 OR d.tp > 0.2 THEN 'Ⅳ类'\n         WHEN d.codmn > 4 OR d.dox < 6 OR d.nh3n > 0.5 OR d.tp > 0.1 THEN 'Ⅲ类'\n         WHEN d.codmn > 2 OR d.dox < 7.5 OR d.nh3n > 0.15 OR d.tp > 0.02 THEN 'Ⅱ类'\n         ELSE 'Ⅰ类'\n       END AS '综合评级',\n       CASE\n         WHEN d.codmn > 6 OR d.dox < 5 OR d.nh3n > 1 OR d.tp > 0.2 THEN '水质异常'\n         ELSE '正常'\n       END AS '预警'\nFROM sl325.wq_pcp_d d\nJOIN sl323.st_stbprp_b b ON d.stcd = b.stcd\nWHERE b.sttp = 'WQ'\n  AND d.spt = (SELECT MAX(d2.spt) FROM sl325.wq_pcp_d d2 WHERE d2.stcd = d.stcd)\nORDER BY d.codmn DESC;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query, query_multi\n\n# Step 1: Get latest water quality data for all WQ stations\n# We need to find the latest spt for each stcd in wq_pcp_d where the station is a WQ station\n# First, identify WQ stations from st_stbprp_b\nwq_stations_sql = \"\"\"\nSELECT stcd FROM sl323.st_stbprp_b WHERE sttp = 'WQ'\n\"\"\"\nwq_stations = query(wq_stations_sql)\nif not wq_stations:\n    print(\"No WQ stations found.\")\n    sys.exit(0)\n\nstcd_list = [row['stcd'] for row in wq_stations]\n\nif not stcd_list:\n    print(\"No WQ station codes found.\")\n    sys.exit(0)\n\n# Step 2: Get the latest record for each WQ station from wq_pcp_d\n# We use a subquery to get the max spt for each stcd\nlatest_wq_sql = \"\"\"\nSELECT r.stcd, r.spt, r.dox, r.codmn, r.nh3n, r.tp\nFROM sl325.wq_pcp_d r\nJOIN (\n    SELECT stcd, MAX(spt) as max_spt\n    FROM sl325.wq_pcp_d\n    WHERE stcd IN ({stcds})\n    GROUP BY stcd\n) latest ON r.stcd = latest.stcd AND r.spt = latest.max_spt\n\"\"\".format(stcds=\",\".join([\"'%s'\" % stcd for stcd in stcd_list]))\n\nlatest_wq_data = query(latest_wq_sql)\n\nif not latest_wq_data:\n    print(\"No latest water quality data found for WQ stations.\")\n    sys.exit(0)\n\n# Step 3: Calculate water quality grade for each station based on single factor evaluation\n# Grade I: DO >= 7.5, CODMn <= 2, NH3N <= 0.2, TP <= 0.02\n# Grade II: DO >= 6, CODMn <= 4, NH3N <= 0.5, TP <= 0.1\n# Grade III: DO >= 5, CODMn <= 6, NH3N <= 1.0, TP <= 0.2\n# Grade IV: DO >= 3, CODMn <= 10, NH3N <= 1.5, TP <= 0.3\n# Grade V: DO >= 2, CODMn <= 15, NH3N <= 2.0, TP <= 0.4\n# Grade Inferior V: DO < 2, CODMn > 15, NH3N > 2.0, TP > 0.4\n\ndef get_water_quality_grade(dox, codmn, nh3n, tp):\n    # Handle NULL values\n    if dox is None or codmn is None or nh3n is None or tp is None:\n        return \"Data Incomplete\"\n    \n    # Determine grade for each parameter\n    grades = []\n    \n    # DO grade\n    if dox >= 7.5:\n        grades.append(1)\n    elif dox >= 6:\n        grades.append(2)\n    elif dox >= 5:\n        grades.append(3)\n    elif dox >= 3:\n        grades.append(4)\n    elif dox >= 2:\n        grades.append(5)\n    else:\n        grades.append(6)\n        \n    # CODMn grade\n    if codmn <= 2:\n        grades.append(1)\n    elif codmn <= 4:\n        grades.append(2)\n    elif codmn <= 6:\n        grades.append(3)\n    elif codmn <= 10:\n        grades.append(4)\n    elif codmn <= 15:\n        grades.append(5)\n    else:\n        grades.append(6)\n        \n    # NH3N grade\n    if nh3n <= 0.2:\n        grades.append(1)\n    elif nh3n <= 0.5:\n        grades.append(2)\n    elif nh3n <= 1.0:\n        grades.append(3)\n    elif nh3n <= 1.5:\n        grades.append(4)\n    elif nh3n <= 2.0:\n        grades.append(5)\n    else:\n        grades.append(6)\n        \n    # TP grade\n    if tp <= 0.02:\n        grades.append(1)\n    elif tp <= 0.1:\n        grades.append(2)\n    elif tp <= 0.2:\n        grades.append(3)\n    elif tp <= 0.3:\n        grades.append(4)\n    elif tp <= 0.4:\n        grades.append(5)\n    else:\n        grades.append(6)\n        \n    # The overall grade is the worst (highest number) grade among all parameters\n    overall_grade = max(grades)\n    \n    grade_names = {\n        1: \"Ⅰ类\",\n        2: \"Ⅱ类\",\n        3: \"Ⅲ类\",\n        4: \"Ⅳ类\",\n        5: \"Ⅴ类\",\n        6: \"劣Ⅴ类\"\n    }\n    \n    return grade_names[overall_grade]\n\n# Step 4: Process results and flag stations below Grade III\nresults = []\nfor row in latest_wq_data:\n    stcd = row['stcd']\n    spt = row['spt']\n    dox = row['dox']\n    codmn = row['codmn']\n    nh3n = row['nh3n']\n    tp = row['tp']\n    \n    grade = get_water_quality_grade(dox, codmn, nh3n, tp)\n    \n    # Flag if grade is below III (i.e., IV, V, or Inferior V)\n    is_below_iii = grade in [\"Ⅳ类\", \"Ⅴ类\", \"劣Ⅴ类\"]\n    \n    results.append({\n        \"stcd\": stcd,\n        \"spt\": spt,\n        \"dox\": dox,\n        \"codmn\": codmn,\n        \"nh3n\": nh3n,\n        \"tp\": tp,\n        \"grade\": grade,\n        \"below_iii\": is_below_iii\n    })\n\n# Step 5: Print results\nprint(\"Water Quality Stations Latest Grade Report\")\nprint(\"=\" * 80)\nprint(f\"{'Station Code':<15} {'Sample Time':<20} {'DO(mg/L)':<10} {'CODMn(mg/L)':<12} {'NH3N(mg/L)':<12} {'TP(mg/L)':<10} {'Grade':<10} {'Below III?':<10}\")\nprint(\"-\" * 80)\n\nfor res in results:\n    print(f\"{res['stcd']:<15} {str(res['spt']):<20} {str(res['dox']):<10} {str(res['codmn']):<12} {str(res['nh3n']):<12} {str(res['tp']):<10} {res['grade']:<10} {'Yes' if res['below_iii'] else 'No':<10}\")\n\n# Step 6: Highlight stations below Grade III\nbelow_iii_stations = [res for res in results if res['below_iii']]\nif below_iii_stations:\n    print(\"\\n\" + \"=\" * 80)\n    print(\"Stations with Water Quality Below Grade III:\")\n    print(\"=\" * 80)\n    for res in below_iii_stations:\n        print(f\"Station Code: {res['stcd']}, Grade: {res['grade']}, Sample Time: {res['spt']}\")\nelse:\n    print(\"\\nNo stations with water quality below Grade III.\")\n```",
+      "actual_sql": "SELECT stcd FROM sl323.st_stbprp_b WHERE sttp = 'WQ'",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.4,
+        "sql_safe": 0.5,
+        "safety_issues": [
+          "无 LIMIT"
+        ],
+        "result_correctness": 0.6
+      },
+      "total_score": 0.57,
+      "duration_sec": 56.93,
+      "error": "",
+      "attribution": {
+        "result_correctness": 0.6,
+        "exec_detail": {
+          "actual_rows": 79,
+          "expected_rows": 0,
+          "actual_err": "",
+          "expected_err": "(2013, 'Lost connection to MySQL server during query (timed out)')"
+        }
+      }
+    },
+    {
+      "index": 97,
+      "skill": "water-warning",
+      "level": "L3",
+      "question": "2024年8月扬州城区降雨量最大的那天，各重点河道水位是否超警戒？",
+      "expected_sql": "SELECT b.stnm AS '测站名称',\n       MAX(CASE WHEN r.tm BETWEEN '2024-08-17' AND '2024-08-23' THEN r.z END) AS '期间最高水位(m)',\n       rv.WRZ AS '警戒水位(m)',\n       CASE WHEN MAX(CASE WHEN r.tm BETWEEN '2024-08-17' AND '2024-08-23' THEN r.z END) > rv.WRZ THEN '超警戒' ELSE '正常' END AS '状态'\nFROM sl323.st_stbprp_b b\nJOIN sl323.st_river_r r ON b.stcd = r.stcd\nLEFT JOIN sl323.st_rvfcch_b rv ON b.stcd = rv.STCD\nWHERE b.stnm IN ('古运河水位站（新城河口）', '新城河水文站（兴城西路北）',\n                  '七里河水位站（东花园路）', '赵家支沟水文站（赵家河路）', '瘦西湖水位站')\n  AND r.tm BETWEEN '2024-08-01' AND '2024-08-31'\nGROUP BY b.stnm, rv.WRZ;",
+      "actual_response": "这是一个非常具体的水利预警查询请求。为了准确回答，我需要执行以下步骤：\n\n1.  **确定时间范围**：锁定 2024年8月。\n2.  **定位扬州城区站点**：在 `sl323.st_stbprp_b` 中筛选位于扬州城区的水位站（通常通过站名 `stnm` 包含“扬州”或“城区”，或河名 `rvnm` 包含相关关键词，且 `sttp='ZZ'`）。\n3.  **获取降雨数据**：*注意*：当前提供的核心表 `sl323.st_river_r`（水位）、`sl323.st_rvfcch_b`（阈值）、`sl325.wq_pcp_d`（水质）中**没有直接的降雨量（Precipitation）数据表**。\n    *   *策略调整*：由于缺乏直接的降雨表，我将无法直接通过“降雨量最大”来筛选日期。\n    *   *替代方案*：通常降雨量最大会导致水位最高。我将查询 **2024年8月扬州城区各重点水位站的最高水位出现的时间**，并假设该时间点对应强降雨过程。或者，如果用户意指“查询8月全月所有时刻，找出水位超警戒的情况”，我将直接查询8月全月的水位预警情况。\n    *   *更严谨的做法*：鉴于没有降雨表，我将查询 **2024年8月扬州城区主要水位站的水位数据**，并检查是否超警戒。如果必须关联降雨，我需要告知用户数据缺失。但根据常见业务场景，用户可能想问的是“8月期间，扬州城区水位是否超警戒”。\n    *   *修正*：让我们先查询扬州城区有哪些水位站，然后查询它们在2024年8月的水位数据，并对比警戒水位。\n\n**步骤 1: 查找扬州城区的水位站 (sttp='ZZ')**\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询扬州城区的水位站\nsql_stations = \"\"\"\nSELECT stcd, stnm, rvnm, hnnm\nFROM sl323.st_stbprp_b\nWHERE sttp = 'ZZ'\n  AND (stnm LIKE '%扬州%' OR stnm LIKE '%城区%' OR rvnm LIKE '%扬州%' OR rvnm LIKE '%城区%')\nLIMIT 20\n\"\"\"\nstations = query(sql_stations)\nprint(\"扬州城区水位站:\")\nfor s in stations:\n    print(s)\n```\n\n**步骤 2: 获取这些站点的警戒水位 (WRZ)**\n\n```python\n# 假设上一步获取了 stcd 列表，这里先获取所有可能相关的站点阈值\n# 为了简化，我们直接查询扬州相关站点的阈值\nsql_thresholds = \"\"\"\nSELECT STCD, WRZ, GRZ\nFROM sl323.st_rvfcch_b\nWHERE STCD IN (\n    SELECT stcd FROM sl323.st_stbprp_b\n    WHERE sttp = 'ZZ'\n      AND (stnm LIKE '%扬州%' OR stnm LIKE '%城区%' OR rvnm LIKE '%扬州%' OR rvnm LIKE '%城区%')\n)\n\"\"\"\nthresholds = query(sql_thresholds)\nprint(\"\\n警戒水位阈值:\")\nfor t in thresholds:\n    print(t)\n```\n\n**步骤 3: 查询2024年8月这些站点的水位数据，并判断是否超警戒**\n\n由于没有降雨表，我将查询2024年8月全月，找出水位最高的时刻（通常对应降雨高峰），并检查是否超警戒。\n\n```python\n# 构建查询：获取2024年8月扬州城区水位站的水位数据，并关联阈值\n# 注意：st_rvfcch_b 的 STCD 是大写，st_river_r 的 stcd 是小写，JOIN 时需注意\nsql_water_level = \"\"\"\nSELECT \n    r.stcd,\n    b.stnm AS station_name,\n    b.rvnm AS river_name,\n    r.tm AS time,\n    r.z AS current_water_level,\n    rv.WRZ AS warning_level,\n    rv.GRZ AS guarantee_level,\n    CASE \n        WHEN r.z > rv.GRZ THEN '红色预警(超保证)'\n        WHEN r.z > rv.WRZ THEN '黄色预警(超警戒)'\n        ELSE '正常'\n    END AS warning_status\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nWHERE b.sttp = 'ZZ'\n  AND (b.stnm LIKE '%扬州%' OR b.stnm LIKE '%城区%' OR b.rvnm LIKE '%扬州%' OR b.rvnm LIKE '%城区%')\n  AND r.tm >= '2024-08-01 00:00:00'\n  AND r.tm < '2024-09-01 00:00:00'\nORDER BY r.z DESC\nLIMIT 20\n\"\"\"\nwater_data = query(sql_water_level)\nprint(\"\\n2024年8月扬州城区水位最高记录及预警状态:\")\nfor w in water_data:\n    print(w)\n```\n\n**执行代码并分析结果**\n\n```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 1. 查找扬州城区的水位站\nsql_stations = \"\"\"\nSELECT stcd, stnm, rvnm, hnnm\nFROM sl323.st_stbprp_b\nWHERE sttp = 'ZZ'\n  AND (stnm LIKE '%扬州%' OR stnm LIKE '%城区%' OR rvnm LIKE '%扬州%' OR rvnm LIKE '%城区%')\nLIMIT 20\n\"\"\"\nstations = query(sql_stations)\nprint(\"=== 扬州城区水位站 ===\")\nfor s in stations:\n    print(s)\n\n# 2. 查询2024年8月这些站点的水位数据，并判断是否超警戒\nsql_water_level = \"\"\"\nSELECT \n    r.stcd,\n    b.stnm AS station_name,\n    b.rvnm AS river_name,\n    r.tm AS time,\n    r.z AS current_water_level,\n    rv.WRZ AS warning_level,\n    rv.GRZ AS guarantee_level,\n    CASE \n        WHEN r.z > rv.GRZ THEN '红色预警(超保证)'\n        WHEN r.z > rv.WRZ THEN '黄色预警(超警戒)'\n        ELSE '正常'\n    END AS warning_status\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nLEFT JOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nWHERE b.sttp = 'ZZ'\n  AND (b.stnm LIKE '%扬州%' OR b.stnm LIKE '%城区%' OR b.rvnm LIKE '%扬州%' OR b.rvnm LIKE '%城区%')\n  AND r.tm >= '2024-08-01 00:00:00'\n  AND r.tm < '2024-09-01 00:00:00'\nORDER BY r.z DESC\nLIMIT 20\n\"\"\"\nwater_data = query(sql_water_level)\nprint(\"\\n=== 2024年8月扬州城区水位最高记录及预警状态 ===\")\nfor w in water_data:\n    print(w)\n```",
+      "actual_sql": "",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 1.0,
+        "has_numeric_data": 1.0,
+        "response_quality": 0.7,
+        "sql_safe": 1.0,
+        "safety_issues": []
+      },
+      "total_score": 0.93,
+      "duration_sec": 71.56,
+      "error": "",
+      "attribution": {
+        "result_correctness": null,
+        "exec_detail": {
+          "reason": "actual_sql 为空（提取失败），不可测量"
+        }
+      }
+    },
+    {
+      "index": 98,
+      "skill": "water-warning",
+      "level": "L3",
+      "question": "查询历史上超保证水位（GRZ）的站点及出现时间。",
+      "expected_sql": "SELECT b.stnm AS '测站名称', r.z AS '水位(m)', rv.GRZ AS '保证水位(m)',\n       r.tm AS '时间', rv.GRZ AS '保证水位'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.stcd\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nWHERE r.z > rv.GRZ AND rv.GRZ IS NOT NULL\nORDER BY r.z - rv.GRZ DESC\nLIMIT 20;",
+      "actual_response": "```python\nimport os, sys\nsys.path.insert(0, os.path.join(os.environ['WATER_RESOURCES_ROOT'], 'lib'))\nfrom db import query\n\n# 查询历史上所有超保证水位（z > GRZ）的记录\n# 注意：st_rvfcch_b 的 STCD 是大写，st_river_r 的 stcd 是小写\n# 使用子查询获取每个站点最新的防洪指标（WRZ/GRZ），因为 st_rvfcch_b 无PK且可能有多条记录\n# 这里我们假设 st_rvfcch_b 中的 GRZ 是相对稳定的基准值，直接 JOIN 即可。\n# 为了性能和安全，我们只查询有 GRZ 数据的站点。\n\nsql = \"\"\"\nSELECT \n    r.stcd AS '站码',\n    b.stnm AS '站名',\n    b.rvnm AS '河流名称',\n    r.tm AS '发生时间',\n    r.z AS '当前水位(m)',\n    rv.GRZ AS '保证水位(m)',\n    (r.z - rv.GRZ) AS '超保证水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.STCD\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nWHERE rv.GRZ IS NOT NULL \n  AND rv.GRZ > 0\n  AND r.z > rv.GRZ\nORDER BY r.z - rv.GRZ DESC, r.tm DESC\nLIMIT 100\n\"\"\"\n\nresult = query(sql)\nprint(result)\n```",
+      "actual_sql": "SELECT \n    r.stcd AS '站码',\n    b.stnm AS '站名',\n    b.rvnm AS '河流名称',\n    r.tm AS '发生时间',\n    r.z AS '当前水位(m)',\n    rv.GRZ AS '保证水位(m)',\n    (r.z - rv.GRZ) AS '超保证水位(m)'\nFROM sl323.st_river_r r\nJOIN sl323.st_stbprp_b b ON r.stcd = b.STCD\nJOIN sl323.st_rvfcch_b rv ON r.stcd = rv.STCD\nWHERE rv.GRZ IS NOT NULL \n  AND rv.GRZ > 0\n  AND r.z > rv.GRZ\nORDER BY r.z - rv.GRZ DESC, r.tm DESC\nLIMIT 100",
+      "scores": {
+        "has_valid_response": 1.0,
+        "has_domain_data": 0.67,
+        "has_numeric_data": 1.0,
+        "response_quality": 1.0,
+        "sql_safe": 1.0,
+        "safety_issues": [],
+        "result_correctness": 1.0
+      },
+      "total_score": 0.95,
+      "duration_sec": 14.94,
+      "error": "",
+      "attribution": {
+        "result_correctness": 1.0,
+        "exec_detail": {
+          "actual_rows": 0,
+          "expected_rows": 0,
+          "actual_err": "",
+          "expected_err": ""
+        }
+      }
+    }
+  ]
+}

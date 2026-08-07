@@ -1,0 +1,72 @@
+{
+  "timestamp": "20260731_170622",
+  "config": {
+    "mode": "gateway_real_platform",
+    "gateway_url": "http://localhost:8001",
+    "model": "(platform default)",
+    "skill": "ALL",
+    "timeout": 900
+  },
+  "summary": {
+    "total": 1,
+    "avg_score": 0.95,
+    "pass_rate": 1.0
+  },
+  "results": [
+    {
+      "index": 42,
+      "skill": "rainfall",
+      "level": "L3",
+      "question": "查询最近一周扬州市各雨量站的累计降雨量排名。",
+      "expected_sql": "SELECT b.stnm AS '雨量站', SUM(p.drp) AS '累计降雨量(mm)'\nFROM sl323.st_pptn_r p\nJOIN sl323.st_stbprp_b b ON p.stcd = b.stcd\nWHERE b.sttp = 'PP'\n  AND p.tm >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)\n  AND p.drp IS NOT NULL\nGROUP BY b.stnm\nORDER BY SUM(p.drp) DESC;",
+      "final_answer": "以下是 **2026年7月24日至7月31日** 扬州市各雨量站累计降雨量排名：\n\n| 排名 | 测站名称 | 累计降雨量(mm) | 最大时段降雨(mm) | 记录次数 |\n|:---:|---------|:---:|:---:|:---:|\n| 1 | 吴庄河闸雨量站（胜利河） | **117.9** | 15.1 | 8 |\n| 2 | 沙施河南节制闸雨量站（利旧） | **106.9** | 13.5 | 8 |\n| 3 | 马港河雨量站 | **100.5** | 12.8 | 8 |\n| 4 | 念四闸站雨量站（利旧） | **93.0** | 11.9 | 8 |\n| 5 | 团结河雨量站（小袁庄） | **82.7** | 10.6 | 8 |\n| 6 | 太平闸站雨量站（利旧） | **74.8** | 9.6 | 8 |\n| 7 | 响水河闸雨量站（利旧） | **65.4** | 8.4 | 8 |\n| 8 | 二道河雨量站（文昌中路） | **59.3** | 7.6 | 8 |\n| 9 | 乌塔沟雨量站（横沟闸站） | **45.5** | 5.8 | 8 |\n| 10 | 扬州（城区站） | **26.7** | 14.9 | 8 |\n\n**数据说明：**\n- 查询时间范围：2026年7月24日 ~ 7月31日（共7天）\n- 扬州市雨量站共57个，其中10个站点有有效降雨记录（冷却河闸雨量站记录为0）\n- 所有有记录的站点均为8次观测记录\n- 累计降雨量最高为 **吴庄河闸雨量站 117.9mm**，最低为 **扬州城区站 26.7mm**\n- 扬州城区站虽然累计降雨量最低，但最大时段降雨达14.9mm，说明降雨集中在少数时段",
+      "actual_sqls": [
+        "SELECT MAX(tm) AS latest_tm FROM st_pptn_r",
+        "SELECT \n    p.stcd AS '测站编码',\n    b.stnm AS '测站名称',\n    b.addvcd AS '区域编码',\n    COUNT(*) AS '记录次数',\n    SUM(p.drp) AS '累计降雨量(mm)',\n    MAX(p.drp) AS '最大时段降雨(mm)',\n    MIN(p.tm) AS '最早记录时间',\n    MAX(p.tm) AS '最晚记录时间'\nFROM st_pptn_r p\nJOIN st_stbprp_b b ON p.stcd = b.stcd\nWHERE p.tm >= '2026-07-24' AND p.tm < '2026-07-31 23:59:59'\n    AND b.sttp = 'PP'\n    AND b.addvcd LIKE '3210%'\nGROUP BY p.stcd, b.stnm, b.addvcd\nORDER BY SUM(p.drp) DESC\nLIMIT 50",
+        "SELECT DISTINCT b.addvcd, b.stnm, b.stcd\nFROM st_stbprp_b b\nWHERE b.sttp = 'PP'\nORDER BY b.addvcd\nLIMIT 30",
+        "SELECT DATE(p.tm) AS date, COUNT(*) AS cnt, SUM(p.drp) AS total_drp\nFROM st_pptn_r p\nJOIN st_stbprp_b b ON p.stcd = b.stcd\nWHERE b.sttp = 'PP'\nGROUP BY DATE(p.tm)\nORDER BY date DESC\nLIMIT 20",
+        "SELECT \n    p.stcd AS '测站编码',\n    b.stnm AS '测站名称',\n    b.addvcd AS '区域编码',\n    COUNT(*) AS '记录次数',\n    ROUND(SUM(p.drp), 1) AS '累计降雨量(mm)',\n    ROUND(MAX(p.drp), 1) AS '最大时段降雨(mm)',\n    ROUND(AVG(p.drp), 1) AS '平均时段降雨(mm)'\nFROM st_pptn_r p\nJOIN st_stbprp_b b ON p.stcd = b.stcd\nWHERE p.tm >= '2026-07-24' AND p.tm < '2026-07-31 23:59:59'\n    AND b.sttp = 'PP'\n    AND b.addvcd IN ('320188', '321002', '321003', '321004', '321005', '321006', '321007', '321008', '321023')\nGROUP BY p.stcd, b.stnm, b.addvcd\nORDER BY SUM(p.drp) DESC\nLIMIT 50",
+        "SELECT COUNT(*) AS total_stations\nFROM st_stbprp_b\nWHERE sttp = 'PP'\n    AND addvcd IN ('320188', '321002', '321003', '321004', '321005', '321006', '321007', '321008', '321023')",
+        "SELECT \n    p.stcd AS '测站编码',\n    b.stnm AS '测站名称',\n    b.addvcd AS '区域编码',\n    COUNT(*) AS '记录次数',\n    ROUND(SUM(p.drp), 1) AS '累计降雨量(mm)',\n    ROUND(MAX(p.drp), 1) AS '最大时段降雨(mm)'\nFROM st_pptn_r p\nJOIN st_stbprp_b b ON p.stcd = b.stcd\nWHERE p.tm >= '2026-07-24' AND p.tm < '2026-07-31 23:59:59'\n    AND b.sttp = 'PP'\n    AND b.addvcd IN ('320188', '321002', '321003', '321004', '321005', '321006', '321007', '321008', '321023')\nGROUP BY p.stcd, b.stnm, b.addvcd\nHAVING SUM(p.drp) > 0\nORDER BY SUM(p.drp) DESC"
+      ],
+      "tool_trace": [
+        "read_file",
+        "read_file",
+        "water-db_get_date_range",
+        "water-db_get_table_schema",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "`st_pptn_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"latest_tm\": \"2026-07-31 00:00:00\"}]",
+        "Query returned 0 rows.\nSQL: SELECT \n    p.stcd AS '测站编码',\n    b.stnm AS '测站名称',\n    b.addvcd AS '区域编码',\n    COUNT(*) AS '记录次数',\n    SUM(p.drp) AS '累计降雨量(mm)',\n    MAX(p.drp) AS '最大时段降雨(mm)',\n    MIN(p.tm) AS '最早记录时间',\n    MAX(p.\nHint: check `get_date_range(table)` for time coverage, or `get_table_schema(table)` for column names.",
+        "[{\"addvcd\": \"320188\", \"stnm\": \"乌塔沟雨量站（横沟闸站）\", \"stcd\": \"HT0061003110000016\"}, {\"addvcd\": \"320188\", \"stnm\": \"二道河雨量站（文昌中路）\", \"stcd\": \"HT0061002002000011\"}, {\"addvcd\": \"320188\", \"stnm\": \"冷却河闸雨量站\", \"stcd\": \"HT0061003053000012\"}, {\"addvcd\": \"320188\", \"stnm\": \"吴庄河闸雨量站（胜利河）\", \"stcd\": \"HT0061002005000019\"}, {\"addvcd\": \"320188\", \"stnm\": \"响水河闸雨量站（利旧）\", \"stcd\": \"HT0061000000000001\"}, {\"addvcd\": \"320188\", \"stnm\": \"团结河雨量站（小袁庄）\", \"stcd\": \"HT0061003103000013\"}, {\"addvcd\": \"320188\", \"stnm\": \"太平闸站雨量站（利旧）\", \"stcd\": \"HT0061000000000003\"}, {\"addvcd\": \"320188\", \"stnm\": \"念四闸站雨量站（利旧）\", \"stcd\": \"HT0061000000000004\"}, {\"addvcd\": \"320188\", \"stnm\": \"扬州\", \"stcd\": \"58245\"}, {\"addvcd\": \"320188\", \"stnm\": \"扬州八里镇\", \"stcd\": \"M6591\"}, {\"addvcd\": \"320188\", \"stnm\": \"扬州城北乡\", \"stcd\": \"M6590\"}, {\"addvcd\": \"320188\", \"stnm\": \"扬州曲江街道\", \"stcd\": \"M6592\"}, {\"addvcd\": \"320188\", \"stnm\": \"扬州梅岭街道\", \"stcd\": \"M3384\"}, {\"addvcd\": \"320188\", \"stnm\": \"扬州汤汪乡\", \"stcd\": \"M6583\"}, {\"addvcd\": \"320188\", \"stnm\": \"沙施河南节制闸雨量站（利旧）\", \"stcd\": \"HT0061000000000002\"}, {\"addvcd\": \"320188\", \"stnm\": \"邗江\", \"stcd\": \"58239\"}, {\"addvcd\": \"320188\", \"stnm\": \"邗江双桥乡\", \"stcd\": \"M3381\"}, {\"addvcd\": \"320188\", \"stnm\": \"邗江汊河街道\", \"stcd\": \"M6581\"}, {\"addvcd\": \"320188\", \"stnm\": \"邗江瓜洲镇\", \"stcd\": \"M3403\"}, {\"addvcd\": \"320188\", \"stnm\": \"邗江蒋王街道\", \"stcd\": \"M6587\"}, {\"addvcd\": \"320188\", \"stnm\": \"邗江邗上街道\", \"stcd\": \"M3404\"}, {\"addvcd\": \"320188\", \"stnm\": \"陆洲泵站雨量站\", \"stcd\": \"HT0061003003000012\"}, {\"addvcd\": \"320188\", \"stnm\": \"马港河雨量站\", \"stcd\": \"HT0061071151000010\"}, {\"addvcd\": \"321002\", \"stnm\": \"扬州头桥镇\", \"stcd\": \"M3385\"}, {\"addvcd\": \"321002\", \"stnm\": \"扬州李典镇\", \"stcd\": \"M6584\"}, {\"addvcd\": \"321002\", \"stnm\": \"扬州杭集镇\", \"stcd\": \"M6585\"}, {\"addvcd\": \"321002\", \"stnm\": \"扬州沙头镇\", \"stcd\": \"M3395\"}, {\"addvcd\": \"321002\", \"stnm\": \"扬州沙头霍桥\", \"stcd\": \"M3386\"}, {\"addvcd\": \"321002\", \"stnm\": \"扬州泰安镇\", \"stcd\": \"M6586\"}, {\"addvcd\": \"321002\", \"stnm\": \"扬州湾头镇\", \"stcd\": \"M3387\"}]",
+        "[{\"date\": \"2026-07-31\", \"cnt\": 11, \"total_drp\": \"105.3\"}, {\"date\": \"2026-07-30\", \"cnt\": 11, \"total_drp\": \"93.3\"}, {\"date\": \"2026-07-29\", \"cnt\": 11, \"total_drp\": \"92.8\"}, {\"date\": \"2026-07-28\", \"cnt\": 11, \"total_drp\": \"93.8\"}, {\"date\": \"2026-07-27\", \"cnt\": 11, \"total_drp\": \"92.5\"}, {\"date\": \"2026-07-26\", \"cnt\": 11, \"total_drp\": \"93.5\"}, {\"date\": \"2026-07-25\", \"cnt\": 11, \"total_drp\": \"108.6\"}, {\"date\": \"2026-07-24\", \"cnt\": 11, \"total_drp\": \"92.9\"}, {\"date\": \"2026-07-23\", \"cnt\": 11, \"total_drp\": \"93.2\"}, {\"date\": \"2026-07-22\", \"cnt\": 11, \"total_drp\": \"93.5\"}, {\"date\": \"2026-07-21\", \"cnt\": 11, \"total_drp\": \"93.3\"}, {\"date\": \"2026-07-20\", \"cnt\": 11, \"total_drp\": \"94.2\"}, {\"date\": \"2026-07-19\", \"cnt\": 11, \"total_drp\": \"97.2\"}, {\"date\": \"2026-07-18\", \"cnt\": 11, \"total_drp\": \"92.5\"}, {\"date\": \"2026-07-17\", \"cnt\": 11, \"total_drp\": \"93.0\"}, {\"date\": \"2026-07-16\", \"cnt\": 11, \"total_drp\": \"92.7\"}, {\"date\": \"2026-07-15\", \"cnt\": 11, \"total_drp\": \"93.5\"}, {\"date\": \"2026-07-14\", \"cnt\": 11, \"total_drp\": \"103.0\"}, {\"date\": \"2026-07-13\", \"cnt\": 11, \"total_drp\": \"93.4\"}, {\"date\": \"2026-07-12\", \"cnt\": 11, \"total_drp\": \"95.2\"}]",
+        "[{\"测站编码\": \"HT0061002005000019\", \"测站名称\": \"吴庄河闸雨量站（胜利河）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"117.9\", \"最大时段降雨(mm)\": \"15.1\", \"平均时段降雨(mm)\": \"14.7\"}, {\"测站编码\": \"HT0061000000000002\", \"测站名称\": \"沙施河南节制闸雨量站（利旧）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"106.9\", \"最大时段降雨(mm)\": \"13.5\", \"平均时段降雨(mm)\": \"13.4\"}, {\"测站编码\": \"HT0061071151000010\", \"测站名称\": \"马港河雨量站\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"100.5\", \"最大时段降雨(mm)\": \"12.8\", \"平均时段降雨(mm)\": \"12.6\"}, {\"测站编码\": \"HT0061000000000004\", \"测站名称\": \"念四闸站雨量站（利旧）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"93.0\", \"最大时段降雨(mm)\": \"11.9\", \"平均时段降雨(mm)\": \"11.6\"}, {\"测站编码\": \"HT0061003103000013\", \"测站名称\": \"团结河雨量站（小袁庄）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"82.7\", \"最大时段降雨(mm)\": \"10.6\", \"平均时段降雨(mm)\": \"10.3\"}, {\"测站编码\": \"HT0061000000000003\", \"测站名称\": \"太平闸站雨量站（利旧）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"74.8\", \"最大时段降雨(mm)\": \"9.6\", \"平均时段降雨(mm)\": \"9.4\"}, {\"测站编码\": \"HT0061000000000001\", \"测站名称\": \"响水河闸雨量站（利旧）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"65.4\", \"最大时段降雨(mm)\": \"8.4\", \"平均时段降雨(mm)\": \"8.2\"}, {\"测站编码\": \"HT0061002002000011\", \"测站名称\": \"二道河雨量站（文昌中路）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"59.3\", \"最大时段降雨(mm)\": \"7.6\", \"平均时段降雨(mm)\": \"7.4\"}, {\"测站编码\": \"HT0061003110000016\", \"测站名称\": \"乌塔沟雨量站（横沟闸站）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"45.5\", \"最大时段降雨(mm)\": \"5.8\", \"平均时段降雨(mm)\": \"5.7\"}, {\"测站编码\": \"58245\", \"测站名称\": \"扬州\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"26.7\", \"最大时段降雨(mm)\": \"14.9\", \"平均时段降雨(mm)\": \"3.3\"}, {\"测站编码\": \"HT0061003053000012\", \"测站名称\": \"冷却河闸雨量站\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"0.0\", \"最大时段降雨(mm)\": \"0.0\", \"平均时段降雨(mm)\": \"0.0\"}]",
+        "[{\"total_stations\": 57}]",
+        "[{\"测站编码\": \"HT0061002005000019\", \"测站名称\": \"吴庄河闸雨量站（胜利河）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"117.9\", \"最大时段降雨(mm)\": \"15.1\"}, {\"测站编码\": \"HT0061000000000002\", \"测站名称\": \"沙施河南节制闸雨量站（利旧）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"106.9\", \"最大时段降雨(mm)\": \"13.5\"}, {\"测站编码\": \"HT0061071151000010\", \"测站名称\": \"马港河雨量站\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"100.5\", \"最大时段降雨(mm)\": \"12.8\"}, {\"测站编码\": \"HT0061000000000004\", \"测站名称\": \"念四闸站雨量站（利旧）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"93.0\", \"最大时段降雨(mm)\": \"11.9\"}, {\"测站编码\": \"HT0061003103000013\", \"测站名称\": \"团结河雨量站（小袁庄）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"82.7\", \"最大时段降雨(mm)\": \"10.6\"}, {\"测站编码\": \"HT0061000000000003\", \"测站名称\": \"太平闸站雨量站（利旧）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"74.8\", \"最大时段降雨(mm)\": \"9.6\"}, {\"测站编码\": \"HT0061000000000001\", \"测站名称\": \"响水河闸雨量站（利旧）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"65.4\", \"最大时段降雨(mm)\": \"8.4\"}, {\"测站编码\": \"HT0061002002000011\", \"测站名称\": \"二道河雨量站（文昌中路）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"59.3\", \"最大时段降雨(mm)\": \"7.6\"}, {\"测站编码\": \"HT0061003110000016\", \"测站名称\": \"乌塔沟雨量站（横沟闸站）\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"45.5\", \"最大时段降雨(mm)\": \"5.8\"}, {\"测站编码\": \"58245\", \"测站名称\": \"扬州\", \"区域编码\": \"320188\", \"记录次数\": 8, \"累计降雨量(mm)\": \"26.7\", \"最大时段降雨(mm)\": \"14.9\"}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 1.0,
+        "comparison_detail": "stdout matched 22/22 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 0.5
+      },
+      "total_score": 0.95,
+      "duration_sec": 254.8,
+      "llm_round_trips": 10,
+      "error": "",
+      "completed": true
+    }
+  ]
+}

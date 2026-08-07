@@ -1,0 +1,45 @@
+{
+  "timestamp": "20260805_190849",
+  "config": {
+    "mode": "gateway_real_platform",
+    "gateway_url": "http://localhost:8001",
+    "model": "(platform default)",
+    "skill": "ALL",
+    "timeout": 900
+  },
+  "summary": {
+    "total": 1,
+    "avg_score": 0.6,
+    "pass_rate": 1.0
+  },
+  "results": [
+    {
+      "index": 3,
+      "skill": "water-situation",
+      "level": "L1",
+      "question": "查询测站总数。",
+      "expected_sql": "SELECT COUNT(*) AS '测站总数'\nFROM sl323.st_stbprp_b;",
+      "final_answer": "当前数据库中共有 **506** 个测站。",
+      "actual_sqls": [],
+      "tool_trace": [
+        "water_db_get_table_schema",
+        "water_db_query_water"
+      ],
+      "tool_results": [],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 0.0,
+        "sql_replay_ok": 0.0,
+        "result_quality": 1.0,
+        "comparison_detail": "stdout matched 1/1 (numeric 1/1, text 0/0)",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.6,
+      "duration_sec": 14.2,
+      "llm_round_trips": 3,
+      "error": "",
+      "completed": true
+    }
+  ]
+}

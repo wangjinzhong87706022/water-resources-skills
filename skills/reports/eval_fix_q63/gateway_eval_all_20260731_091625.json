@@ -1,0 +1,62 @@
+{
+  "timestamp": "20260731_091625",
+  "config": {
+    "mode": "gateway_real_platform",
+    "gateway_url": "http://localhost:8001",
+    "model": "(platform default)",
+    "skill": "ALL",
+    "timeout": 900
+  },
+  "summary": {
+    "total": 1,
+    "avg_score": 0.79,
+    "pass_rate": 1.0
+  },
+  "results": [
+    {
+      "index": 63,
+      "skill": "water-forecast",
+      "level": "L3",
+      "question": "查询河道断面数据（某任务下的所有断面水位）。",
+      "expected_sql": "SELECT dm.name AS '断面名称', dm.z AS '水位(m)', dm.Qin AS '入流(m³/s)', dm.Qout AS '出流(m³/s)', dm.tm AS '时间'\nFROM slztk.st_mx_rv_dm_r dm\nWHERE dm.taskid = (SELECT taskid FROM slztk.st_mx_taskid_r WHERE stuts = '1' ORDER BY tm DESC LIMIT 1)\nORDER BY dm.tm DESC, dm.name\nLIMIT 50;",
+      "final_answer": "现在我理解了数据结构。用户提到\"某任务下的所有断面水位\"，这里的\"断面\"对应河道测站（stcd），\"任务\"可能指某条河道或水系。\n\n",
+      "actual_sqls": [
+        "SELECT DISTINCT stcd FROM st_river_r LIMIT 20",
+        "SELECT r.stcd, b.stnm, b.rvnm, b.hnnm, COUNT(*) as record_cnt, MIN(r.tm) as first_tm, MAX(r.tm) as last_tm\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nGROUP BY r.stcd, b.stnm, b.rvnm, b.hnnm\nORDER BY record_cnt DESC\nLIMIT 30",
+        "SELECT r.stcd, b.stnm, b.rvnm, b.hnnm, COUNT(*) as record_cnt, MIN(r.tm) as first_tm, MAX(r.tm) as last_tm\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nWHERE r.tm >= '2026-01-01'\nGROUP BY r.stcd, b.stnm, b.rvnm, b.hnnm\nORDER BY record_cnt DESC\nLIMIT 30"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_query_water",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "ask_clarification"
+      ],
+      "tool_results": [
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "Schema of `st_river_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  z  decimal(38,3)  NULL    \n  q  decimal(38,3)  NULL    \n  xsa  decimal(38,3)  NULL    \n  xsavv  decimal(38,3)  NULL    \n  xsmxv  decimal(38,3)  NULL    \n  flwchrcd  char(1)  NULL    \n  wptn  char(1)  NULL    \n  msqmt  char(1)  NULL    \n  msamt  char(1)  NULL    \n  msvmt  char(1)  NULL    ",
+        "[{\"stcd\": \"00000001\"}, {\"stcd\": \"00000002\"}, {\"stcd\": \"00000003\"}, {\"stcd\": \"00000004\"}, {\"stcd\": \"00000005\"}, {\"stcd\": \"00000007\"}, {\"stcd\": \"00000008\"}, {\"stcd\": \"00000009\"}, {\"stcd\": \"00000011\"}, {\"stcd\": \"1778384898\"}, {\"stcd\": \"22051901\"}, {\"stcd\": \"22060701\"}, {\"stcd\": \"50916500\"}, {\"stcd\": \"51003600\"}, {\"stcd\": \"51003650\"}, {\"stcd\": \"51003800\"}, {\"stcd\": \"51004900\"}, {\"stcd\": \"51005000\"}, {\"stcd\": \"51005110\"}, {\"stcd\": \"51005115\"}]",
+        "`st_river_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "Error: Query timeout after 30s.\nSQL: SELECT r.stcd, b.stnm, b.rvnm, b.hnnm, COUNT(*) as record_cnt, MIN(r.tm) as first_tm, MAX(r.tm) as last_tm\nFROM st_river_r r\nJOIN st_stbprp_b b ON r.stcd = b.stcd\nGROUP BY r.stcd, b.stnm, b.rvnm, b.hn",
+        "[{\"stcd\": \"HT003108110300002X\", \"stnm\": \"龙涧河水位站\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 25612, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031081104000014\", \"stnm\": \"龙河水位站\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 25607, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031003001000018\", \"stnm\": \"新城河(文昌路桥点)\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 25121, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021003052000011\", \"stnm\": \"瘦西湖水位站\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 25111, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021071151000019\", \"stnm\": \"古运河水文站（扬子津体育公园）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 25080, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031003103000021\", \"stnm\": \"古运河水位站（春江路）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 25021, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031071151000033\", \"stnm\": \"春江河水位站（金春路）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24995, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031071151000014\", \"stnm\": \"施桥港水位站（临江路）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24993, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031003052000017\", \"stnm\": \"保障湖水位站（汉陵苑）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24988, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031071150000015\", \"stnm\": \"周庄河水位站（华阳东路）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24981, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031002005000027\", \"stnm\": \"七里河水位站（东花园路）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24978, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031003006000013\", \"stnm\": \"玉带河水位站（史可法西路）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24976, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031002004000013\", \"stnm\": \"沙施河水位站（老沙河）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24958, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021003103000011\", \"stnm\": \"仪扬河水位站（润扬南路）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24948, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031003009000010\", \"stnm\": \"中心河水位站（站南路）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24943, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021003003000010\", \"stnm\": \"赵家支沟水文站（赵家河路）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24926, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021071050000023\", \"stnm\": \"古运河水位站（新城河口）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24863, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021003053000010\", \"stnm\": \"邗沟水文站（史可法路东）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24859, \"first_tm\": \"2026-01-01 00:05:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021002001000010\", \"stnm\": \"古运河水文站（钞关泵站）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24763, \"first_tm\": \"2026-01-01 00:05:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021003003000025\", \"stnm\": \"七里沟（南）水位水文站（韩庄）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24752, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021071050000019\", \"stnm\": \"古运河水文站（扬子江南路古运河大桥）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24727, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021071150000039\", \"stnm\": \"乌塔沟水文站(横沟闸站)\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24678, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT002100200200001X\", \"stnm\": \"二道河水文站（文昌中路）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24627, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021003005000019\", \"stnm\": \"宝带河水文站（杨庄河口）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24579, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021071050000038\", \"stnm\": \"古运河水文站(大运河博物馆)\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24566, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021003001000012\", \"stnm\": \"新城河水文站（兴城西路北）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24498, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0031003103000017\", \"stnm\": \"向阳河水位站（华声路）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24395, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021003002000011\", \"stnm\": \"七里沟（北）水文站（福祥路南）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24352, \"first_tm\": \"2026-01-01 00:00:00\", \"last_tm\": \"2026-06-11 00:00:00\"}, {\"stcd\": \"HT0021003010000013\", \"stnm\": \"叶桥大沟水位站（叶桥路东）\", \"rvnm\": null, \"hnnm\": null, \"record_cnt\": 24301, \"first_tm\": \"2026-01-01 00:00:"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.3,
+        "comparison_detail": "Expected SQL returned no comparable values",
+        "match_type": "stdout_no_expected_values",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.79,
+      "duration_sec": 275.6,
+      "llm_round_trips": 6,
+      "error": "",
+      "completed": true
+    }
+  ]
+}

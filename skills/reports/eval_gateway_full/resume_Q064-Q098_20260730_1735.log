@@ -1,0 +1,123 @@
+
+============================================================
+DeerFlow Gateway 真实平台评测: ALL
+Gateway: http://localhost:8001 | 用例数: 35 | 单题超时: 900s
+============================================================
+
+[  1/35] Q064 [water-forecast/L3] 查询最新已完成任务的预测起止时间。
+  ✓ 170.0s | rounds=8 | sqls=3 | score=0.880
+[  2/35] Q065 [water-forecast/L3] 查询未来24小时所有站点的预测流量（type='2'）。
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '测站名称', r.tm AS '预报时间', r.vals AS '预报流量(m³/s)'
+FROM slztk.st_mx_preset_cal_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+WHERE r.type = '2'
+  AND r.tm BETWEEN NOW() AND DATE_ADD(NOW
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 438.0s | rounds=13 | sqls=8 | score=0.740
+[  3/35] Q066 [water-forecast/L3] 查询历史上有多少次预测任务已完成。
+  ✓ 199.7s | rounds=8 | sqls=5 | score=0.900
+[  4/35] Q067 [water-forecast/L3] 预测瘦西湖未来24小时水位变化。
+[db hint] Query returned 0 rows. SQL: SELECT r.tm AS '预报时间', r.vals AS '预报水位(m)'
+FROM slztk.st_mx_preset_cal_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+WHERE b.stnm LIKE '%瘦西湖%'
+  AND r.type = '1'
+  AND r.tm BETWEEN NOW() AND DATE_AD
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 239.8s | rounds=11 | sqls=4 | score=0.740
+[  5/35] Q068 [water-forecast/L3] 查询最新任务中预测水位最高和最低的站点。
+[db hint] Query returned 0 rows. SQL: SELECT stcd, stnm FROM sl323.st_stbprp_b WHERE stcd IN ('137', '108', '139')
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 211.9s | rounds=7 | sqls=5 | score=0.900
+[  6/35] Q069 [water-forecast/L3] 查询今天有哪些预测任务，分别是什么状态？
+[db hint] Query returned 0 rows. SQL: SELECT taskid AS '任务ID', tm AS '调度时间',
+       CASE WHEN stuts = '0' THEN '计算中' WHEN stuts = '1' THEN '已完成' END AS '状态',
+       CASE WHEN type = '1' THEN '滚动预报' WHEN type = '2' THEN '模型计算' END AS '类型'
+
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 42.2s | rounds=7 | sqls=4 | score=0.790
+[  7/35] Q070 [gate-pump-operation/L1] 查询所有闸站的最新启闭状态。
+  ✓ 451.6s | rounds=5 | sqls=1 | score=0.881
+[  8/35] Q071 [gate-pump-operation/L1] 查询当前开启状态的泵站最新水情数据。
+  ✓ 39.2s | rounds=4 | sqls=1 | score=0.850
+[  9/35] Q072 [gate-pump-operation/L2] 查询念四闸站最新的上下游水位和过闸流量。
+  ✓ 381.7s | rounds=9 | sqls=6 | score=0.900
+[ 10/35] Q073 [gate-pump-operation/L2] 查询泵站综合运行状态汇总。
+  ✓ 267.0s | rounds=7 | sqls=8 | score=0.850
+[ 11/35] Q074 [gate-pump-operation/L2] 查询润扬河闸各闸门最新开度。
+  ✓ 213.8s | rounds=8 | sqls=4 | score=1.000
+[ 12/35] Q075 [gate-pump-operation/L3] 查询当前所有正在排水的泵站及其抽水流量排名。
+  ✓ 213.7s | rounds=8 | sqls=6 | score=0.850
+[ 13/35] Q076 [gate-pump-operation/L3] 查询当前所有堰闸的水位差排名（上下游水位差最大的前10）。
+  ✓ 216.6s | rounds=7 | sqls=4 | score=0.700
+[ 14/35] Q077 [gate-pump-operation/L3] 查询军桥站各泵的最新工情数据（电压、电流、功率）。
+  ✓ 333.7s | rounds=10 | sqls=8 | score=0.800
+[ 15/35] Q078 [gate-pump-operation/L3] 查询当前所有正在引水的泵站及其引水量。
+  ✓ 260.6s | rounds=8 | sqls=5 | score=0.850
+[ 16/35] Q079 [gate-pump-operation/L3] 查询戴庄排涝站闸门的开度历史记录（最近10条）。
+  ✓ 216.6s | rounds=5 | sqls=2 | score=1.000
+[ 17/35] Q080 [gate-pump-operation/L3] 查询新城河闸上下游水位及过闸流量（堰闸水情）。
+  ✓ 231.1s | rounds=9 | sqls=5 | score=0.950
+[ 18/35] Q081 [gate-pump-operation/L3] 查询所有闸门的开启孔数统计。
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '闸站', g.gtname AS '闸门', g.gtopnum AS '开启孔数', g.gtophgt AS '开度(m)'
+FROM sl323.st_gate_r g
+JOIN sl323.st_stbprp_b b ON g.stcd = b.stcd
+JOIN (SELECT stcd, MAX(tm) AS maxTm FROM sl323.st_
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 50.0s | rounds=6 | sqls=3 | score=0.790
+[ 19/35] Q082 [gate-pump-operation/L3] 统计当前有多少闸门处于开启状态、多少处于关闭状态。
+  ✓ 429.7s | rounds=7 | sqls=4 | score=1.000
+[ 20/35] Q083 [gate-pump-operation/L3] 查询有哪些闸站和泵站？分别属于哪个管理区域？
+  ✓ 153.8s | rounds=3 | sqls=2 | score=0.984
+[ 21/35] Q084 [gate-pump-operation/L3] 查询扬州水利枢纽泵站当前的运行状态。
+  ✓ 481.4s | rounds=10 | sqls=11 | score=0.800
+[ 22/35] Q085 [water-warning/L1] 查询当前超警戒水位的站点。
+  ✓ 363.8s | rounds=10 | sqls=9 | score=0.821
+[ 23/35] Q086 [water-warning/L1] 查询防洪预警汇总（多少站正常、超警戒、超保证）。
+  ✓ 309.1s | rounds=7 | sqls=4 | score=0.900
+[ 24/35] Q087 [water-warning/L2] 扬州市重点河道水位实时情况（含超警戒判断）。
+  ✓ 127.0s | rounds=5 | sqls=2 | score=0.850
+[ 25/35] Q088 [water-warning/L2] 查询水质低于Ⅳ类的站点。
+  ✓ 150.4s | rounds=11 | sqls=8 | score=0.800
+[ 26/35] Q089 [water-warning/L2] 扬州市重点河道指定测站当前水位如何。
+  ✓ 104.7s | rounds=9 | sqls=5 | score=0.750
+[ 27/35] Q090 [water-warning/L3] 24年8月20号左右，扬州古运河、新城河、瘦西湖最高水位及是否超标。
+  ✓ 148.2s | rounds=7 | sqls=7 | score=0.720
+[ 28/35] Q091 [water-warning/L3] 查询所有站点的预警水位配置（有警戒水位的站）。
+  ✓ 108.6s | rounds=7 | sqls=4 | score=0.777
+[ 29/35] Q092 [water-warning/L3] 综合查询：当前有多少闸站超警戒水位、哪些泵站正在排水、整体防洪形势。
+  ✓ 164.0s | rounds=6 | sqls=9 | score=0.850
+[ 30/35] Q093 [water-warning/L3] 查询当前所有站点的预警状态一览（包含正常站）。
+  ✓ 129.0s | rounds=6 | sqls=1 | score=0.794
+[ 31/35] Q094 [water-warning/L3] 查询最近30天内是否有站点曾超警戒水位。
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '测站名称', r.z AS '水位(m)', rv.WRZ AS '警戒水位(m)',
+       r.tm AS '时间',
+       CASE WHEN r.z > rv.GRZ THEN '超保证' WHEN r.z > rv.WRZ THEN '超警戒' END AS '预警类型'
+FROM sl323.st_river_r r
+JOIN sl32
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 128.2s | rounds=9 | sqls=6 | score=0.740
+[ 32/35] Q095 [water-warning/L3] 扬州市重点河道（古运河、新城河、瘦西湖、沿山河等）实时水位情况。
+[db hint] Query returned 0 rows. SQL: SELECT r.stcd, COUNT(*) as cnt, MIN(r.tm) as min_tm, MAX(r.tm) as max_tm, ROUND(AVG(r.z), 2) as avg_z
+FROM st_river_r r
+WHERE r.stcd IN ('62705460', '62705461', 'HJDBSXM2021013', 'HP0071003002000020',
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 116.4s | rounds=6 | sqls=5 | score=0.850
+[ 33/35] Q096 [water-warning/L3] 查询所有水质站的最新水质综合评级，标注低于Ⅲ类的站点。
+  ✓ 360.8s | rounds=9 | sqls=3 | score=0.800
+[ 34/35] Q097 [water-warning/L3] 2024年8月扬州城区降雨量最大的那天，各重点河道水位是否超警戒？
+  ✓ 144.9s | rounds=8 | sqls=5 | score=0.732
+[ 35/35] Q098 [water-warning/L3] 查询历史上超保证水位（GRZ）的站点及出现时间。
+[db hint] Query returned 0 rows. SQL: SELECT b.stnm AS '测站名称', r.z AS '水位(m)', rv.GRZ AS '保证水位(m)',
+       r.tm AS '时间', rv.GRZ AS '保证水位'
+FROM sl323.st_river_r r
+JOIN sl323.st_stbprp_b b ON r.stcd = b.stcd
+JOIN sl323.st_rvfcch_b rv ON r.s
+[db hint] Check get_date_range(table) for time coverage, or column names / filter values via the schema.
+  ✓ 114.3s | rounds=7 | sqls=8 | score=0.790
+
+============================================================
+完成 35 题 | 平均分 0.838 | 通过率 100.0%
+============================================================
+📄 JSON: reports/eval_gateway_full/gateway_eval_all_20260730_194952.json
+📄 Markdown: reports/eval_gateway_full/gateway_eval_all_20260730_194952.md

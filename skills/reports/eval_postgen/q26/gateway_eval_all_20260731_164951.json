@@ -1,0 +1,59 @@
+{
+  "timestamp": "20260731_164951",
+  "config": {
+    "mode": "gateway_real_platform",
+    "gateway_url": "http://localhost:8001",
+    "model": "(platform default)",
+    "skill": "ALL",
+    "timeout": 900
+  },
+  "summary": {
+    "total": 1,
+    "avg_score": 0.75,
+    "pass_rate": 1.0
+  },
+  "results": [
+    {
+      "index": 26,
+      "skill": "rainfall",
+      "level": "L1",
+      "question": "查询扬州城区今日降雨量。",
+      "expected_sql": "SELECT DATE(p.tm) AS '日期', SUM(p.drp) AS '日降雨量(mm)'\nFROM sl323.st_pptn_r p\nWHERE p.stcd = '58245'\n  AND DATE(p.tm) = CURDATE()\n  AND p.drp IS NOT NULL\nGROUP BY DATE(p.tm);",
+      "final_answer": "查询结果如下：\n\n**扬州城区今日（2026-07-31）降雨量：11.8 mm**\n\n数据来源为数据库最新记录（2026-07-31 00:00:00），时段降水量为 11.8 mm。目前今日仅有这一条观测记录。",
+      "actual_sqls": [
+        "SELECT DATE(p.tm) AS '日期', SUM(p.drp) AS '日降雨量(mm)', COUNT(*) AS '观测次数'\nFROM st_pptn_r p\nWHERE p.stcd = '58245'\n  AND p.tm >= DATE((SELECT MAX(tm) FROM st_pptn_r))\n  AND p.tm < DATE((SELECT MAX(tm) FROM st_pptn_r)) + INTERVAL 1 DAY\n  AND p.drp IS NOT NULL\nGROUP BY DATE(p.tm)\nORDER BY DATE(p.tm);",
+        "SELECT MAX(tm) AS '最新数据时间' FROM st_pptn_r WHERE stcd = '58245';",
+        "SELECT p.tm AS '观测时间', p.drp AS '时段降水量(mm)', p.invt AS '时段长(h)', p.dyp AS '日降水量(mm)'\nFROM st_pptn_r p\nWHERE p.stcd = '58245'\n  AND DATE(p.tm) = '2026-07-31'\nORDER BY p.tm;"
+      ],
+      "tool_trace": [
+        "read_file",
+        "read_file",
+        "read_file",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "`st_pptn_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "[{\"日期\": \"2026-07-31\", \"日降雨量(mm)\": \"11.8\", \"观测次数\": 1}]",
+        "[{\"最新数据时间\": \"2026-07-31 00:00:00\"}]",
+        "[{\"观测时间\": \"2026-07-31 00:00:00\", \"时段降水量(mm)\": \"11.8\", \"时段长(h)\": null, \"日降水量(mm)\": null}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 0.0,
+        "result_quality": 1.0,
+        "comparison_detail": "stdout matched 2/2 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.75,
+      "duration_sec": 38.2,
+      "llm_round_trips": 7,
+      "error": "",
+      "completed": true
+    }
+  ]
+}

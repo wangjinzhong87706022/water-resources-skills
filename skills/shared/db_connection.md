@@ -80,30 +80,22 @@ rows = query("SELECT ...", timeout=60)
 # 多个查询顺序执行
 results = query_multi([
     "SELECT COUNT(*) AS cnt FROM sl323.st_stbprp_b",
-    "SELECT MAX(tm) FROM sl323.st_river_r WHERE tm >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
+    "SELECT MAX(tm) FROM sl323.st_river_r WHERE tm >= '2026-01-01'"
 ])
 ```
 
-**db.py 自动从环境变量读取配置**（`lib/db.py:17-23`）：
-```python
-DB_CONFIG = {
-    'host': os.environ.get('SL323_DB_HOST', '192.168.100.103'),
-    'port': int(os.environ.get('SL323_DB_PORT', '3306')),
-    'user': os.environ.get('SL323_DB_USER', 'root'),
-    'password': os.environ.get('SL323_DB_PASSWORD', ''),
-    'charset': 'utf8mb4',
-}
-```
+**db.py 配置解析优先级**（`lib/db.py` `_cfg()`）：`os.environ` → 仓库根 `.env` 文件 → 内置默认值。DeerFlow 沙箱会剥除环境中所有 `*PASSWORD*` 变量，因此密码实际由 `.env` 文件兜底提供——**部署时确保仓库根有 `.env`**。
 
 ### 关键特性
 
-- **自动环境变量读取** — 连接信息来自环境变量，无需硬编码
-- **每查询 30 秒超时** — MySQL 端 `max_execution_time` 强制终止慢查询，避免 300s 整体超时
+- **配置自动解析** — 环境变量优先，`.env` 兜底（沙箱剥除密码类环境变量）
+- **每查询 30 秒超时** — pymysql 客户端 `read_timeout`；超时抛 `TimeoutError`，错误信息内含改写建议（派生表 JOIN / tm 范围条件）
+- **分区裁剪守卫** — `YEAR(tm)`/`DATE(tm)` 等函数且无 tm 范围条件的 SQL 会被直接拒绝（`ValueError`），避免全分区扫描；确需全扫传 `allow_full_scan=True`
 - **返回 list[dict]** — 直接用 `row['列名']` 访问结果
-- **空结果自动提示** — 建议扩大时间范围或检查分区表 tm 条件
-- **超时错误含建议** — 提示添加 `WHERE tm >= ...` 以利用分区裁剪
-- **SQL 安全校验** — 只允许 SELECT/SHOW/DESCRIBE
-- **复杂查询拆分** — 多步查询用 `query_multi()` 或多次 `query()` 调用
+- **空结果自动提示** — stderr 提示检查时间覆盖/列名/过滤值
+- **schema 自纠错** — Unknown column/table 错误自动附带 INFORMATION_SCHEMA 真实列清单
+- **SQL 安全校验** — 只允许 SELECT/SHOW/DESCRIBE/EXPLAIN 开头（**CTE `WITH` 开头会被拒绝**，改用子查询）
+- **get_date_range(table)** — 零扫描获取表时间覆盖（读分区边界），判断数据新鲜度时优先用
 
 ## 路径说明
 
@@ -136,24 +128,9 @@ from db import query
 **优先级**：`WATER_RESOURCES_ROOT` 环境变量 → `WATER_RESOURCES_LIB`/`_SHARED` 显式覆盖 → 候选根兜底（`/mnt/skills`、仓库路径、`~/.hermes/...`）。
 
 
-## 备选：原始 pymysql（不推荐）
-
-仅在 db.py 模块不可用时使用：
-
-```python
-import pymysql
-conn = pymysql.connect(
-    host=os.environ.get('SL323_DB_HOST', '192.168.100.103'),
-    port=int(os.environ.get('SL323_DB_PORT', '3306')),
-    user=os.environ.get('SL323_DB_USER', 'root'),
-    password=os.environ.get('SL323_DB_PASSWORD', ''),
-    database='sl323'
-)
-```
-
 ## 注意事项
 
 - 跨库查询时使用 `库名.表名` 格式（如 `sl325.wq_pcp_d`）
-- 首次使用需确认 pymysql 已安装：`pip install pymysql`
-- 所有连接必须使用 `conn.cursor()` 执行查询后关闭：`cursor.close(); conn.close()`
-- **部署时无需修改代码**：通过环境变量配置连接信息
+- pymysql 已预装（由 lib/db.py 内部 import），**🚫 禁止 pip install**（沙箱 externally-managed，pip 必失败）
+- **禁止手写 pymysql.connect() 连接代码**——沙箱剥除密码环境变量，手写连接拿不到密码必失败；一律走 db.py
+- **部署时无需修改代码**：通过环境变量 + `.env` 配置连接信息

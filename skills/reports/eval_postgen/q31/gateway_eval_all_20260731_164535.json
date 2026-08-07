@@ -1,0 +1,61 @@
+{
+  "timestamp": "20260731_164535",
+  "config": {
+    "mode": "gateway_real_platform",
+    "gateway_url": "http://localhost:8001",
+    "model": "(platform default)",
+    "skill": "ALL",
+    "timeout": 900
+  },
+  "summary": {
+    "total": 1,
+    "avg_score": 0.865,
+    "pass_rate": 1.0
+  },
+  "results": [
+    {
+      "index": 31,
+      "skill": "rainfall",
+      "level": "L2",
+      "question": "查询最近三天各雨量站的累计降雨量。",
+      "expected_sql": "SELECT b.stnm AS '雨量站名称', SUM(p.drp) AS '累计降雨量(mm)'\nFROM sl323.st_pptn_r p\nJOIN sl323.st_stbprp_b b ON p.stcd = b.stcd\nWHERE b.sttp = 'PP'\n  AND p.tm >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)\n  AND p.drp IS NOT NULL\nGROUP BY b.stnm\nORDER BY SUM(p.drp) DESC;",
+      "final_answer": "最近三天（2026-07-29 至 2026-07-31）共有 **10 个雨量站**有数据，按累计降雨量从高到低排列如下：\n\n| 排名 | 站名 | 站码 | 累计降雨量(mm) |\n|:---:|------|------|:---:|\n| 1 | 吴庄河闸雨量站（胜利河） | HT0061002005000019 | **44.5** |\n| 2 | 沙施河南节制闸雨量站（利旧） | HT0061000000000002 | **40.3** |\n| 3 | 马港河雨量站 | HT0061071151000010 | **37.1** |\n| 4 | 念四闸站雨量站（利旧） | HT0061000000000004 | **34.8** |\n| 5 | 团结河雨量站（小袁庄） | HT0061003103000013 | **31.0** |\n| 6 | 太平闸站雨量站（利旧） | HT0061000000000003 | **28.0** |\n| 7 | 响水河闸雨量站（利旧） | HT0061000000000001 | **24.5** |\n| 8 | 二道河雨量站（文昌中路） | HT0061002002000011 | **22.4** |\n| 9 | 乌塔沟雨量站（横沟闸站） | HT0061003110000016 | **17.0** |\n| 10 | 冷却河闸雨量站 | HT0061003053000012 | **0.0** |\n\n**概况：**\n- 所有站点均属于同一区域（代码 320188）\n- 降雨量分布差异较大：最高 44.5mm（吴庄河闸），最低 0mm（冷却河闸）\n- 前 5 站降雨量均在 30mm 以上，后 5 站均低于 30mm，空间分布呈现一定梯度特征",
+      "actual_sqls": [
+        "SELECT MAX(tm) AS latest_tm FROM st_pptn_r",
+        "SELECT\n    p.stcd,\n    b.stnm AS '站名',\n    b.addvcd AS '区域代码',\n    SUM(p.drp) AS '累计降雨量(mm)'\nFROM st_pptn_r p\nJOIN st_stbprp_b b ON p.stcd = b.stcd\nWHERE p.tm >= '2026-07-29' AND p.tm < '2026-08-01'\n    AND b.sttp = 'PP'\nGROUP BY p.stcd, b.stnm, b.addvcd\nORDER BY SUM(p.drp) DESC\nLIMIT 100",
+        "SELECT COUNT(*) AS total_stations FROM (\n    SELECT p.stcd\n    FROM st_pptn_r p\n    JOIN st_stbprp_b b ON p.stcd = b.stcd\n    WHERE p.tm >= '2026-07-29' AND p.tm < '2026-08-01'\n        AND b.sttp = 'PP'\n    GROUP BY p.stcd\n) sub"
+      ],
+      "tool_trace": [
+        "read_file",
+        "water-db_get_table_schema",
+        "water-db_get_table_schema",
+        "water-db_get_date_range",
+        "water-db_query_water",
+        "water-db_query_water",
+        "water-db_query_water"
+      ],
+      "tool_results": [
+        "Schema of `st_pptn_r`:\n  stcd  char(18)  NOT NULL  PRI  \n  tm  datetime  NOT NULL  PRI  \n  drp  decimal(5,1)  NULL    \n  invt  decimal(5,2)  NULL    \n  pdr  decimal(5,2)  NULL    \n  dyp  decimal(5,1)  NULL    \n  wth  char(1)  NULL    \n  type  char(1)  NULL    ",
+        "`st_pptn_r`: ~2023-01-01 ~ 2026-12-31 (partition bounds: 2024-01-01 ~ 2027-01-01)",
+        "Schema of `st_stbprp_b`:\n  stcd  char(18)  NOT NULL  PRI  \n  stnm  char(30)  NULL    \n  rvnm  char(30)  NULL    \n  hnnm  char(30)  NULL    \n  bsnm  char(30)  NULL    \n  lgtd  decimal(10,6)  NULL    \n  lttd  decimal(10,6)  NULL    \n  stlc  char(50)  NULL    \n  addvcd  char(6)  NULL    \n  dtmnm  char(16)  NULL    \n  dtmel  decimal(7,3)  NULL    \n  dtpr  decimal(7,3)  NULL    \n  sttp  char(2)  NOT NULL  PRI  \n  frgrd  char(1)  NULL    \n  esstym  char(6)  NULL    \n  bgfrym  char(6)  NULL    \n  atcunit  char(20)  NULL    \n  admauth  char(20)  NULL    \n  locality  char(10)  NOT NULL    \n  stbk  char(1)  NULL    \n  stazt  decimal(65,30)  NULL    \n  dstrvm  decimal(6,1)  NULL    \n  drna  decimal(65,30)  NULL    \n  phcd  char(6)  NULL    \n  usfl  char(1)  NULL    \n  comments  varchar(200)  NULL    \n  moditime  datetime  NULL    \n  source  char(1)  NULL    \n  extend_rain_sort  int(11)  NULL    \n  extend_stcd_sort  int(11)  NULL    \n  extend_prst  char(1)  NULL    \n  extend_gate_sort  int(11)  NULL    \n  extend_wq_type  int(11)  NULL    \n  gateheight  decimal(7,3)  NULL    ",
+        "[{\"latest_tm\": \"2026-07-31 00:00:00\"}]",
+        "[{\"stcd\": \"HT0061002005000019\", \"站名\": \"吴庄河闸雨量站（胜利河）\", \"区域代码\": \"320188\", \"累计降雨量(mm)\": \"44.5\"}, {\"stcd\": \"HT0061000000000002\", \"站名\": \"沙施河南节制闸雨量站（利旧）\", \"区域代码\": \"320188\", \"累计降雨量(mm)\": \"40.3\"}, {\"stcd\": \"HT0061071151000010\", \"站名\": \"马港河雨量站\", \"区域代码\": \"320188\", \"累计降雨量(mm)\": \"37.1\"}, {\"stcd\": \"HT0061000000000004\", \"站名\": \"念四闸站雨量站（利旧）\", \"区域代码\": \"320188\", \"累计降雨量(mm)\": \"34.8\"}, {\"stcd\": \"HT0061003103000013\", \"站名\": \"团结河雨量站（小袁庄）\", \"区域代码\": \"320188\", \"累计降雨量(mm)\": \"31.0\"}, {\"stcd\": \"HT0061000000000003\", \"站名\": \"太平闸站雨量站（利旧）\", \"区域代码\": \"320188\", \"累计降雨量(mm)\": \"28.0\"}, {\"stcd\": \"HT0061000000000001\", \"站名\": \"响水河闸雨量站（利旧）\", \"区域代码\": \"320188\", \"累计降雨量(mm)\": \"24.5\"}, {\"stcd\": \"HT0061002002000011\", \"站名\": \"二道河雨量站（文昌中路）\", \"区域代码\": \"320188\", \"累计降雨量(mm)\": \"22.4\"}, {\"stcd\": \"HT0061003110000016\", \"站名\": \"乌塔沟雨量站（横沟闸站）\", \"区域代码\": \"320188\", \"累计降雨量(mm)\": \"17.0\"}, {\"stcd\": \"HT0061003053000012\", \"站名\": \"冷却河闸雨量站\", \"区域代码\": \"320188\", \"累计降雨量(mm)\": \"0.0\"}]",
+        "[{\"total_stations\": 10}]"
+      ],
+      "scores": {
+        "has_valid_response": 1.0,
+        "sql_generated": 1.0,
+        "sql_replay_ok": 1.0,
+        "result_quality": 0.55,
+        "comparison_detail": "stdout matched 11/20 expected values",
+        "match_type": "stdout_recall",
+        "trace_sanity": 1.0
+      },
+      "total_score": 0.865,
+      "duration_sec": 333.9,
+      "llm_round_trips": 6,
+      "error": "",
+      "completed": true
+    }
+  ]
+}
